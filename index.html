@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Promemori Abonimesh</title>
+<style>
+:root{--bg:#f3f4f7;--card:#fff;--text:#1b1e23;--muted:#6b7280;--line:#e2e5ea;--accent:#2563eb;--red:#dc2626;--amber:#d97706;--green:#16a34a;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#1a1d23;--text:#eceef2;--muted:#9aa3b2;--line:#2a2f39;--accent:#60a5fa;--red:#f87171;--amber:#fbbf24;--green:#4ade80;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+/* ---- menuja lart ---- */
+.top{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.top-in{display:flex;align-items:center;gap:6px;padding:6px 10px;overflow-x:auto}
+.brand{font-weight:800;margin-right:8px;white-space:nowrap}
+.top a{padding:9px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:600;white-space:nowrap}
+.top a.on{background:var(--accent);color:#fff}
+/* ---- faqja e gjerë ---- */
+main{width:100%;max-width:1400px;margin:0 auto;padding:10px 10px calc(30px + env(safe-area-inset-bottom,0px))}
+h1{font-size:20px;margin:6px 0 10px}h2{font-size:16px;margin:18px 0 8px}
+.view{display:none}.view.on{display:block}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;min-height:44px}
+textarea{resize:vertical}
+input[type=checkbox]{width:auto;min-height:0;margin-right:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+button,a.btn{display:inline-block;padding:10px 14px;min-height:42px;border:0;border-radius:10px;background:var(--accent);color:#fff;font:inherit;font-weight:600;text-decoration:none;cursor:pointer;text-align:center}
+button.ghost,a.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);font-size:14px}
+button.del{background:transparent;color:var(--red);border:1px solid var(--line);font-size:14px}
+button:disabled{opacity:.45;cursor:default}
+.meta{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.f.wide{grid-column:1/-1}
+/* ---- filtrat ---- */
+.chips{display:flex;gap:6px;margin-bottom:8px}
+.chip{flex:1;background:var(--card);color:var(--text);border:1px solid var(--line);font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tools{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px}
+/* ---- lista ---- */
+.list{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.lhead{display:none}
+.item{border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.head{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;cursor:pointer;align-items:center}
+.nm{font-weight:700}.sub{color:var(--muted);font-size:13px}
+.c-user,.c-panel{display:none}
+.c-date{text-align:right;font-size:13px;white-space:nowrap}
+.c-state{grid-column:2;text-align:right;font-weight:700;font-size:13px;white-space:nowrap}
+.item.open{background:color-mix(in srgb,var(--accent) 6%,var(--card))}
+.edit{display:none;padding:4px 12px 14px}.item.open .edit{display:block}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.empty{color:var(--muted);text-align:center;padding:22px}
+.row{display:flex;gap:8px;align-items:center;padding:6px 0}
+.row input{flex:1}
+/* ---- kyçi me PIN ---- */
+#lock{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#lock .box{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+#lock h1{margin:0 0 6px;font-size:20px}
+#lock input{text-align:center;font-size:22px;letter-spacing:.3em;margin:8px 0}
+#lock button{width:100%;margin-top:6px}
+#lockmsg{min-height:18px;color:var(--red);font-size:13px;margin:6px 0 0}
+@media (min-width:760px){
+  .head{grid-template-columns:2.2fr 1.4fr .8fr 1.3fr 1fr;gap:10px}
+  .sub{display:none}.c-user,.c-panel{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis}
+  .c-date{text-align:left;font-size:14px}.c-state{grid-column:auto;text-align:left}
+  .lhead{display:grid;grid-template-columns:2.2fr 1.4fr .8fr 1.3fr 1fr;gap:10px;padding:8px 12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+}
+@media (max-width:520px){.tools{grid-template-columns:1fr 1fr}.tools #q{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div id="lock" role="dialog" aria-modal="true">
+  <form class="box" id="lockform" autocomplete="off">
+    <h1 id="locktitle">Promemori</h1>
+    <p class="meta" id="locksub" style="margin:0 0 8px"></p>
+    <input id="pin1" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="PIN">
+    <input id="pin2" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Përsërite PIN-in" style="display:none">
+    <p id="lockmsg"></p>
+    <button type="submit" id="lockbtn">Hap</button>
+  </form>
+</div>
+
+
+<header class="top"><div class="top-in">
+  <span class="brand">📋 Promemori</span>
+  <a href="#lista" data-v="lista">Lista</a>
+  <a href="#krijo" data-v="krijo">➕ Krijo</a>
+  <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
+</div></header>
+
+<main>
+<datalist id="clientsdl"></datalist>
+
+<section id="v-lista" class="view">
+  <h1>Lista e abonimeve</h1>
+  <div class="chips">
+    <button class="chip" data-f="all" id="ch-all"></button>
+    <button class="chip" data-f="soon" id="ch-soon"></button>
+    <button class="chip" data-f="over" id="ch-over"></button>
+  </div>
+  <div class="tools">
+    <input id="q" placeholder="Kërko emër, username ose shënim" autocapitalize="none">
+    <select id="pf"></select>
+    <select id="sb">
+      <option value="date">Rendit: data</option>
+      <option value="name">Rendit: emri</option>
+      <option value="panel">Rendit: paneli</option>
+    </select>
+  </div>
+  <div class="list">
+    <div class="lhead"><span>Emri</span><span>Username</span><span>Paneli</span><span>Skadon</span><span>Mbetet</span></div>
+    <div id="list"></div>
+  </div>
+  <p id="cnt" class="meta" style="text-align:center"></p>
+  <button id="more" class="ghost" style="display:none;width:100%">Shfaq edhe 50</button>
+  <p class="meta" style="text-align:center">Prek një rresht për ta hapur dhe ndryshuar çdo fushë. Ndryshimet ruhen automatikisht.</p>
+</section>
+
+<section id="v-krijo" class="view">
+  <h1>Krijo abonim</h1>
+  <div class="card">
+    <div class="grid">
+      <label class="f">Emri<input id="n" placeholder="p.sh. Paolo"></label>
+      <label class="f">Username<input id="u" autocapitalize="none"></label>
+      <label class="f">Paneli<select id="p"></select></label>
+      <label class="f">Data e krijimit (fillimit)<input id="d" type="date"></label>
+      <label class="f">Kohëzgjatja<select id="m"></select></label>
+      <label class="f">Ora e skadimit<input id="h" type="time"></label>
+      <label class="f wide">Shënim (opsionale)<input id="t"></label>
+    </div>
+    <div id="prev" class="meta" style="margin:10px 0"></div>
+    <button id="add">Shto</button>
+    <span id="addmsg" class="meta" style="margin-left:8px"></span>
+  </div>
+
+  <h2>📥 Importo shumë njëherësh</h2>
+  <div class="card">
+    <p class="meta" style="margin-top:0">Një rresht për abonent: <b>emri; username; paneli; data e krijimit; muaj OSE data e skadimit; shënim</b><br>P.sh. <code>Paolo; xjhffahsd; Lion; 09.11.2026; 6</code> ose <code>Shoku Takut; username; Lion; ; 01-11-2027; shënim</code>. Për 1 vit shkruaj 12.</p>
+    <textarea id="impbox" rows="6" placeholder="Paolo; xjhffahsd; Lion; 09.11.2026; 6"></textarea>
+    <button id="imp" style="margin-top:8px">Importo</button>
+    <p id="impmsg" class="meta"></p>
+  </div>
+</section>
+
+<section id="v-konfigurimi" class="view">
+  <h1>Konfigurimi</h1>
+  <div class="grid" style="align-items:start">
+    <div>
+      <h2 style="margin-top:0">Panelet</h2>
+      <div class="card">
+        <div id="plist"></div>
+        <div class="row" style="margin-top:6px">
+          <input id="newp" placeholder="Panel i ri">
+          <button id="addp">Shto</button>
+        </div>
+      </div>
+
+      <h2>Vlerat e paracaktuara</h2>
+      <div class="card">
+        <div class="grid">
+          <label class="f">Ora e skadimit<input id="ctime" type="time"></label>
+          <label class="f">Kohëzgjatja<select id="cmonths"></select></label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 style="margin-top:0">Sinkronizo me emailin (GitHub)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Dërgon listën direkt në <code>reminders.json</code> te repo juaj private në GitHub. Atje programi dërgon emailet: 1 ditë para, ditën e skadimit nga ora 08:00, dhe kur vjen ora e skadimit. Tokeni ruhet vetëm në këtë telefon.</p>
+        <div class="grid">
+          <label class="f">Repo (emri/repo)<input id="syncrepo" placeholder="p.sh. arisheqi/promemori" autocapitalize="none"></label>
+          <label class="f">Dega (branch)<input id="syncbranch" placeholder="main" autocapitalize="none"></label>
+          <label class="f wide">Token GitHub (Contents: Read and write)<input id="synctoken" type="password" autocapitalize="none" autocomplete="off"></label>
+        </div>
+        <label class="f" style="flex-direction:row;align-items:center;margin:10px 0"><input id="syncauto" type="checkbox">Sinkronizo automatikisht pas çdo ndryshimi</label>
+        <button id="syncnow">Sinkronizo tani</button>
+        <p id="syncmsg" class="meta"></p>
+      </div>
+
+      <h2>Për emailin (dorazi)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Gjeneron listën në formatin e <code>reminders.json</code> për programin e emailit.</p>
+        <div class="btns" style="margin-top:0">
+          <button class="ghost" id="exp">Gjenero &amp; kopjo</button>
+          <button class="ghost" id="expdl">Shkarko reminders.json</button>
+        </div>
+        <textarea id="expbox" readonly rows="8" style="display:none;margin-top:8px;font:12px monospace"></textarea>
+      </div>
+
+            <h2>PIN i faqes</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Faqja kërkon PIN sa herë e hap dhe kyçet vetë pas 2 minutash jashtë faqes. PIN-i ruhet vetëm në këtë pajisje.</p>
+        <div class="btns" style="margin-top:0">
+          <button class="ghost" onclick="lockNow()">Kyç tani</button>
+          <button class="ghost" onclick="changePin()">Ndrysho PIN-in</button>
+        </div>
+      </div>
+
+      <h2>Kopje rezervë</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Të dhënat ruhen vetëm në këtë telefon. Bëj kopje herë pas here.</p>
+        <button class="ghost" id="bk">Gjenero kopjen</button>
+        <textarea id="bkbox" readonly rows="5" style="display:none;margin-top:8px;font:12px monospace"></textarea>
+        <textarea id="rsbox" rows="3" placeholder="Ngjit këtu kopjen për ta rikthyer" style="margin:12px 0 8px"></textarea>
+        <button class="del" id="rs">Rikthe (zëvendëson gjithçka)</button>
+        <p id="rsmsg" class="meta"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ---------- kyçi me PIN (ndarë nga pjesa tjetër) ---------- */
+(function () {
+  const $ = id => document.getElementById(id);
+  const L = $("lock"), PK = "pin-v1";
+  let fails = 0, hiddenAt = 0;
+  function hsh(str) { let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0, c; i < str.length; i++) { c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36); }
+  const getRec = () => { try { return JSON.parse(localStorage.getItem(PK)); } catch (e) { return null; } };
+  const isUnl = () => { try { return sessionStorage.getItem("unl") === "1"; } catch (e) { return false; } };
+  const setUnl = v => { try { v ? sessionStorage.setItem("unl", "1") : sessionStorage.removeItem("unl"); } catch (e) {} };
+  let rec = getRec();
+  function show() {
+    rec = getRec(); L.style.display = "flex";
+    $("locktitle").textContent = rec ? "Shkruaj PIN-in" : "Vendos një PIN";
+    $("locksub").textContent = rec ? "" : "4 deri 8 shifra. Do ta kërkojë sa herë ta hapësh faqen.";
+    $("pin2").style.display = rec ? "none" : "block";
+    $("lockbtn").textContent = rec ? "Hap" : "Ruaj PIN-in";
+    $("pin1").value = ""; $("pin2").value = ""; $("lockmsg").textContent = "";
+    setTimeout(() => $("pin1").focus(), 50);
+  }
+  function hide() { L.style.display = "none"; setUnl(true); }
+  $("lockform").addEventListener("submit", e => {
+    e.preventDefault();
+    const a = $("pin1").value, msg = $("lockmsg");
+    if (rec) {
+      if (hsh(rec.s + a) === rec.h) { fails = 0; hide(); return; }
+      fails++; $("pin1").value = ""; msg.textContent = "PIN i gabuar.";
+      if (fails >= 5) { $("lockbtn").disabled = true; $("pin1").disabled = true; msg.textContent = "Shumë përpjekje. Prit 30 sekonda.";
+        setTimeout(() => { fails = 0; $("lockbtn").disabled = false; $("pin1").disabled = false; msg.textContent = ""; $("pin1").focus(); }, 30000); }
+      return;
+    }
+    if (!/^\d{4,8}$/.test(a)) { msg.textContent = "PIN-i duhet të jetë 4 deri 8 shifra."; return; }
+    if (a !== $("pin2").value) { msg.textContent = "Dy PIN-et nuk përputhen."; return; }
+    const s = Math.random().toString(36).slice(2);
+    try { localStorage.setItem(PK, JSON.stringify({s: s, h: hsh(s + a)})); } catch (e) {}
+    rec = getRec(); hide();
+  });
+  window.lockNow = () => { setUnl(false); show(); };
+  window.changePin = () => { try { localStorage.removeItem(PK); } catch (e) {} setUnl(false); show(); };
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (getRec() && hiddenAt && Date.now() - hiddenAt > 120000) window.lockNow();
+  });
+  if (rec && isUnl()) hide(); else show();
+})();
+</script>
+<script>
+const KEY = "abonime-v1", PKEY = "panele-v1", CKEY = "cfg-v1";
+const $ = id => document.getElementById(id);
+const p2 = n => String(n).padStart(2, "0");
+function ld(k, def) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : def; } catch (e) { return def; } }
+function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) schedSync(); }
+function schedSync() { if (typeof sync === "undefined" || !sync.auto || !sync.token) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 3000); }
+
+let items = ld(KEY, []);
+let panels = ld(PKEY, ["Mega", "Lion"]);
+let cfg = Object.assign({time: "14:00", months: 1}, ld(CKEY, {}));
+let sync = Object.assign({repo: "", branch: "main", token: "", auto: false}, ld("sync-v1", {}));
+let syncTimer = null;
+let openId = null, flt = "all", lim = 50;
+const MONTHS = [[0, "—"], [1, "1 muaj"], [2, "2 muaj"], [3, "3 muaj"], [4, "4 muaj"], [5, "5 muaj"], [6, "6 muaj"], [9, "9 muaj"], [12, "1 vit"], [24, "2 vjet"]];
+
+const iso = d => d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+const todayIso = () => iso(new Date());
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmt = s => { if (!s) return ""; const [y, m, d] = s.split("-"); return d + "." + m + "." + y; };
+const durLabel = m => (MONTHS.find(x => x[0] === m) || [0, m + " muaj"])[1];
+function addMonths(s, mo) {
+  const [y, m, d] = s.split("-").map(Number);
+  const t = new Date(y, m - 1 + mo, 1);
+  const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  return iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, last)));
+}
+function normDate(s) {
+  s = (s || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+  return m ? m[3] + "-" + p2(m[2]) + "-" + p2(m[1]) : "";
+}
+const endDT = it => new Date(it.date + "T" + (it.time || "23:59"));
+function daysLeft(it) {
+  const n = new Date(), td = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.round((parse(it.date) - td) / 864e5);
+}
+function state(it) {
+  if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
+  const l = daysLeft(it);
+  if (l === 0) return {t: "SOT" + (it.time ? " " + it.time : ""), c: "var(--red)"};
+  return {t: l === 1 ? "nesër" : "pas " + l + " ditësh", c: l <= 3 ? "var(--red)" : l <= 14 ? "var(--amber)" : "var(--green)"};
+}
+function calUrl(it) {
+  const [y, m, d] = it.date.split("-").map(Number);
+  let a, b;
+  if (it.time) {
+    const [hh, mm] = it.time.split(":").map(Number);
+    const e = new Date(y, m - 1, d, hh, mm + 30);
+    a = it.date.replace(/-/g, "") + "T" + p2(hh) + p2(mm) + "00";
+    b = iso(e).replace(/-/g, "") + "T" + p2(e.getHours()) + p2(e.getMinutes()) + "00";
+  } else {
+    a = it.date.replace(/-/g, "");
+    b = iso(new Date(y, m - 1, d + 1)).replace(/-/g, "");
+  }
+  const det = [it.username ? "Username: " + it.username : "", it.panel ? "Paneli: " + it.panel : "", it.note || ""].filter(Boolean).join("\n");
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" +
+    encodeURIComponent("Mbaron: " + it.name + (it.panel ? " (" + it.panel + ")" : "")) +
+    "&dates=" + a + "/" + b + "&details=" + encodeURIComponent(det) + "&ctz=Europe/Tirane";
+}
+function fillSelect(sel, opts, keep) {
+  const cur = keep ? sel.value : "";
+  sel.innerHTML = "";
+  opts.forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; sel.appendChild(o); });
+  if (keep && opts.some(o => String(o[0]) === cur)) sel.value = cur;
+}
+
+/* ---------- pamjet (menuja lart) ---------- */
+const VIEWS = ["lista", "krijo", "konfigurimi"];
+function showView() {
+  let v = location.hash.slice(1);
+  if (!VIEWS.includes(v)) v = "lista";
+  VIEWS.forEach(x => {
+    $("v-" + x).classList.toggle("on", x === v);
+    document.querySelector('.top a[data-v="' + x + '"]').classList.toggle("on", x === v);
+  });
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", showView);
+
+/* ---------- panelet ---------- */
+const allPanels = () => [...new Set([...panels, ...items.map(x => x.panel).filter(Boolean)])];
+function addPanel(p) { if (!panels.includes(p)) { panels.push(p); sv(PKEY, panels); } }
+function refreshPanels() {
+  const all = allPanels();
+  fillSelect($("p"), all.map(x => [x, x]), true);
+  fillSelect($("pf"), [["", "Të gjitha panelet"], ...all.map(x => [x, x])], true);
+  const box = $("plist"); box.innerHTML = "";
+  all.forEach(p => {
+    const n = items.filter(x => x.panel === p).length;
+    const row = document.createElement("div"); row.className = "row";
+    const inp = document.createElement("input"); inp.value = p;
+    inp.onchange = () => {
+      const nv = inp.value.trim();
+      if (!nv || (nv !== p && all.includes(nv))) { inp.value = p; return; }
+      items.forEach(x => { if (x.panel === p) x.panel = nv; });
+      panels = [...new Set(allPanels().map(x => x === p ? nv : x))];
+      sv(KEY, items); sv(PKEY, panels); refreshPanels(); render();
+    };
+    const cnt = document.createElement("span"); cnt.className = "meta"; cnt.textContent = n + " ab.";
+    const b = document.createElement("button"); b.className = "del"; b.textContent = n ? "në përdorim" : "Fshi"; b.disabled = n > 0;
+    b.onclick = () => { panels = panels.filter(x => x !== p); sv(PKEY, panels); refreshPanels(); };
+    row.append(inp, cnt, b); box.appendChild(row);
+  });
+}
+
+/* ---------- lista ---------- */
+function renew(it, mo) {
+  const base = state(it).over ? todayIso() : it.date;
+  it.start = base; it.months = mo; it.date = addMonths(base, mo);
+  sv(KEY, items); render();
+}
+const ckey = x => (x.client || x.name || "").trim().toLowerCase();
+const linked = it => items.filter(x => x !== it && ckey(x) === ckey(it));
+function refreshHead(el, it) {
+  const s = state(it);
+  el.querySelector(".nm").textContent = it.name;
+  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", it.panel || "", ...linked(it).map(o => "+ " + (o.panel || "?") + " " + fmt(o.date))].filter(Boolean).join(" · ");
+  el.querySelector(".c-user").textContent = it.username || "";
+  el.querySelector(".c-panel").textContent = it.panel || "";
+  el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
+  const st = el.querySelector(".c-state"); st.textContent = s.t; st.style.color = s.c;
+}
+function buildEditor(it, el) {
+  const box = el.querySelector(".edit"); box.innerHTML = "";
+  const g = document.createElement("div"); g.className = "grid";
+  const mk = (lab, node, cls) => {
+    const w = document.createElement("label"); w.className = "f " + (cls || "");
+    const s = document.createElement("span"); s.textContent = lab; w.append(s, node); g.appendChild(w); return node;
+  };
+  const save = () => { sv(KEY, items); refreshHead(el, it); };
+  const inp = (type, val, on) => {
+    const i = document.createElement("input"); i.type = type; i.value = val || "";
+    if (type === "text") i.autocapitalize = "none";
+    i.addEventListener("change", () => { on(i.value); save(); });
+    return i;
+  };
+  const sel = (opts, val, on) => {
+    const s = document.createElement("select");
+    fillSelect(s, opts); s.value = String(val);
+    s.addEventListener("change", () => { on(s.value); save(); });
+    return s;
+  };
+  let dateI, startI, monI;
+  const recalc = () => { if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; } };
+
+  mk("Emri", inp("text", it.name, v => { it.name = v.trim() || it.name; }));
+  const ci = document.createElement("input"); ci.type = "text"; ci.setAttribute("list", "clientsdl"); ci.autocapitalize = "none";
+  ci.value = it.client || ""; ci.placeholder = it.name;
+  ci.addEventListener("change", () => { it.client = ci.value.trim(); sv(KEY, items); render(); });
+  mk("Klienti (shkruaj të njëjtin emër në Lion dhe Mega për t'i lidhur)", ci, "wide");
+  $("clientsdl").innerHTML = [...new Set(items.map(x => x.client || x.name))].map(x => '<option value="' + x.replace(/"/g, "&quot;") + '">').join("");
+  mk("Username", inp("text", it.username, v => { it.username = v.trim(); }));
+  mk("Paneli", sel(allPanels().map(x => [x, x]), it.panel || "", v => { it.panel = v; addPanel(v); refreshPanels(); }));
+  dateI = mk("Data e skadimit", inp("date", it.date, v => { if (v) it.date = v; else dateI.value = it.date; }));
+  mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
+  startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
+  const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
+  monI = mk("Kohëzgjatja (llogarit skadimin)", sel(mopts, it.months || 0, v => { it.months = +v; recalc(); }));
+  const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
+  ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
+  mk("Shënim", ta, "wide");
+  box.appendChild(g);
+
+  const b = document.createElement("div"); b.className = "btns";
+  [[1, "+1 muaj"], [3, "+3 muaj"], [6, "+6 muaj"], [12, "+1 vit"]].forEach(([m, l]) => {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "Rinovo " + l; x.onclick = () => renew(it, m); b.appendChild(x);
+  });
+  linked(it).forEach(o => {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "Hap " + (o.panel || "?") + " · " + fmt(o.date);
+    x.onclick = () => { openId = o.id; render(); }; b.appendChild(x);
+  });
+  const free = allPanels().filter(p => !items.some(x => ckey(x) === ckey(it) && x.panel === p));
+  if (free.length) {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "➕ Shto edhe në " + free[0];
+    x.onclick = () => {
+      it.client = it.client || it.name;
+      const s = todayIso(), n = {id: Date.now() + Math.random(), name: it.name, client: it.client, username: "", panel: free[0], date: addMonths(s, cfg.months), start: s, months: cfg.months, time: cfg.time, note: ""};
+      items.push(n); sv(KEY, items); openId = n.id; render();
+    };
+    b.appendChild(x);
+  }
+  const a = document.createElement("a"); a.className = "btn ghost"; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Në kalendar";
+  a.onclick = () => { a.href = calUrl(it); };
+  a.href = calUrl(it); b.appendChild(a);
+  const cl = document.createElement("button"); cl.className = "ghost"; cl.textContent = "Mbyll";
+  cl.onclick = () => { openId = null; render(); };
+  b.appendChild(cl);
+  const d = document.createElement("button"); d.className = "del"; d.textContent = "Fshi";
+  d.onclick = () => {
+    if (d.dataset.s) { items = items.filter(x => x.id !== it.id); openId = null; sv(KEY, items); refreshPanels(); render(); }
+    else { d.dataset.s = "1"; d.textContent = "Prek sërish për ta fshirë"; }
+  };
+  b.appendChild(d);
+  box.appendChild(b);
+}
+function render() {
+  const all = items.map(it => ({it, s: state(it)}));
+  const soon = x => !x.s.over && daysLeft(x.it) <= 7;
+  $("ch-all").textContent = "Të gjithë " + all.length;
+  $("ch-soon").textContent = "≤7 ditë " + all.filter(soon).length;
+  $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
+  const q = $("q").value.trim().toLowerCase(), pf = $("pf").value, sb = $("sb").value;
+  const rows = all.filter(x => (!pf || x.it.panel === pf) &&
+    (!q || (x.it.name + " " + (x.it.client || "") + " " + (x.it.username || "") + " " + (x.it.note || "")).toLowerCase().includes(q)) &&
+    (flt === "all" || (flt === "over" ? x.s.over : soon(x))));
+  rows.sort((a, b) => {
+    if (sb === "name") return a.it.name.localeCompare(b.it.name, "sq", {sensitivity: "base"});
+    if (sb === "panel") return (a.it.panel || "").localeCompare(b.it.panel || "") || endDT(a.it) - endDT(b.it);
+    if (!!a.s.over !== !!b.s.over) return a.s.over ? 1 : -1;
+    return a.s.over ? endDT(b.it) - endDT(a.it) : endDT(a.it) - endDT(b.it);
+  });
+  const shown = rows.slice(0, lim);
+  const box = $("list"); box.innerHTML = "";
+  $("cnt").textContent = rows.length ? "Shfaqen " + shown.length + " nga " + rows.length : "";
+  $("more").style.display = rows.length > lim ? "block" : "none";
+  if (!rows.length) { box.innerHTML = '<div class="empty">Asnjë abonent.</div>'; return; }
+  shown.forEach(({it}) => {
+    const el = document.createElement("div");
+    el.className = "item" + (openId === it.id ? " open" : "");
+    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div><div class="sub"></div></div><div class="c-user"></div><div class="c-panel"></div><div class="c-date"></div><div class="c-state"></div></div><div class="edit"></div>';
+    refreshHead(el, it);
+    el.querySelector(".head").onclick = () => { openId = openId === it.id ? null : it.id; render(); };
+    if (openId === it.id) buildEditor(it, el);
+    box.appendChild(el);
+  });
+}
+const resetLim = () => { lim = 50; render(); };
+$("q").oninput = resetLim; $("pf").onchange = resetLim; $("sb").onchange = resetLim;
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => { flt = c.dataset.f; resetLim(); });
+$("more").onclick = () => { lim += 50; render(); };
+
+/* ---------- krijo ---------- */
+function updPrev() {
+  const s = $("d").value, mo = +$("m").value;
+  $("prev").textContent = s && mo ? "Skadon më " + fmt(addMonths(s, mo)) + " " + ($("h").value || "") : "";
+}
+["d", "m", "h"].forEach(i => $(i).addEventListener("input", updPrev));
+$("add").onclick = () => {
+  const n = $("n").value.trim(), u = $("u").value.trim(), p = $("p").value;
+  const s = $("d").value, mo = +$("m").value;
+  if (!n || !s || !mo) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
+  items.push({id: Date.now() + Math.random(), name: n, username: u, panel: p, date: addMonths(s, mo), start: s, months: mo, time: $("h").value || cfg.time, note: $("t").value.trim()});
+  sv(KEY, items);
+  ["n", "u", "t"].forEach(i => $(i).value = "");
+  $("addmsg").textContent = "✓ U shtua: " + n;
+  refreshPanels(); render(); $("n").focus();
+};
+$("imp").onclick = () => {
+  const lines = $("impbox").value.split("\n").map(l => l.trim()).filter(Boolean);
+  let ok = 0, dup = 0; const bad = [];
+  lines.forEach((ln, i) => {
+    const [n, u, pr, ds, ms, nt] = ln.split(/[;\t]/).map(x => x.trim());
+    const s = normDate(ds);
+    const endD = normDate(ms);
+    const mo = endD ? 0 : (/vit/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
+    if (!n || !(endD || (s && mo > 0))) { bad.push(i + 1); return; }
+    let p = "";
+    if (pr) { p = panels.find(x => x.toLowerCase() === pr.toLowerCase()) || pr; addPanel(p); }
+    const date = endD || addMonths(s, mo);
+    if (items.some(x => x.name === n && (x.username || "") === (u || "") && (x.panel || "") === p && x.date === date)) { dup++; return; }
+    items.push({id: Date.now() + Math.random(), name: n, username: u || "", panel: p, date, start: s, months: mo || 0, time: cfg.time, note: nt || ""});
+    ok++;
+  });
+  sv(KEY, items); refreshPanels(); render();
+  $("impmsg").textContent = "U shtuan " + ok + (dup ? ", u kaluan " + dup + " të përsëritura" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") : ".");
+  if (!bad.length) $("impbox").value = "";
+};
+
+/* ---------- konfigurimi ---------- */
+function applyCfg() {
+  $("ctime").value = cfg.time; $("cmonths").value = String(cfg.months);
+  $("h").value = cfg.time; $("m").value = String(cfg.months); updPrev();
+}
+$("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, cfg); applyCfg(); };
+$("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
+$("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(p); $("newp").value = ""; refreshPanels(); } };
+function remindersJson() {
+  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", date: x.date, time: x.time || "14:00", note: x.note || ""})), null, 2);
+}
+$("exp").onclick = () => {
+  const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
+  try { navigator.clipboard.writeText(box.value); } catch (e) {}
+};
+$("expdl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([remindersJson()], {type: "application/json"}));
+  a.download = "reminders.json"; document.body.appendChild(a); a.click(); a.remove();
+};
+/* ---------- sinkronizimi me GitHub ---------- */
+const b64 = s => btoa(unescape(encodeURIComponent(s)));
+const errText = st => st === 401 ? "tokeni është i pavlefshëm ose ka skaduar" : st === 403 ? "tokeni s'ka leje (duhet Contents: Read and write)" : st === 404 ? "repo nuk u gjet (kontrollo emrin dhe që tokeni ka akses te ky repo)" : st === 409 || st === 422 ? "konflikt, provo sërish" : "HTTP " + st;
+async function syncNow() {
+  const msg = $("syncmsg");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo) || !sync.token) { msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  msg.textContent = "Po sinkronizoj…";
+  const br = sync.branch || "main";
+  const url = "https://api.github.com/repos/" + sync.repo + "/contents/reminders.json";
+  const H = {Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
+  try {
+    let sha;
+    const g = await fetch(url + "?ref=" + encodeURIComponent(br), {headers: H});
+    if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error(errText(g.status));
+    const body = {message: "Përditësim nga telefoni", content: b64(remindersJson()), branch: br};
+    if (sha) body.sha = sha;
+    const p = await fetch(url, {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, H), body: JSON.stringify(body)});
+    if (!p.ok) throw new Error(errText(p.status));
+    msg.textContent = "✓ Sinkronizuar " + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + " (" + items.length + " abonime)";
+    return true;
+  } catch (e) { msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+}
+function readSync() {
+  sync.repo = $("syncrepo").value.trim(); sync.branch = $("syncbranch").value.trim() || "main";
+  sync.token = $("synctoken").value.trim(); sync.auto = $("syncauto").checked; sv("sync-v1", sync);
+}
+$("syncrepo").value = sync.repo; $("syncbranch").value = sync.branch; $("synctoken").value = sync.token; $("syncauto").checked = !!sync.auto;
+["syncrepo", "syncbranch", "synctoken", "syncauto"].forEach(id => $(id).onchange = readSync);
+$("syncnow").onclick = () => { readSync(); syncNow(); };
+
+$("bk").onclick = () => {
+  const box = $("bkbox"); box.value = JSON.stringify({items, panels, cfg}); box.style.display = "block"; box.focus(); box.select();
+  try { navigator.clipboard.writeText(box.value); } catch (e) {}
+};
+$("rs").onclick = () => {
+  const b = $("rs");
+  if (!b.dataset.s) { b.dataset.s = "1"; b.textContent = "Prek sërish për ta rikthyer"; return; }
+  delete b.dataset.s; b.textContent = "Rikthe (zëvendëson gjithçka)";
+  try {
+    const d = JSON.parse($("rsbox").value);
+    if (!Array.isArray(d.items)) throw 0;
+    items = d.items; panels = d.panels || panels; cfg = Object.assign(cfg, d.cfg || {});
+    sv(KEY, items); sv(PKEY, panels); sv(CKEY, cfg);
+    refreshPanels(); applyCfg(); render();
+    $("rsmsg").textContent = "✓ U rikthyen " + items.length + " abonime."; $("rsbox").value = "";
+  } catch (e) { $("rsmsg").textContent = "Kopja nuk është e vlefshme."; }
+};
+
+/* ---------- të dhënat fillestare nga Lion Panel (3 faqet), ngarkohen një herë ---------- */
+const SEED1 = [["Pa emër", "ab285b12", "2026-11-09", ""], ["Shoku Takut", "b8b18014", "2027-11-01", ""], ["Hati smart", "ff5f2cd6", "2027-10-31", ""], ["Shoku Fredit", "a77b785a", "2027-10-29", ""], ["Vjehrra Markjolit", "3fa3fd41", "2027-10-24", ""], ["mondi2 free", "c21309f3", "2027-10-24", "4D:2C:DE:CF:09:51"], ["Cubi Alb", "a638a0bc", "2027-10-20", ""], ["Mondi Shoku", "52b4a187", "2027-10-17", ""], ["ErvisiKraja shoku", "cd28462b", "2027-10-16", ""], ["Kunatit shokut", "07d53301", "2027-10-16", ""], ["Fredi smart", "ecc28b61", "2027-10-14", ""], ["Hotiptv d0:cd:bf:de:88:36", "b4f9aa55", "2027-10-06", ""], ["Shoku mondit", "5ce37540", "2027-10-05", ""], ["Shoku i", "4e31d266", "2027-09-18", ""], ["Altini i", "774f601f", "2027-09-17", ""], ["Vjehrri gencit", "6e815089", "2027-09-13", ""], ["Genci", "affa9493", "2027-09-13", "smart 4f:d7:c9:29:a8:02"], ["Profe", "36073d8b", "2027-09-11", "smart"], ["Gledisi Kledisa", "d999ad0d", "2027-08-24", "smart"], ["Arianiti", "f28bbeff", "2027-06-30", ""], ["Ksamili Smart", "043515b5", "2027-06-12", ""], ["Besari", "905769ca", "2027-05-23", ""], ["Taku Itali", "6c8bab78", "2027-08-18", ""], ["Gledisi", "c8363618", "2027-05-08", "smart iptv"], ["Vali shoku", "bc855b59", "2027-05-06", ""]];
+const SEED2 = [["Klodi Tanit", "231b739b", "2027-04-28", "smart"], ["Sermeti", "215a102a", "2027-03-28", "SmartOne 4C:57:39:E0:72:04"], ["Namiku france", "fcef13db", "2027-03-11", ""], ["Axhi Eldit", "d785c5b5", "2027-03-08", ""], ["Kristi ,extreme", "2c9e6781", "2027-01-26", ""], ["Elesi De", "12a9fa39", "2027-01-12", ""], ["Bushi De", "cfe400d0", "2027-01-09", ""], ["Paolo smart", "f48a7752", "2026-12-27", ""], ["Gazmendi Sallon", "59c87b14", "2026-12-26", ""], ["Ramizi Hot", "Ffxj5148dasdasdada", "2026-12-06", ""], ["Eldi Smart", "nGMv7930", "2026-11-27", ""], ["Kushtrim De", "uVEV7137", "2026-11-13", ""], ["endri shpi", "YUTR1264", "2027-11-07", ""], ["Elezi ,shoku", "BuKv2863", "2027-10-27", ""], ["Cubi BE", "duda8348", "2027-10-20", ""], ["Djali i", "57Vw8542", "2026-10-17", ""], ["Endri ,kunati", "EndriiiNkw61410", "2026-10-15", ""], ["Eduardi smartone", "M92m1474", "2027-10-20", ""], ["Flamuri shoku", "9eSf9432", "2027-08-29", ""], ["Motra Endrit", "1Bcm3988", "2027-06-19", ""], ["endri 2", "HUrd5061", "2027-06-17", ""], ["endri 1", "UHzX21002912", "2027-06-17", ""], ["qimi", "qIMIhyqR4843", "2026-11-25", ""], ["Gjini Velipoj", "kn2W7260", "2027-02-23", ""], ["BABA markut", "zzAF1789", "2027-02-12", "68:fc:ca:14:f5:e2"], ["Sadik shala", "G9CP9079", "2027-01-24", ""], ["Vita /fitiptv", "rYxZ4524", "2027-01-05", "smarters"], ["Markjoli ,", "kGsb20042025", "2027-01-02", ""], ["Toshi b0:e4:5c:6a:fd:a1", "Toshiiiy7zf6006", "2026-11-22", ""], ["64:e7:d8:06:ac:0c net", "LinoooNkyt4979", "2027-11-04", ""], ["visari iptv", "9R1X8972", "2027-10-28", ""], ["elvi iptv", "GUMf9098", "2027-09-20", ""], ["Shoku markut", "jRUf4489", "2027-02-25", ""], ["Adi Canada", "Addd3hbB2070", "2027-02-12", "smart"], ["alberoni 1", "7aaW7607", "2027-02-12", "fc:03:9f:95:4b:c8"], ["Alberoni", "9XqW3940", "2027-02-12", "38:18:4c:fb:08:11 smart"], ["admiri", "1r3g4089Ad", "2027-02-12", "Smart Iptv"], ["70:2a:d5:c1:9e:92 Shoku", "CK5c1936", "2027-01-16", ""], ["elezi 2", "uF4c5914", "2027-02-07", ""], ["samia F0:70:4F:EF:3A:AA", "Samia9s5V9540", "2026-12-11", ""], ["Azmiri SmartOne", "Azmx11Q4430", "2026-12-02", ""], ["Markjoli DE", "huhj7619", "2027-10-31", ""]];
+function seedLion(flag, data) {
+  if (ld(flag, false)) return;
+  data.forEach(([n, u, d, nt]) => {
+    if (!items.some(x => x.name === n && (x.username || "") === u && x.panel === "Lion" && x.date === d))
+      items.push({id: Date.now() + Math.random(), name: n, username: u, panel: "Lion", date: d, start: "", months: 0, time: cfg.time, note: nt});
+  });
+  addPanel("Lion"); sv(KEY, items); sv(flag, true);
+}
+seedLion("seed-lion-1", SEED1);
+seedLion("seed-lion-2", SEED2);
+
+/* ---------- Mega OTT (2 abonime), ngarkohen një herë; nëse "Paolo" ekziston pa username, përditësohet ---------- */
+const SEED_MEGA = [
+  ["Paolo", "PaoloCapaliku", "2027-05-08", "19:26", "2026-11-07", 6, "Filloi 7 nëntor 2026, 6 muaj"],
+  ["Daja Tanit", "JKXLL1N4", "2027-11-09", "16:50", "2026-11-08", 12, "Filloi 8 nëntor 2026, 1 vit"]
+];
+if (!ld("seed-mega-1", false)) {
+  SEED_MEGA.forEach(([n, u, d, h, st, mo, nt]) => {
+    if (items.some(x => (x.username || "") === u && x.panel === "Mega")) return;
+    const old = items.find(x => x.name === n && x.panel === "Mega" && !x.username);
+    if (old) Object.assign(old, {username: u, date: d, time: h, start: st, months: mo, note: nt});
+    else items.push({id: Date.now() + Math.random(), name: n, username: u, panel: "Mega", date: d, start: st, months: mo, time: h, note: nt});
+  });
+  addPanel("Mega"); sv(KEY, items); sv("seed-mega-1", true);
+}
+
+/* ---------- nisja ---------- */
+fillSelect($("m"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+fillSelect($("cmonths"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+$("d").value = todayIso();
+applyCfg(); refreshPanels(); render(); showView();
+/* ---------- rifreskim kur ndryshon dita (numërimi "pas X ditësh") ---------- */
+let lastDay = todayIso();
+function dayCheck() {
+  if (todayIso() === lastDay) return;
+  const a = document.activeElement;
+  if (a && a.closest && a.closest(".edit")) return;
+  lastDay = todayIso(); render();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
+setInterval(dayCheck, 60000);
+</script>
+</body>
+</html>
