@@ -71,7 +71,7 @@ button:disabled{opacity:.45;cursor:default}
 </div>
 
 <header class="top"><div class="top-in">
-  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v4</small></span>
+  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v7</small></span>
   <a href="#lista" data-v="lista">Lista</a>
   <a href="#krijo" data-v="krijo">➕ Krijo</a>
   <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
@@ -203,6 +203,7 @@ function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e
 function schedSync() { if (typeof sync === "undefined" || !sync.auto || !sync.token) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 3000); }
 
 let items = ld(KEY, []);
+items.forEach(x => { if (x.dual === undefined) x.dual = !!x.client; }); // lidhja tani bëhet me tick; ata me Klient të shkruar mbeten të lidhur
 let panels = ld(PKEY, ["Mega", "Lion"]);
 let cfg = Object.assign({time: "14:00", months: 1}, ld(CKEY, {}));
 let sync = Object.assign({repo: "", branch: "main", token: "", auto: false}, ld("sync-v1", {}));
@@ -232,6 +233,7 @@ function daysLeft(it) {
   const n = new Date(), td = new Date(n.getFullYear(), n.getMonth(), n.getDate());
   return Math.round((parse(it.date) - td) / 864e5);
 }
+function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
 function state(it) {
   if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
   const l = daysLeft(it);
@@ -308,18 +310,36 @@ function renew(it, mo) {
   sv(KEY, items); render();
 }
 const ckey = x => (x.client || x.name || "").trim().toLowerCase();
-const linked = it => it.free ? [] : items.filter(x => x !== it && !x.free && ckey(x) === ckey(it));
+const linked = it => (it.free || !it.dual) ? [] : items.filter(x => x !== it && !x.free && x.dual && ckey(x) === ckey(it));
 function refreshHead(el, it) {
   const s = state(it);
   el.querySelector(".nm").textContent = (it.free ? "🆓 " : "") + it.name;
-  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", it.panel || "", ...linked(it).map(o => "+ " + (o.panel || "?") + " " + fmt(o.date))].filter(Boolean).join(" · ");
+  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", it.panel || "", ...linked(it).map(o => "+ " + (o.panel || "?") + " " + daysTxt(o) + " (" + fmt(o.date) + ")")].filter(Boolean).join(" · ");
   el.querySelector(".c-user").textContent = it.username || "";
   el.querySelector(".c-panel").textContent = it.panel || "";
   el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
   const st = el.querySelector(".c-state"); st.textContent = (it.free && !s.over) ? "I LIRË · " + daysLeft(it) + " ditë" : s.t; st.style.color = (it.free && !s.over) ? "var(--accent)" : s.c;
 }
+function groupMsg(it) {
+  const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
+  return (it.client || it.name) + ": " + g.map(x => (x.panel || "?") + " " + daysTxt(x)).join(" · ");
+}
+/* kthen false nëse përdoruesi nuk e konfirmon; nëse po, e shkëput nga paneli tjetër (që mbetet i paprekur) */
+function askGive(it, newName) {
+  const oth = linked(it);
+  if (!oth.length || newName.trim().toLowerCase() === ckey(it)) return true;
+  const ok = confirm("Ky abonim është i lidhur me «" + (it.client || it.name) + "» (" + groupMsg(it) + ").\n\nA don t'ia japësh dikujt tjetër («" + newName + "»)?\n\n" + oth.map(o => o.panel || "?").join(", ") + " mbetet te «" + (it.client || it.name) + "» pa u ndryshuar.");
+  if (ok) { it.client = ""; it.dual = false; }
+  return ok;
+}
 function buildEditor(it, el) {
   const box = el.querySelector(".edit"); box.innerHTML = "";
+  if (linked(it).length) {
+    const nb = document.createElement("div");
+    nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+    nb.textContent = "🔗 " + groupMsg(it);
+    box.appendChild(nb);
+  }
   const g = document.createElement("div"); g.className = "grid";
   const mk = (lab, node, cls) => {
     const w = document.createElement("label"); w.className = "f " + (cls || "");
@@ -341,16 +361,38 @@ function buildEditor(it, el) {
   let dateI, startI, monI;
   const recalc = () => { if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; } };
 
-  mk("Emri", inp("text", it.name, v => { it.name = v.trim() || it.name; }));
+  const ni = document.createElement("input"); ni.type = "text"; ni.autocapitalize = "none"; ni.value = it.name;
+  ni.addEventListener("change", () => {
+    const nv = ni.value.trim();
+    if (!nv || nv === it.name) { ni.value = it.name; return; }
+    if (!askGive(it, nv)) { ni.value = it.name; return; }
+    it.name = nv; sv(KEY, items); render();
+  });
+  mk("Emri", ni);
   const fw = document.createElement("label"); fw.className = "f wide"; fw.style.cssText = "flex-direction:row;align-items:center;gap:8px";
   const fc = document.createElement("input"); fc.type = "checkbox"; fc.checked = !!it.free; fc.style.cssText = "width:22px;height:22px";
   const ft = document.createElement("span"); ft.style.fontWeight = "600";
   const fi = () => { ft.textContent = it.free ? "Abonim i lirë: mbeten " + Math.max(daysLeft(it), 0) + " ditë (deri më " + fmt(it.date) + "). Për t'ia dhënë një klienti: hiq tick-un dhe ndrysho emrin." : "Abonim i lirë (përdoret për klient tjetër)"; };
   fc.addEventListener("change", () => { it.free = fc.checked; if (!it.free) delete it.free; fi(); sv(KEY, items); render(); });
   fi(); fw.append(fc, ft); g.appendChild(fw);
+  const dw = document.createElement("label"); dw.className = "f wide"; dw.style.cssText = "flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap";
+  const dc = document.createElement("input"); dc.type = "checkbox"; dc.checked = !!it.dual; dc.style.cssText = "width:22px;height:22px";
+  const dt = document.createElement("span"); dt.style.fontWeight = "600"; dt.textContent = "🔗 Abonim i dyfishtë (lidhet me panelin tjetër të të njëjtit klient)";
+  const dh = document.createElement("span"); dh.className = "meta"; dh.style.cssText = "flex-basis:100%;margin:0";
+  const dHint = () => { dh.textContent = !it.dual ? "" : linked(it).length ? "Lidhur: " + groupMsg(it) : "S'u gjet abonim tjetër me emrin «" + (it.client || it.name) + "» që ka tick. Shtoje me butonin ➕ më poshtë ose vendos të njëjtin emër te tjetri."; };
+  dc.addEventListener("change", () => {
+    it.dual = dc.checked; if (!it.dual) delete it.dual;
+    if (it.dual) items.forEach(x => { if (x !== it && !x.free && ckey(x) === ckey(it) && x.panel !== it.panel) x.dual = true; });
+    sv(KEY, items); render();
+  });
+  dHint(); dw.append(dc, dt, dh); g.appendChild(dw);
   const ci = document.createElement("input"); ci.type = "text"; ci.setAttribute("list", "clientsdl"); ci.autocapitalize = "none";
   ci.value = it.client || ""; ci.placeholder = it.name;
-  ci.addEventListener("change", () => { it.client = ci.value.trim(); sv(KEY, items); render(); });
+  ci.addEventListener("change", () => {
+    const nv = ci.value.trim();
+    if (!askGive(it, nv || it.name)) { ci.value = it.client || ""; return; }
+    it.client = nv; sv(KEY, items); render();
+  });
   mk("Klienti (shkruaj të njëjtin emër në Lion dhe Mega për t'i lidhur)", ci, "wide");
   $("clientsdl").innerHTML = [...new Set(items.map(x => x.client || x.name))].map(x => '<option value="' + x.replace(/"/g, "&quot;") + '">').join("");
   mk("Username", inp("text", it.username, v => { it.username = v.trim(); }));
@@ -377,8 +419,8 @@ function buildEditor(it, el) {
   if (free.length) {
     const x = document.createElement("button"); x.className = "ghost"; x.textContent = "➕ Shto edhe në " + free[0];
     x.onclick = () => {
-      it.client = it.client || it.name;
-      const s = todayIso(), n = {id: Date.now() + Math.random(), name: it.name, client: it.client, username: "", panel: free[0], date: addMonths(s, cfg.months), start: s, months: cfg.months, time: cfg.time, note: ""};
+      it.client = it.client || it.name; it.dual = true;
+      const s = todayIso(), n = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: free[0], date: addMonths(s, cfg.months), start: s, months: cfg.months, time: cfg.time, note: ""};
       items.push(n); sv(KEY, items); openId = n.id; render();
     };
     b.appendChild(x);
@@ -420,6 +462,18 @@ function render() {
   $("cnt").textContent = rows.length ? "Shfaqen " + shown.length + " nga " + rows.length : "";
   $("more").style.display = rows.length > lim ? "block" : "none";
   if (!rows.length) { box.innerHTML = '<div class="empty">Asnjë abonent.</div>'; return; }
+  if (q) {
+    const seen = new Set();
+    shown.forEach(({it}) => {
+      const k = ckey(it);
+      if (it.free || seen.has(k) || !linked(it).length || seen.size >= 5) return;
+      seen.add(k);
+      const nb = document.createElement("div");
+      nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--accent);border-radius:10px;font-weight:600;background:var(--card)";
+      nb.textContent = "🔗 " + groupMsg(it);
+      box.appendChild(nb);
+    });
+  }
   shown.forEach(({it}) => {
     const el = document.createElement("div");
     el.className = "item" + (openId === it.id ? " open" : "");
@@ -481,7 +535,7 @@ $("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, c
 $("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
 $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(p); $("newp").value = ""; refreshPanels(); } };
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, date: x.date, time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, dual: !!x.dual, date: x.date, time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
