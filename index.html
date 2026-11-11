@@ -140,7 +140,8 @@ button:disabled{opacity:.45;cursor:default}
       <label class="f">Ora e skadimit<input id="h" type="time"></label>
       <label class="f">Aplikacioni<input id="ap" list="appsdl" placeholder="p.sh. SmartOne" autocapitalize="none"></label>
       <label class="f">MAC adresa<input id="mc" placeholder="AA:BB:CC:DD:EE:FF" autocapitalize="none"></label>
-      <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="du" type="checkbox" style="width:22px;height:22px">🔗 Është në dy panele (lidhet me abonimin tjetër me të njëjtin emër)</label>
+      <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="du" type="checkbox" style="width:22px;height:22px">🔗 Është edhe në panel tjetër (lidhet me abonimin tjetër me të njëjtin emër)</label>
+      <div id="dualopts" class="wide" style="display:none;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)"></div>
       <label class="f wide">Shënim (opsionale)<input id="t"></label>
     </div>
     <div id="prev" class="meta" style="margin:10px 0"></div>
@@ -182,7 +183,7 @@ button:disabled{opacity:.45;cursor:default}
     <div>
       <h2 style="margin-top:0">Sinkronizo me emailin (GitHub)</h2>
       <div class="card">
-        <p class="meta" style="margin-top:0">Dërgon listën direkt në <code>reminders.json</code> te repo juaj private në GitHub. Atje programi dërgon emailet: 1 ditë para, ditën e skadimit nga ora 08:00, dhe kur vjen ora e skadimit. Tokeni ruhet vetëm në këtë telefon.</p>
+        <p class="meta" style="margin-top:0">Dërgon listën direkt në <code>reminders.json</code> te repo juaj private në GitHub. Atje programi dërgon emailet: 1 ditë para, ditën e skadimit nga ora 08:00, dhe kur vjen ora e skadimit. Tokeni ruhet vetëm në këtë pajisje.<br><b>Pajisje e re (telefon, PC):</b> shkruaj repon dhe tokenin, vendos tick-un «automatikisht» dhe shtyp «Merr nga GitHub». Pas kësaj çdo pajisje tërheq vetë listën kur e hap dhe e dërgon pas çdo ndryshimi.</p>
         <div class="grid">
           <label class="f">Repo (emri/repo)<input id="syncrepo" placeholder="p.sh. arisheqi/promemori" autocapitalize="none"></label>
           <label class="f">Dega (branch)<input id="syncbranch" placeholder="main" autocapitalize="none"></label>
@@ -190,6 +191,7 @@ button:disabled{opacity:.45;cursor:default}
         </div>
         <label class="f" style="flex-direction:row;align-items:center;margin:10px 0"><input id="syncauto" type="checkbox">Sinkronizo automatikisht pas çdo ndryshimi</label>
         <button id="syncnow">Sinkronizo tani</button>
+        <button id="syncpull" type="button" class="ghost" style="margin-left:8px">Merr nga GitHub</button>
         <button id="syncdiag" type="button" style="margin-left:8px">Diagnostiko</button>
         <p id="syncmsg" class="meta"></p>
       </div>
@@ -224,17 +226,20 @@ const KEY = "abonime-v1", PKEY = "panele-v1", CKEY = "cfg-v1";
 const $ = id => document.getElementById(id);
 const p2 = n => String(n).padStart(2, "0");
 function ld(k, def) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : def; } catch (e) { return def; } }
-function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) schedSync(); }
+let ver = 0;
+function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) { ver++; try { localStorage.setItem("dirty-v1", "1"); } catch (e) {} schedSync(); } }
 function schedSync() { if (typeof sync === "undefined" || !sync.auto || !sync.token) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 3000); }
 
 let items = ld(KEY, []);
 items.forEach(x => { if (x.dual === undefined) x.dual = !!x.client; }); // lidhja tani bëhet me tick; ata me Klient të shkruar mbeten të lidhur
 let panels = ld(PKEY, ["Mega", "Lion"]);
 let cfg = Object.assign({time: "14:00", months: 1}, ld(CKEY, {}));
-let sync = Object.assign({repo: "", branch: "main", token: "", auto: false}, ld("sync-v1", {}));
+if (![1, 3, 6, 12].includes(cfg.months)) cfg.months = 1;
+let sync = Object.assign({repo: "", branch: "main", token: "", auto: true, sha: ""}, ld("sync-v1", {}));
 let syncTimer = null;
+let copyMsg = "";
 let editing = false, openId = null, flt = "all", lim = 50;
-const MONTHS = [[0, "—"], [1, "1 muaj"], [2, "2 muaj"], [3, "3 muaj"], [4, "4 muaj"], [5, "5 muaj"], [6, "6 muaj"], [9, "9 muaj"], [12, "1 vit"], [24, "2 vjet"]];
+const MONTHS = [[0, "—"], [1, "1 muaj"], [3, "3 muaj"], [6, "6 muaj"], [12, "1 vit"]];
 
 const iso = d => d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
 const todayIso = () => iso(new Date());
@@ -305,7 +310,21 @@ window.addEventListener("hashchange", showView);
 /* ---------- panelet ---------- */
 const allPanels = () => [...new Set([...panels, ...items.map(x => x.panel).filter(Boolean)])];
 function addPanel(p) { if (!panels.includes(p)) { panels.push(p); sv(PKEY, panels); } }
+function renderDualOpts() {
+  const box = $("dualopts"); if (!box) return;
+  box.innerHTML = ""; const on = $("du").checked; box.style.display = on ? "block" : "none"; if (!on) return;
+  const t = document.createElement("div"); t.style.cssText = "font-weight:600;margin-bottom:8px"; t.textContent = "Krijo edhe në (zgjidh):";
+  const row = document.createElement("div"); row.style.cssText = "display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px";
+  const mkc = (lab, cls, val) => { const l = document.createElement("label"); l.style.cssText = "display:flex;align-items:center;gap:6px"; const i = document.createElement("input"); i.type = "checkbox"; i.checked = true; i.style.cssText = "width:20px;height:20px"; if (cls) i.className = cls; if (val) i.value = val; l.append(i, document.createTextNode(lab)); return [l, i]; };
+  allPanels().filter(x => x !== $("p").value).forEach(pn => row.appendChild(mkc(pn, "dp", pn)[0]));
+  const t2 = document.createElement("div"); t2.style.cssText = "font-weight:600;margin:6px 0 8px"; t2.textContent = "dhe kopjo aplikacionin / MAC-un:";
+  const row2 = document.createElement("div"); row2.style.cssText = "display:flex;gap:16px;flex-wrap:wrap";
+  const [la, ia] = mkc("Aplikacionin"), [lm, im] = mkc("MAC adresën"); ia.id = "dapp"; im.id = "dmac"; row2.append(la, lm);
+  const h = document.createElement("div"); h.className = "meta"; h.style.margin = "8px 0 0"; h.textContent = "Username-i dhe skadimi te paneli tjetër merren si këtu; i ndryshon më pas nëse duhet.";
+  box.append(t, row, t2, row2, h);
+}
 function refreshPanels() {
+  renderDualOpts();
   const all = allPanels();
   fillSelect($("p"), all.map(x => [x, x]), true);
   fillSelect($("pf"), [["", "Të gjitha panelet"], ...all.map(x => [x, x])], true);
@@ -408,7 +427,7 @@ function buildEditor(it, box) {
     const w = document.createElement("label"); w.className = "f " + (cls || "");
     const s = document.createElement("span"); s.textContent = lab; w.append(s, node); g.appendChild(w); return node;
   };
-  const save = () => { sv(KEY, items); const re = rowEls.get(it.id); if (re) refreshHead(re, it); fillInfo(it); };
+  const save = () => { sv(KEY, items); const re = rowEls.get(it.id); if (re) refreshHead(re, it); fillInfo(it); updSum(); };
   const inp = (type, val, on) => {
     const i = document.createElement("input"); i.type = type; i.value = val || "";
     if (type === "text") i.autocapitalize = "none";
@@ -422,7 +441,10 @@ function buildEditor(it, box) {
     return s;
   };
   let dateI, startI, monI;
-  const recalc = () => { if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; } };
+  const recalc = () => {
+    if (!it.start && it.months > 0) { it.start = todayIso(); startI.value = it.start; }
+    if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; }
+  };
 
   const ni = document.createElement("input"); ni.type = "text"; ni.autocapitalize = "none"; ni.value = it.name;
   ni.addEventListener("change", () => {
@@ -476,11 +498,55 @@ function buildEditor(it, box) {
   mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
   startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
   const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
-  monI = mk("Kohëzgjatja (llogarit skadimin)", sel(mopts, it.months || 0, v => { it.months = +v; recalc(); }));
+  monI = mk("Kohëzgjatja: zgjidh 1 muaj / 3 / 6 / 1 vit (llogarit skadimin)", sel(mopts, it.months || 0, v => { it.months = +v; recalc(); }));
   const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
   ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
   mk("Shënim", ta, "wide");
   box.appendChild(g);
+  const sumEl = document.createElement("div");
+  sumEl.style.cssText = "padding:10px 12px;margin:10px 0;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+  function updSum() {
+    const mt = it.months ? " (" + (it.months === 12 ? "1 vit" : it.months + " muaj") + ")" : "";
+    sumEl.textContent = "▶ Fillon " + (it.start ? fmt(it.start) : "—") + "  →  ⏹ Mbaron " + fmt(it.date) + (it.time ? " " + it.time : "") + mt;
+  }
+  updSum(); box.appendChild(sumEl);
+
+  const cps = allPanels().filter(p => p !== it.panel);
+  if (cps.length) {
+    const cb = document.createElement("div");
+    cb.style.cssText = "padding:10px 12px;margin:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--bg)";
+    const ct = document.createElement("div"); ct.style.cssText = "font-weight:600;margin-bottom:8px"; ct.textContent = "📋 Kopjo te paneli tjetër (zgjidh çfarë):";
+    const ck = document.createElement("div"); ck.style.cssText = "display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px";
+    const mkc = lab => { const l = document.createElement("label"); l.style.cssText = "display:flex;align-items:center;gap:6px"; const i = document.createElement("input"); i.type = "checkbox"; i.checked = true; i.style.cssText = "width:20px;height:20px"; l.append(i, document.createTextNode(lab)); ck.appendChild(l); return i; };
+    const cApp = mkc("Aplikacionin"), cMac = mkc("MAC adresën");
+    const cbt = document.createElement("div"); cbt.className = "btns";
+    const doCopy = names => {
+      if (!cApp.checked && !cMac.checked) { cm.textContent = "Zgjidh aplikacionin ose MAC."; return; }
+      if ((!cApp.checked || !it.app) && (!cMac.checked || !it.mac)) { cm.textContent = "Nuk ka çfarë të kopjohet (fushat e zgjedhura janë bosh)."; return; }
+      const done = [];
+      names.forEach(pn => {
+        let ex = items.find(x => x !== it && ckey(x) === ckey(it) && x.panel === pn), made = false;
+        if (!ex) {
+          const t = todayIso(); it.client = it.client || it.name; it.dual = true; made = true;
+          ex = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: pn, date: addMonths(t, cfg.months), start: t, months: cfg.months, time: cfg.time, note: "", mig: 1};
+          items.push(ex);
+        }
+        if (cApp.checked && it.app) ex.app = it.app;
+        if (cMac.checked && it.mac) ex.mac = it.mac;
+        done.push(pn + (made ? " (i ri, kontrollo datën)" : ""));
+      });
+      copyMsg = "✓ U kopjua te: " + done.join(", ");
+      sv(KEY, items); render();
+    };
+    cps.forEach(pn => {
+      const x = document.createElement("button"); x.type = "button"; x.className = "ghost";
+      const exists = items.some(y => y !== it && ckey(y) === ckey(it) && y.panel === pn);
+      x.textContent = "→ " + pn + (exists ? "" : " (krijo)"); x.onclick = () => doCopy([pn]); cbt.appendChild(x);
+    });
+    if (cps.length > 1) { const x = document.createElement("button"); x.type = "button"; x.className = "ghost"; x.textContent = "→ Të gjitha"; x.onclick = () => doCopy(cps); cbt.appendChild(x); }
+    const cm = document.createElement("div"); cm.className = "meta"; cm.style.margin = "8px 0 0"; cm.textContent = copyMsg; copyMsg = "";
+    cb.append(ct, ck, cbt, cm); box.appendChild(cb);
+  }
 
   const b = document.createElement("div"); b.className = "btns";
   [[1, "+1 muaj"], [3, "+3 muaj"], [6, "+6 muaj"], [12, "+1 vit"]].forEach(([m, l]) => {
@@ -571,17 +637,30 @@ function updPrev() {
   $("prev").textContent = s && mo ? "Skadon më " + fmt(addMonths(s, mo)) + " " + ($("h").value || "") : "";
 }
 ["d", "m", "h"].forEach(i => $(i).addEventListener("input", updPrev));
+$("du").addEventListener("change", renderDualOpts); $("p").addEventListener("change", renderDualOpts);
 $("add").onclick = () => {
   const n = $("n").value.trim(), u = $("u").value.trim(), p = $("p").value;
   const s = $("d").value, mo = +$("m").value;
   if (!n || !s || !mo) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
   const du = $("du").checked;
-  items.push({id: Date.now() + Math.random(), name: n, username: u, app: $("ap").value.trim(), mac: $("mc").value.trim().toUpperCase(), mig: 1, dual: du, panel: p, date: addMonths(s, mo), start: s, months: mo, time: $("h").value || cfg.time, note: $("t").value.trim()});
+  const ap = $("ap").value.trim(), mc = $("mc").value.trim().toUpperCase(), tm = $("h").value || cfg.time;
+  items.push({id: Date.now() + Math.random(), name: n, username: u, app: ap, mac: mc, mig: 1, dual: du, panel: p, date: addMonths(s, mo), start: s, months: mo, time: tm, note: $("t").value.trim()});
   if (du) items.forEach(x => { if (ckey(x) === n.toLowerCase()) x.dual = true; });
+  const alsoIn = [];
+  if (du) {
+    const wApp = $("dapp") && $("dapp").checked, wMac = $("dmac") && $("dmac").checked;
+    [...document.querySelectorAll("#dualopts .dp")].filter(c => c.checked).forEach(c => {
+      let ex = items.find(x => ckey(x) === n.toLowerCase() && x.panel === c.value);
+      if (!ex) { ex = {id: Date.now() + Math.random(), name: n, client: n, dual: true, username: "", panel: c.value, date: addMonths(s, mo), start: s, months: mo, time: tm, note: "", mig: 1}; items.push(ex); }
+      if (wApp && ap) ex.app = ap;
+      if (wMac && mc) ex.mac = mc;
+      alsoIn.push(c.value);
+    });
+  }
   sv(KEY, items);
   $("du").checked = false;
   ["n", "u", "t", "ap", "mc"].forEach(i => $(i).value = "");
-  $("addmsg").textContent = "✓ U shtua: " + n;
+  $("addmsg").textContent = "✓ U shtua: " + n + (alsoIn.length ? " (dhe te " + alsoIn.join(", ") + ")" : "");
   refreshPanels(); render(); $("n").focus();
 };
 $("imp").onclick = () => {
@@ -614,7 +693,7 @@ $("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, c
 $("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
 $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(p); $("newp").value = ""; refreshPanels(); } };
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -629,25 +708,73 @@ $("expdl").onclick = () => {
 const b64 = s => btoa(unescape(encodeURIComponent(s)));
 const errText = st => st === 401 ? "tokeni është i pavlefshëm ose ka skaduar" : st === 403 ? "tokeni s'ka leje (duhet Contents: Read and write)" : st === 404 ? "repo nuk u gjet (kontrollo emrin dhe që tokeni ka akses te ky repo)" : st === 409 || st === 422 ? "konflikt, provo sërish" : "HTTP " + st;
 let syncBusy = false;
+const ghUrl = () => "https://api.github.com/repos/" + sync.repo + "/contents/reminders.json";
+const ghH = () => ({Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"});
+const syncReady = () => /^[\w.-]+\/[\w.-]+$/.test(sync.repo) && !!sync.token;
+const isDirty = () => { try { return !!localStorage.getItem("dirty-v1"); } catch (e) { return false; } };
+const fromB64 = t => new TextDecoder().decode(Uint8Array.from(atob(String(t).replace(/\s/g, "")), c => c.charCodeAt(0)));
+/* zëvendëson listën lokale me atë të GitHub */
+function adoptRemote(j) {
+  const arr = JSON.parse(fromB64(j.content));
+  if (!Array.isArray(arr)) throw new Error("reminders.json nuk është listë");
+  items = arr.map(x => {
+    const o = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "",
+      dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mig: 1};
+    if (x.free) o.free = true;
+    return o;
+  });
+  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); } catch (e) {}
+  sync.sha = j.sha; sv("sync-v1", sync);
+  items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
+  openId = null; editing = false; refreshPanels(); render();
+}
+/* tërheq listën nga GitHub. manual=true: me butonin (me konfirmim); manual=false: automatikisht, vetëm kur është e sigurt */
+async function pullNow(manual) {
+  const msg = $("syncmsg");
+  if (!syncReady()) { if (manual) msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (syncBusy) return false;
+  if (!manual && (isDirty() || editing)) return false;
+  syncBusy = true;
+  try {
+    const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+    if (g.status === 404) { if (manual) msg.textContent = "reminders.json s'ekziston ende në GitHub."; return false; }
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json();
+    if (!manual) {
+      if (j.sha === sync.sha) return false;                    // asgjë e re
+      if (sync.sha === "" && items.length) return false;       // pajisje me të dhëna që s'është sinkronizuar kurrë: vendos ti
+    } else if (items.length && !confirm("Lista e kësaj pajisjeje do të zëvendësohet me atë nga GitHub. Vazhdoj?")) return false;
+    adoptRemote(j);
+    msg.textContent = "✓ U ngarkuan " + items.length + " abonime nga GitHub (" + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + ")";
+    return true;
+  } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+  finally { syncBusy = false; }
+}
 async function syncNow() {
   const msg = $("syncmsg");
   if (syncBusy) { schedSync(); return false; }
-  if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo) || !sync.token) { msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (!syncReady()) { msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (!items.length) { msg.textContent = "Lista është bosh, s'e dërgoj (që të mos fshihet ajo në GitHub). Shtyp «Merr nga GitHub»."; return false; }
   syncBusy = true;
   msg.textContent = "Po sinkronizoj…";
-  const br = sync.branch || "main";
-  const url = "https://api.github.com/repos/" + sync.repo + "/contents/reminders.json";
-  const H = {Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
+  const br = sync.branch || "main", v0 = ver;
   try {
     for (let attempt = 0; attempt < 3; attempt++) {
-      let sha;
-      // cache:"no-store" -> shfletuesi s'duhet të ripërdorë një sha të vjetër (shkaku kryesor i "konflikt")
-      const g = await fetch(url + "?ref=" + encodeURIComponent(br) + "&_=" + Date.now(), {headers: H, cache: "no-store"});
-      if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error(await errMsg(g));
-      const body = {message: "Përditësim nga telefoni", content: b64(remindersJson()), branch: br};
+      let sha, remote;
+      const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(br) + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+      if (g.ok) { remote = await g.json(); sha = remote.sha; } else if (g.status !== 404) throw new Error(await errMsg(g));
+      if (sha && sha !== sync.sha) {
+        // GitHub ka version që kjo pajisje s'e njeh (ndryshuar nga pajisje tjetër ose s'është sinkronizuar kurrë)
+        let same = false; try { same = fromB64(remote.content).trim() === remoteJsonSafe(); } catch (e) {}
+        if (!same && !confirm("Lista në GitHub është ndryshe nga ajo e kësaj pajisjeje (mund ta ketë ndryshuar një pajisje tjetër).\n\nOK = e mbishkruaj me listën e kësaj pajisjeje\nAnulo = marr listën nga GitHub (humbasin ndryshimet e kësaj pajisjeje)")) {
+          adoptRemote(remote); msg.textContent = "✓ U ngarkua lista nga GitHub (" + items.length + " abonime)"; return true;
+        }
+      }
+      const body = {message: "Përditësim nga aplikacioni", content: b64(remindersJson()), branch: br};
       if (sha) body.sha = sha;
-      const p = await fetch(url, {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, H), body: JSON.stringify(body), cache: "no-store"});
+      const p = await fetch(ghUrl(), {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, ghH()), body: JSON.stringify(body), cache: "no-store"});
       if (p.ok) {
+        try { sync.sha = (await p.json()).content.sha; sv("sync-v1", sync); if (ver === v0) localStorage.removeItem("dirty-v1"); } catch (e) {}
         msg.textContent = "✓ Sinkronizuar " + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + " (" + items.length + " abonime)";
         return true;
       }
@@ -657,6 +784,7 @@ async function syncNow() {
   } catch (e) { msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
   finally { syncBusy = false; }
 }
+const remoteJsonSafe = () => remindersJson().trim();
 async function errMsg(r) {
   let d = ""; try { d = (await r.json()).message || ""; } catch (e) {}
   return errText(r.status) + (d ? " [" + d + "]" : "");
@@ -668,6 +796,7 @@ function readSync() {
 $("syncrepo").value = sync.repo; $("syncbranch").value = sync.branch; $("synctoken").value = sync.token; $("syncauto").checked = !!sync.auto;
 ["syncrepo", "syncbranch", "synctoken", "syncauto"].forEach(id => { $(id).onchange = readSync; $(id).oninput = readSync; });
 $("syncnow").onclick = () => { readSync(); syncNow(); };
+$("syncpull").onclick = () => { readSync(); pullNow(true); };
 $("syncdiag").onclick = async () => {
   readSync();
   const msg = $("syncmsg"), L = [];
@@ -711,35 +840,6 @@ $("rs").onclick = () => {
   } catch (e) { $("rsmsg").textContent = "Kopja nuk është e vlefshme."; }
 };
 
-/* ---------- të dhënat fillestare nga Lion Panel (3 faqet), ngarkohen një herë ---------- */
-const SEED1 = [["Pa emër", "ab285b12", "2026-11-09", ""], ["Shoku Takut", "b8b18014", "2027-11-01", ""], ["Hati smart", "ff5f2cd6", "2027-10-31", ""], ["Shoku Fredit", "a77b785a", "2027-10-29", ""], ["Vjehrra Markjolit", "3fa3fd41", "2027-10-24", ""], ["mondi2 free", "c21309f3", "2027-10-24", "4D:2C:DE:CF:09:51"], ["Cubi Alb", "a638a0bc", "2027-10-20", ""], ["Mondi Shoku", "52b4a187", "2027-10-17", ""], ["ErvisiKraja shoku", "cd28462b", "2027-10-16", ""], ["Kunatit shokut", "07d53301", "2027-10-16", ""], ["Fredi smart", "ecc28b61", "2027-10-14", ""], ["Hotiptv d0:cd:bf:de:88:36", "b4f9aa55", "2027-10-06", ""], ["Shoku mondit", "5ce37540", "2027-10-05", ""], ["Shoku i", "4e31d266", "2027-09-18", ""], ["Altini i", "774f601f", "2027-09-17", ""], ["Vjehrri gencit", "6e815089", "2027-09-13", ""], ["Genci", "affa9493", "2027-09-13", "smart 4f:d7:c9:29:a8:02"], ["Profe", "36073d8b", "2027-09-11", "smart"], ["Gledisi Kledisa", "d999ad0d", "2027-08-24", "smart"], ["Arianiti", "f28bbeff", "2027-06-30", ""], ["Ksamili Smart", "043515b5", "2027-06-12", ""], ["Besari", "905769ca", "2027-05-23", ""], ["Taku Itali", "6c8bab78", "2027-08-18", ""], ["Gledisi", "c8363618", "2027-05-08", "smart iptv"], ["Vali shoku", "bc855b59", "2027-05-06", ""]];
-const SEED2 = [["Klodi Tanit", "231b739b", "2027-04-28", "smart"], ["Sermeti", "215a102a", "2027-03-28", "SmartOne 4C:57:39:E0:72:04"], ["Namiku france", "fcef13db", "2027-03-11", ""], ["Axhi Eldit", "d785c5b5", "2027-03-08", ""], ["Kristi ,extreme", "2c9e6781", "2027-01-26", ""], ["Elesi De", "12a9fa39", "2027-01-12", ""], ["Bushi De", "cfe400d0", "2027-01-09", ""], ["Paolo smart", "f48a7752", "2026-12-27", ""], ["Gazmendi Sallon", "59c87b14", "2026-12-26", ""], ["Ramizi Hot", "Ffxj5148dasdasdada", "2026-12-06", ""], ["Eldi Smart", "nGMv7930", "2026-11-27", ""], ["Kushtrim De", "uVEV7137", "2026-11-13", ""], ["endri shpi", "YUTR1264", "2027-11-07", ""], ["Elezi ,shoku", "BuKv2863", "2027-10-27", ""], ["Cubi BE", "duda8348", "2027-10-20", ""], ["Djali i", "57Vw8542", "2026-10-17", ""], ["Endri ,kunati", "EndriiiNkw61410", "2026-10-15", ""], ["Eduardi smartone", "M92m1474", "2027-10-20", ""], ["Flamuri shoku", "9eSf9432", "2027-08-29", ""], ["Motra Endrit", "1Bcm3988", "2027-06-19", ""], ["endri 2", "HUrd5061", "2027-06-17", ""], ["endri 1", "UHzX21002912", "2027-06-17", ""], ["qimi", "qIMIhyqR4843", "2026-11-25", ""], ["Gjini Velipoj", "kn2W7260", "2027-02-23", ""], ["BABA markut", "zzAF1789", "2027-02-12", "68:fc:ca:14:f5:e2"], ["Sadik shala", "G9CP9079", "2027-01-24", ""], ["Vita /fitiptv", "rYxZ4524", "2027-01-05", "smarters"], ["Markjoli ,", "kGsb20042025", "2027-01-02", ""], ["Toshi b0:e4:5c:6a:fd:a1", "Toshiiiy7zf6006", "2026-11-22", ""], ["64:e7:d8:06:ac:0c net", "LinoooNkyt4979", "2027-11-04", ""], ["visari iptv", "9R1X8972", "2027-10-28", ""], ["elvi iptv", "GUMf9098", "2027-09-20", ""], ["Shoku markut", "jRUf4489", "2027-02-25", ""], ["Adi Canada", "Addd3hbB2070", "2027-02-12", "smart"], ["alberoni 1", "7aaW7607", "2027-02-12", "fc:03:9f:95:4b:c8"], ["Alberoni", "9XqW3940", "2027-02-12", "38:18:4c:fb:08:11 smart"], ["admiri", "1r3g4089Ad", "2027-02-12", "Smart Iptv"], ["70:2a:d5:c1:9e:92 Shoku", "CK5c1936", "2027-01-16", ""], ["elezi 2", "uF4c5914", "2027-02-07", ""], ["samia F0:70:4F:EF:3A:AA", "Samia9s5V9540", "2026-12-11", ""], ["Azmiri SmartOne", "Azmx11Q4430", "2026-12-02", ""], ["Markjoli DE", "huhj7619", "2027-10-31", ""]];
-function seedLion(flag, data) {
-  if (ld(flag, false)) return;
-  data.forEach(([n, u, d, nt]) => {
-    if (!items.some(x => x.name === n && (x.username || "") === u && x.panel === "Lion" && x.date === d))
-      items.push({id: Date.now() + Math.random(), name: n, username: u, panel: "Lion", date: d, start: "", months: 0, time: cfg.time, note: nt});
-  });
-  addPanel("Lion"); sv(KEY, items); sv(flag, true);
-}
-seedLion("seed-lion-1", SEED1);
-seedLion("seed-lion-2", SEED2);
-
-/* ---------- Mega OTT (2 abonime), ngarkohen një herë; nëse "Paolo" ekziston pa username, përditësohet ---------- */
-const SEED_MEGA = [
-  ["Paolo", "PaoloCapaliku", "2027-05-08", "19:26", "2026-11-07", 6, "Filloi 7 nëntor 2026, 6 muaj"],
-  ["Daja Tanit", "JKXLL1N4", "2027-11-09", "16:50", "2026-11-08", 12, "Filloi 8 nëntor 2026, 1 vit"]
-];
-if (!ld("seed-mega-1", false)) {
-  SEED_MEGA.forEach(([n, u, d, h, st, mo, nt]) => {
-    if (items.some(x => (x.username || "") === u && x.panel === "Mega")) return;
-    const old = items.find(x => x.name === n && x.panel === "Mega" && !x.username);
-    if (old) Object.assign(old, {username: u, date: d, time: h, start: st, months: mo, note: nt});
-    else items.push({id: Date.now() + Math.random(), name: n, username: u, panel: "Mega", date: d, start: st, months: mo, time: h, note: nt});
-  });
-  addPanel("Mega"); sv(KEY, items); sv("seed-mega-1", true);
-}
-
 /* ---------- migrim një herë: MAC dhe aplikacioni nga shënimi në fushat e tyre ---------- */
 const MACRE = /([0-9a-f]{2}[:-]){5}[0-9a-f]{2}/i;
 let mg = false;
@@ -757,6 +857,9 @@ fillSelect($("m"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
 fillSelect($("cmonths"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
 $("d").value = todayIso();
 applyCfg(); refreshPanels(); render(); showView();
+pullNow(false);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) pullNow(false); });
+setInterval(() => { if (!document.hidden) pullNow(false); }, 120000);
 /* ---------- rifreskim kur ndryshon dita (numërimi "pas X ditësh") ---------- */
 let lastDay = todayIso();
 function dayCheck() {
