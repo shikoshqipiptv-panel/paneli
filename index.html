@@ -445,6 +445,10 @@ function buildEditor(it, box) {
     if (!it.start && it.months > 0) { it.start = todayIso(); startI.value = it.start; }
     if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; }
   };
+  /* kur ndryshon kohëzgjatja: skadimi mbetet ai që është, fillimi llogaritet prapa nga skadimi */
+  const recalcStart = () => {
+    if (it.date && it.months > 0) { it.start = addMonths(it.date, -it.months); startI.value = it.start; }
+  };
 
   const ni = document.createElement("input"); ni.type = "text"; ni.autocapitalize = "none"; ni.value = it.name;
   ni.addEventListener("change", () => {
@@ -498,7 +502,7 @@ function buildEditor(it, box) {
   mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
   startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
   const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
-  monI = mk("Kohëzgjatja: zgjidh 1 muaj / 3 / 6 / 1 vit (llogarit skadimin)", sel(mopts, it.months || 0, v => { it.months = +v; recalc(); }));
+  monI = mk("Kohëzgjatja: zgjidh 1 muaj / 3 / 6 / 1 vit (llogarit fillimin nga skadimi)", sel(mopts, it.months || 0, v => { it.months = +v; recalcStart(); }));
   const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
   ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
   mk("Shënim", ta, "wide");
