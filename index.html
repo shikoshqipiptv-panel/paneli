@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Promemori Abonimesh</title>
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <style>
 :root{--bg:#f3f4f7;--card:#fff;--text:#1b1e23;--muted:#6b7280;--line:#e2e5ea;--accent:#2563eb;--red:#dc2626;--amber:#d97706;--green:#16a34a;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#1a1d23;--text:#eceef2;--muted:#9aa3b2;--line:#2a2f39;--accent:#60a5fa;--red:#f87171;--amber:#fbbf24;--green:#4ade80;color-scheme:dark}}
@@ -52,13 +53,6 @@ button:disabled{opacity:.45;cursor:default}
 .empty{color:var(--muted);text-align:center;padding:22px}
 .row{display:flex;gap:8px;align-items:center;padding:6px 0}
 .row input{flex:1}
-/* ---- kyçi me PIN ---- */
-#lock{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
-#lock .box{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
-#lock h1{margin:0 0 6px;font-size:20px}
-#lock input{text-align:center;font-size:22px;letter-spacing:.3em;margin:8px 0}
-#lock button{width:100%;margin-top:6px}
-#lockmsg{min-height:18px;color:var(--red);font-size:13px;margin:6px 0 0}
 @media (min-width:760px){
   .head{grid-template-columns:2.2fr 1.4fr .8fr 1.3fr 1fr;gap:10px}
   .sub{display:none}.c-user,.c-panel{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis}
@@ -69,20 +63,15 @@ button:disabled{opacity:.45;cursor:default}
 </style>
 </head>
 <body>
-<div id="lock" role="dialog" aria-modal="true">
-  <form class="box" id="lockform" autocomplete="off">
-    <h1 id="locktitle">Promemori</h1>
-    <p class="meta" id="locksub" style="margin:0 0 8px"></p>
-    <input id="pin1" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="PIN">
-    <input id="pin2" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Përsërite PIN-in" style="display:none">
-    <p id="lockmsg"></p>
-    <button type="submit" id="lockbtn">Hap</button>
-  </form>
+<div id="pinbox" style="display:none;position:fixed;inset:0;z-index:99;background:var(--bg,#f4f6fb);align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;text-align:center">
+  <div style="font-size:42px">🔒</div>
+  <div style="font-weight:700;font-size:18px">Shkruaj PIN-in</div>
+  <input id="pininp" type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="max-width:220px;text-align:center;font-size:24px;letter-spacing:6px">
+  <div id="pinmsg" style="min-height:20px;color:#dc2626;font-size:14px"></div>
 </div>
 
-
 <header class="top"><div class="top-in">
-  <span class="brand">📋 Promemori</span>
+  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v4</small></span>
   <a href="#lista" data-v="lista">Lista</a>
   <a href="#krijo" data-v="krijo">➕ Krijo</a>
   <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
@@ -97,6 +86,7 @@ button:disabled{opacity:.45;cursor:default}
     <button class="chip" data-f="all" id="ch-all"></button>
     <button class="chip" data-f="soon" id="ch-soon"></button>
     <button class="chip" data-f="over" id="ch-over"></button>
+    <button class="chip" data-f="free" id="ch-free"></button>
   </div>
   <div class="tools">
     <input id="q" placeholder="Kërko emër, username ose shënim" autocapitalize="none">
@@ -175,6 +165,7 @@ button:disabled{opacity:.45;cursor:default}
         </div>
         <label class="f" style="flex-direction:row;align-items:center;margin:10px 0"><input id="syncauto" type="checkbox">Sinkronizo automatikisht pas çdo ndryshimi</label>
         <button id="syncnow">Sinkronizo tani</button>
+        <button id="syncdiag" type="button" style="margin-left:8px">Diagnostiko</button>
         <p id="syncmsg" class="meta"></p>
       </div>
 
@@ -186,15 +177,6 @@ button:disabled{opacity:.45;cursor:default}
           <button class="ghost" id="expdl">Shkarko reminders.json</button>
         </div>
         <textarea id="expbox" readonly rows="8" style="display:none;margin-top:8px;font:12px monospace"></textarea>
-      </div>
-
-            <h2>PIN i faqes</h2>
-      <div class="card">
-        <p class="meta" style="margin-top:0">Faqja kërkon PIN sa herë e hap dhe kyçet vetë pas 2 minutash jashtë faqes. PIN-i ruhet vetëm në këtë pajisje.</p>
-        <div class="btns" style="margin-top:0">
-          <button class="ghost" onclick="lockNow()">Kyç tani</button>
-          <button class="ghost" onclick="changePin()">Ndrysho PIN-in</button>
-        </div>
       </div>
 
       <h2>Kopje rezervë</h2>
@@ -212,56 +194,6 @@ button:disabled{opacity:.45;cursor:default}
 
 </main>
 
-<script>
-/* ---------- kyçi me PIN (ndarë nga pjesa tjetër) ---------- */
-(function () {
-  const $ = id => document.getElementById(id);
-  const L = $("lock"), PK = "pin-v1";
-  let fails = 0, hiddenAt = 0;
-  function hsh(str) { let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (let i = 0, c; i < str.length; i++) { c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36); }
-  const getRec = () => { try { return JSON.parse(localStorage.getItem(PK)); } catch (e) { return null; } };
-  const isUnl = () => { try { return sessionStorage.getItem("unl") === "1"; } catch (e) { return false; } };
-  const setUnl = v => { try { v ? sessionStorage.setItem("unl", "1") : sessionStorage.removeItem("unl"); } catch (e) {} };
-  let rec = getRec();
-  function show() {
-    rec = getRec(); L.style.display = "flex";
-    $("locktitle").textContent = rec ? "Shkruaj PIN-in" : "Vendos një PIN";
-    $("locksub").textContent = rec ? "" : "4 deri 8 shifra. Do ta kërkojë sa herë ta hapësh faqen.";
-    $("pin2").style.display = rec ? "none" : "block";
-    $("lockbtn").textContent = rec ? "Hap" : "Ruaj PIN-in";
-    $("pin1").value = ""; $("pin2").value = ""; $("lockmsg").textContent = "";
-    setTimeout(() => $("pin1").focus(), 50);
-  }
-  function hide() { L.style.display = "none"; setUnl(true); }
-  $("lockform").addEventListener("submit", e => {
-    e.preventDefault();
-    const a = $("pin1").value, msg = $("lockmsg");
-    if (rec) {
-      if (hsh(rec.s + a) === rec.h) { fails = 0; hide(); return; }
-      fails++; $("pin1").value = ""; msg.textContent = "PIN i gabuar.";
-      if (fails >= 5) { $("lockbtn").disabled = true; $("pin1").disabled = true; msg.textContent = "Shumë përpjekje. Prit 30 sekonda.";
-        setTimeout(() => { fails = 0; $("lockbtn").disabled = false; $("pin1").disabled = false; msg.textContent = ""; $("pin1").focus(); }, 30000); }
-      return;
-    }
-    if (!/^\d{4,8}$/.test(a)) { msg.textContent = "PIN-i duhet të jetë 4 deri 8 shifra."; return; }
-    if (a !== $("pin2").value) { msg.textContent = "Dy PIN-et nuk përputhen."; return; }
-    const s = Math.random().toString(36).slice(2);
-    try { localStorage.setItem(PK, JSON.stringify({s: s, h: hsh(s + a)})); } catch (e) {}
-    rec = getRec(); hide();
-  });
-  window.lockNow = () => { setUnl(false); show(); };
-  window.changePin = () => { try { localStorage.removeItem(PK); } catch (e) {} setUnl(false); show(); };
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { hiddenAt = Date.now(); return; }
-    if (getRec() && hiddenAt && Date.now() - hiddenAt > 120000) window.lockNow();
-  });
-  if (rec && isUnl()) hide(); else show();
-})();
-</script>
 <script>
 const KEY = "abonime-v1", PKEY = "panele-v1", CKEY = "cfg-v1";
 const $ = id => document.getElementById(id);
@@ -376,15 +308,15 @@ function renew(it, mo) {
   sv(KEY, items); render();
 }
 const ckey = x => (x.client || x.name || "").trim().toLowerCase();
-const linked = it => items.filter(x => x !== it && ckey(x) === ckey(it));
+const linked = it => it.free ? [] : items.filter(x => x !== it && !x.free && ckey(x) === ckey(it));
 function refreshHead(el, it) {
   const s = state(it);
-  el.querySelector(".nm").textContent = it.name;
+  el.querySelector(".nm").textContent = (it.free ? "🆓 " : "") + it.name;
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", it.panel || "", ...linked(it).map(o => "+ " + (o.panel || "?") + " " + fmt(o.date))].filter(Boolean).join(" · ");
   el.querySelector(".c-user").textContent = it.username || "";
   el.querySelector(".c-panel").textContent = it.panel || "";
   el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
-  const st = el.querySelector(".c-state"); st.textContent = s.t; st.style.color = s.c;
+  const st = el.querySelector(".c-state"); st.textContent = (it.free && !s.over) ? "I LIRË · " + daysLeft(it) + " ditë" : s.t; st.style.color = (it.free && !s.over) ? "var(--accent)" : s.c;
 }
 function buildEditor(it, el) {
   const box = el.querySelector(".edit"); box.innerHTML = "";
@@ -410,6 +342,12 @@ function buildEditor(it, el) {
   const recalc = () => { if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; } };
 
   mk("Emri", inp("text", it.name, v => { it.name = v.trim() || it.name; }));
+  const fw = document.createElement("label"); fw.className = "f wide"; fw.style.cssText = "flex-direction:row;align-items:center;gap:8px";
+  const fc = document.createElement("input"); fc.type = "checkbox"; fc.checked = !!it.free; fc.style.cssText = "width:22px;height:22px";
+  const ft = document.createElement("span"); ft.style.fontWeight = "600";
+  const fi = () => { ft.textContent = it.free ? "Abonim i lirë: mbeten " + Math.max(daysLeft(it), 0) + " ditë (deri më " + fmt(it.date) + "). Për t'ia dhënë një klienti: hiq tick-un dhe ndrysho emrin." : "Abonim i lirë (përdoret për klient tjetër)"; };
+  fc.addEventListener("change", () => { it.free = fc.checked; if (!it.free) delete it.free; fi(); sv(KEY, items); render(); });
+  fi(); fw.append(fc, ft); g.appendChild(fw);
   const ci = document.createElement("input"); ci.type = "text"; ci.setAttribute("list", "clientsdl"); ci.autocapitalize = "none";
   ci.value = it.client || ""; ci.placeholder = it.name;
   ci.addEventListener("change", () => { it.client = ci.value.trim(); sv(KEY, items); render(); });
@@ -465,11 +403,12 @@ function render() {
   $("ch-all").textContent = "Të gjithë " + all.length;
   $("ch-soon").textContent = "≤7 ditë " + all.filter(soon).length;
   $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
+  $("ch-free").textContent = "Të lira " + all.filter(x => x.it.free && !x.s.over).length;
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
   const q = $("q").value.trim().toLowerCase(), pf = $("pf").value, sb = $("sb").value;
   const rows = all.filter(x => (!pf || x.it.panel === pf) &&
     (!q || (x.it.name + " " + (x.it.client || "") + " " + (x.it.username || "") + " " + (x.it.note || "")).toLowerCase().includes(q)) &&
-    (flt === "all" || (flt === "over" ? x.s.over : soon(x))));
+    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : soon(x))));
   rows.sort((a, b) => {
     if (sb === "name") return a.it.name.localeCompare(b.it.name, "sq", {sensitivity: "base"});
     if (sb === "panel") return (a.it.panel || "").localeCompare(b.it.panel || "") || endDT(a.it) - endDT(b.it);
@@ -542,7 +481,7 @@ $("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, c
 $("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
 $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(p); $("newp").value = ""; refreshPanels(); } };
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", date: x.date, time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, date: x.date, time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -556,32 +495,70 @@ $("expdl").onclick = () => {
 /* ---------- sinkronizimi me GitHub ---------- */
 const b64 = s => btoa(unescape(encodeURIComponent(s)));
 const errText = st => st === 401 ? "tokeni është i pavlefshëm ose ka skaduar" : st === 403 ? "tokeni s'ka leje (duhet Contents: Read and write)" : st === 404 ? "repo nuk u gjet (kontrollo emrin dhe që tokeni ka akses te ky repo)" : st === 409 || st === 422 ? "konflikt, provo sërish" : "HTTP " + st;
+let syncBusy = false;
 async function syncNow() {
   const msg = $("syncmsg");
+  if (syncBusy) { schedSync(); return false; }
   if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo) || !sync.token) { msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  syncBusy = true;
   msg.textContent = "Po sinkronizoj…";
   const br = sync.branch || "main";
   const url = "https://api.github.com/repos/" + sync.repo + "/contents/reminders.json";
   const H = {Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
   try {
-    let sha;
-    const g = await fetch(url + "?ref=" + encodeURIComponent(br), {headers: H});
-    if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error(errText(g.status));
-    const body = {message: "Përditësim nga telefoni", content: b64(remindersJson()), branch: br};
-    if (sha) body.sha = sha;
-    const p = await fetch(url, {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, H), body: JSON.stringify(body)});
-    if (!p.ok) throw new Error(errText(p.status));
-    msg.textContent = "✓ Sinkronizuar " + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + " (" + items.length + " abonime)";
-    return true;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      let sha;
+      // cache:"no-store" -> shfletuesi s'duhet të ripërdorë një sha të vjetër (shkaku kryesor i "konflikt")
+      const g = await fetch(url + "?ref=" + encodeURIComponent(br) + "&_=" + Date.now(), {headers: H, cache: "no-store"});
+      if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error(await errMsg(g));
+      const body = {message: "Përditësim nga telefoni", content: b64(remindersJson()), branch: br};
+      if (sha) body.sha = sha;
+      const p = await fetch(url, {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, H), body: JSON.stringify(body), cache: "no-store"});
+      if (p.ok) {
+        msg.textContent = "✓ Sinkronizuar " + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + " (" + items.length + " abonime)";
+        return true;
+      }
+      if ((p.status === 409 || p.status === 422) && attempt < 2) continue; // sha e vjetër, provo sërish
+      throw new Error(await errMsg(p));
+    }
   } catch (e) { msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+  finally { syncBusy = false; }
+}
+async function errMsg(r) {
+  let d = ""; try { d = (await r.json()).message || ""; } catch (e) {}
+  return errText(r.status) + (d ? " [" + d + "]" : "");
 }
 function readSync() {
   sync.repo = $("syncrepo").value.trim(); sync.branch = $("syncbranch").value.trim() || "main";
   sync.token = $("synctoken").value.trim(); sync.auto = $("syncauto").checked; sv("sync-v1", sync);
 }
 $("syncrepo").value = sync.repo; $("syncbranch").value = sync.branch; $("synctoken").value = sync.token; $("syncauto").checked = !!sync.auto;
-["syncrepo", "syncbranch", "synctoken", "syncauto"].forEach(id => $(id).onchange = readSync);
+["syncrepo", "syncbranch", "synctoken", "syncauto"].forEach(id => { $(id).onchange = readSync; $(id).oninput = readSync; });
 $("syncnow").onclick = () => { readSync(); syncNow(); };
+$("syncdiag").onclick = async () => {
+  readSync();
+  const msg = $("syncmsg"), L = [];
+  const show = () => { msg.style.whiteSpace = "pre-wrap"; msg.textContent = "Faqja v4\n" + L.join("\n"); };
+  L.push("Repo: " + (sync.repo || "(bosh)") + " | Dega: " + (sync.branch || "main") + " | Token: " + (sync.token ? sync.token.slice(0, 11) + "… (" + sync.token.length + " shkronja)" : "(bosh)")); show();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo) || !sync.token) { L.push("✗ Plotëso repon (emri/repo) dhe tokenin."); show(); return; }
+  const H = {Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
+  const api = "https://api.github.com/repos/" + sync.repo;
+  const step = async (label, u, opt) => {
+    try {
+      const r = await fetch(u, Object.assign({headers: H, cache: "no-store"}, opt || {}));
+      let j = {}; try { j = await r.json(); } catch (e) {}
+      L.push((r.ok ? "✓ " : "✗ ") + label + " → HTTP " + r.status + (r.ok ? "" : " " + (j.message || "")));
+      if (r.ok && j.private !== undefined) L.push("   repo është " + (j.private ? "PRIVATE" : "PUBLIC ⚠") + (j.permissions && j.permissions.push === false ? " | tokeni s'ka leje shkrimi" : ""));
+      show(); return r.ok ? j : null;
+    } catch (e) { L.push("✗ " + label + " → rrjeti/CORS: " + e.message); show(); return null; }
+  };
+  const rp = await step("Hyrja te repo", api);
+  if (!rp) { L.push("→ Kontrollo emrin e repos dhe që tokeni e ka këtë repo të zgjedhur."); show(); return; }
+  await step("Dega " + (sync.branch || "main"), api + "/branches/" + encodeURIComponent(sync.branch || "main"));
+  await step("Skedari reminders.json", api + "/contents/reminders.json?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now());
+  L.push("Tani shtyp \"Sinkronizo tani\"."); show();
+};
+
 
 $("bk").onclick = () => {
   const box = $("bkbox"); box.value = JSON.stringify({items, panels, cfg}); box.style.display = "block"; box.focus(); box.select();
@@ -645,6 +622,24 @@ function dayCheck() {
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
 setInterval(dayCheck, 60000);
+</script>
+<script>
+/* PIN: kërkohet vetëm një herë në këtë telefon, pastaj mbahet mend */
+(async function () {
+  const OK = "47ab178bf6d0a4000708b74052b81576a6a5f1ce51906148da7c045ee5314485", K = "pin-ok-v1";
+  const box = document.getElementById("pinbox"), inp = document.getElementById("pininp"), msg = document.getElementById("pinmsg");
+  const sha = async s => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))).map(b => b.toString(16).padStart(2, "0")).join("");
+  try { if (localStorage.getItem(K) === OK) return; } catch (e) {}
+  box.style.display = "flex"; setTimeout(() => inp.focus(), 50);
+  inp.addEventListener("input", async () => {
+    msg.textContent = "";
+    if (inp.value.length < 6) return;
+    let h = ""; try { h = await sha("promemori:" + inp.value); } catch (e) { msg.textContent = "Hape faqen me https."; return; }
+    if (h === OK) { try { localStorage.setItem(K, OK); } catch (e) {} box.style.display = "none"; inp.value = ""; }
+    else if (inp.value.length >= 6 && h !== OK && inp.value.length >= 12) { inp.value = ""; msg.textContent = "PIN i gabuar"; }
+    else if (inp.value.length === 6) { msg.textContent = "PIN i gabuar"; setTimeout(() => { inp.value = ""; }, 600); }
+  });
+})();
 </script>
 </body>
 </html>
