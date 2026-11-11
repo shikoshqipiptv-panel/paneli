@@ -85,7 +85,8 @@ button:disabled{opacity:.45;cursor:default}
 <div id="pinbox" style="display:none;position:fixed;inset:0;z-index:99;background:var(--bg,#f4f6fb);align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;text-align:center">
   <div style="font-size:42px">🔒</div>
   <div style="font-weight:700;font-size:18px">Shkruaj PIN-in</div>
-  <input id="pininp" type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="max-width:220px;text-align:center;font-size:24px;letter-spacing:6px">
+  <input id="pininp" type="password" inputmode="numeric" autocomplete="off" maxlength="64" style="max-width:220px;text-align:center;font-size:24px;letter-spacing:6px">
+  <button id="pinbtn" type="button" style="display:none">Hap</button>
   <div id="pinmsg" style="min-height:20px;color:#dc2626;font-size:14px"></div>
 </div>
 
@@ -194,6 +195,13 @@ button:disabled{opacity:.45;cursor:default}
         <button id="syncpull" type="button" class="ghost" style="margin-left:8px">Merr nga GitHub</button>
         <button id="syncdiag" type="button" style="margin-left:8px">Diagnostiko</button>
         <p id="syncmsg" class="meta"></p>
+        <hr style="border:0;border-top:1px solid #e2e8f0;margin:14px 0">
+        <b>Hyrje vetëm me PIN në pajisje të tjera (telefon, incognito)</b>
+        <p class="meta">Përdoret në kompjuterin ku tokeni është i vendosur më sipër. Shkruaj një PIN/fjalëkalim të ri (min. 8 karaktere, jo PIN-in e vjetër). Programi e enkripton tokenin me të dhe të jep një rresht <code>const VAULT = "…";</code>. Ngjite te <code>index.html</code> në repo publike (zëvendëso rreshtin <code>const VAULT = "";</code>). Pastaj në telefon kërkohet vetëm PIN-i.</p>
+        <label class="f">PIN / fjalëkalim i ri<input id="vaultpin" type="password" autocomplete="new-password" autocapitalize="none"></label>
+        <button id="vaultgen" type="button" style="margin-top:8px">Gjenero kodin e enkriptuar</button>
+        <textarea id="vaultout" readonly style="display:none;width:100%;height:120px;margin-top:8px;font-size:12px"></textarea>
+        <p id="vaultmsg" class="meta"></p>
       </div>
 
       <h2>Për emailin (dorazi)</h2>
@@ -876,11 +884,77 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) dayC
 setInterval(dayCheck, 60000);
 </script>
 <script>
-/* PIN: kërkohet vetëm një herë në këtë telefon, pastaj mbahet mend */
+/* PIN / vault: tokeni enkriptohet me PIN (PBKDF2 + AES-GCM). Në pajisje të reja kërkohet vetëm PIN-i. */
+const VAULT = "";
 (async function () {
+  const box = document.getElementById("pinbox"), inp = document.getElementById("pininp"), msg = document.getElementById("pinmsg"), btn = document.getElementById("pinbtn");
+  const E = new TextEncoder(), ITER = 1000000;
+  const b2s = u => { let r = ""; u.forEach(c => r += String.fromCharCode(c)); return btoa(r); };
+  const s2b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+  async function deriveKey(pin, salt, iter) {
+    const base = await crypto.subtle.importKey("raw", E.encode(pin), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({name: "PBKDF2", salt, iterations: iter, hash: "SHA-256"}, base, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
+  }
+  async function seal(pin, obj) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(pin, salt, ITER);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, E.encode(JSON.stringify(obj))));
+    const all = new Uint8Array(28 + ct.length); all.set(salt, 0); all.set(iv, 16); all.set(ct, 28);
+    return "v1." + ITER + "." + b2s(all);
+  }
+  async function unseal(pin, v) {
+    const p = v.split("."), all = s2b(p[2]), iter = parseInt(p[1], 10);
+    const key = await deriveKey(pin, all.slice(0, 16), iter);
+    const pt = await crypto.subtle.decrypt({name: "AES-GCM", iv: all.slice(16, 28)}, key, all.slice(28));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  const rd = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+
+  /* ---- gjenerimi i kodit (në kompjuter) ---- */
+  const gen = document.getElementById("vaultgen");
+  if (gen) gen.onclick = async () => {
+    const vm = document.getElementById("vaultmsg"), out = document.getElementById("vaultout");
+    const pin = document.getElementById("vaultpin").value;
+    const repo = document.getElementById("syncrepo").value.trim(), br = document.getElementById("syncbranch").value.trim() || "main", tok = document.getElementById("synctoken").value.trim();
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !tok) { vm.textContent = "Plotëso më sipër repon (emri/repo) dhe tokenin."; return; }
+    if (pin.length < 8) { vm.textContent = "PIN-i duhet të ketë të paktën 8 karaktere."; return; }
+    vm.textContent = "Po enkriptohet…"; gen.disabled = true;
+    try {
+      out.value = 'const VAULT = "' + await seal(pin, {r: repo, b: br, t: tok}) + '";';
+      out.style.display = "block"; out.focus(); out.select();
+      try { navigator.clipboard.writeText(out.value); } catch (e) {}
+      vm.textContent = "✓ Gati (u kopjua). Ngjite në index.html në vend të rreshtit const VAULT = \"\"; dhe ruaje (Commit). PIN-in mos e humb: s'ka rikthim.";
+    } catch (e) { vm.textContent = "Gabim: hape faqen me https."; }
+    gen.disabled = false;
+  };
+
+  /* ---- porta ---- */
+  if (VAULT) {
+    const s = rd("sync-v1");
+    if (s.token && s.repo) return;              // kjo pajisje është tashmë e hapur
+    inp.inputMode = "text"; btn.style.display = "";
+    box.style.display = "flex"; setTimeout(() => inp.focus(), 50);
+    const unlock = async () => {
+      const pin = inp.value; if (!pin) return;
+      btn.disabled = true; msg.style.color = "#64748b"; msg.textContent = "Po kontrollohet…";
+      try {
+        const o = await unseal(pin, VAULT);
+        localStorage.setItem("sync-v1", JSON.stringify(Object.assign({}, rd("sync-v1"), {repo: o.r, branch: o.b || "main", token: o.t, auto: true})));
+        location.reload();
+      } catch (e) {
+        msg.style.color = "#dc2626";
+        msg.textContent = (e && e.name === "OperationError") ? "PIN i gabuar" : "Gabim: hape faqen me https";
+        inp.value = ""; btn.disabled = false; inp.focus();
+      }
+    };
+    btn.onclick = unlock;
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") unlock(); });
+    return;
+  }
+
+  /* ---- porta e vjetër (derisa të vendoset VAULT) ---- */
   const OK = "47ab178bf6d0a4000708b74052b81576a6a5f1ce51906148da7c045ee5314485", K = "pin-ok-v1";
-  const box = document.getElementById("pinbox"), inp = document.getElementById("pininp"), msg = document.getElementById("pinmsg");
-  const sha = async s => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))).map(b => b.toString(16).padStart(2, "0")).join("");
+  const sha = async t => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", E.encode(t)))).map(b => b.toString(16).padStart(2, "0")).join("");
   try { if (localStorage.getItem(K) === OK) return; } catch (e) {}
   box.style.display = "flex"; setTimeout(() => inp.focus(), 50);
   inp.addEventListener("input", async () => {
@@ -888,7 +962,7 @@ setInterval(dayCheck, 60000);
     if (inp.value.length < 6) return;
     let h = ""; try { h = await sha("promemori:" + inp.value); } catch (e) { msg.textContent = "Hape faqen me https."; return; }
     if (h === OK) { try { localStorage.setItem(K, OK); } catch (e) {} box.style.display = "none"; inp.value = ""; }
-    else if (inp.value.length >= 6 && h !== OK && inp.value.length >= 12) { inp.value = ""; msg.textContent = "PIN i gabuar"; }
+    else if (inp.value.length >= 12) { inp.value = ""; msg.textContent = "PIN i gabuar"; }
     else if (inp.value.length === 6) { msg.textContent = "PIN i gabuar"; setTimeout(() => { inp.value = ""; }, 600); }
   });
 })();
