@@ -190,6 +190,7 @@ button.paybtn.ok{background:var(--green)}
 
 <section id="v-lista" class="view">
   <h1>Lista e abonimeve</h1>
+  <div id="stat" class="card"></div>
   <div class="lay" id="lay"><aside id="side"></aside><div class="lmain">
   <div class="chips">
     <button class="chip" data-f="all" id="ch-all"></button>
@@ -740,8 +741,53 @@ function buildEditor(it, box) {
   b.appendChild(d);
   box.appendChild(b);
 }
+/* ---------- totali + krahasimi me GitHub ---------- */
+const counts = a => { const by = {}; a.forEach(x => { const p = x.panel || "?"; by[p] = (by[p] || 0) + 1; }); return {n: a.length, by, fal: a.filter(x => x.falas).length, up: a.filter(x => x.unpaid).length, fr: a.filter(x => x.free).length}; };
+const cTxt = c => c.n + " abonentë (" + Object.entries(c.by).map(([p, k]) => p + " " + k).join(", ") + ") · 🎁 Falas " + c.fal + " · ❗ Pa paguar " + c.up + " · 🆓 Të lira " + c.fr;
+let cmpTxt = "", cmpDiff = false;
+function updStat() {
+  const el = $("stat"); if (!el) return;
+  try {
+    el.innerHTML = "";
+    const a = document.createElement("div"); a.style.cssText = "font-weight:700;font-size:17px"; a.textContent = "Gjithsej: " + cTxt(counts(items));
+    const b = document.createElement("div"); b.className = "meta"; b.style.cssText = "margin-top:6px;white-space:pre-wrap";
+    b.textContent = cmpTxt || ("Kjo pajisje: " + (isDirty() ? "ka ndryshime të pa dërguara" : "pa ndryshime të pa dërguara") + " · versioni: " + (sync.sha ? sync.sha.slice(0, 7) : "asnjë (s'është sinkronizuar kurrë)"));
+    const w = document.createElement("div"); w.className = "btns"; w.style.marginTop = "8px";
+    const c = document.createElement("button"); c.type = "button"; c.className = "ghost"; c.textContent = "🔄 Krahaso me GitHub"; c.onclick = compareGH; w.appendChild(c);
+    if (cmpDiff) {
+      const m = document.createElement("button"); m.type = "button"; m.textContent = "⇄ Bashko me GitHub (pa humbur asgjë)";
+      m.onclick = async () => {
+        readSync();
+        try {
+          const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+          if (!g.ok) throw new Error(await errMsg(g));
+          const r = mergeRemote(await g.json()); cmpTxt = "✓ U bashkua: " + r.add + " të rinj, " + r.upd + " të përditësuar. Tani " + items.length + " gjithsej; po dërgohet te GitHub."; cmpDiff = false;
+        } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); }
+        updStat();
+      };
+      w.appendChild(m);
+      const p = document.createElement("button"); p.type = "button"; p.textContent = "⬇ Merr nga GitHub (zëvendëson listën e kësaj pajisjeje)";
+      p.onclick = async () => { readSync(); if (await pullNow(true)) { cmpTxt = ""; cmpDiff = false; } updStat(); }; w.appendChild(p);
+    }
+    el.append(a, b, w);
+  } catch (e) {}
+}
+async function compareGH() {
+  readSync();
+  if (!syncReady()) { cmpTxt = "Plotëso repon dhe tokenin te Konfigurimi."; cmpDiff = false; updStat(); return; }
+  cmpTxt = "Po krahasoj me GitHub…"; updStat();
+  try {
+    const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json(), r = counts(JSON.parse(fromB64(j.content))), l = counts(items);
+    const same = j.sha === sync.sha && !isDirty();
+    cmpDiff = !same;
+    cmpTxt = "GitHub: " + cTxt(r) + "\nKjo pajisje: " + cTxt(l) + "\n" + (same ? "✓ Njësoj me GitHub." : "✗ Ndryshojnë" + (isDirty() ? " (kjo pajisje ka ndryshime të pa dërguara)" : sync.sha ? " (GitHub ka version tjetër)" : " (kjo pajisje s'është sinkronizuar kurrë me GitHub, prandaj s'e tërheq vetë)") + ".");
+  } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); cmpDiff = false; }
+  updStat();
+}
 function render() {
-  rowEls.clear(); fillApps(); renderSide();
+  rowEls.clear(); fillApps(); renderSide(); updStat();
   const all = items.map(it => ({it, s: state(it)}));
   const soon = x => !x.s.over && daysLeft(x.it) <= 7;
   $("ch-all").textContent = "Të gjithë " + all.length;
@@ -901,6 +947,31 @@ function adoptRemote(j) {
   items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
   openId = null; editing = false; refreshPanels(); render();
 }
+/* bashkon listën e GitHub me atë të kësaj pajisjeje, pa humbur asgjë (shton ata që mungojnë, merr shenjat Falas/Pa paguar/Të lira) */
+function mergeRemote(j) {
+  const arr = JSON.parse(fromB64(j.content));
+  if (!Array.isArray(arr)) throw new Error("reminders.json nuk është listë");
+  const low = v => String(v || "").trim().toLowerCase();
+  let add = 0, upd = 0;
+  arr.forEach(x => {
+    const r = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "", dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
+    ["free", "unpaid", "falas", "pnm", "pnt", "cr"].forEach(k => { if (x[k]) r[k] = x[k]; });
+    if (!r.date) return;
+    const ex = items.find(y => y.id === r.id) || items.find(y => low(y.panel) === low(r.panel) && (r.username ? low(y.username) === low(r.username) : low(y.name) === low(r.name) && y.date === r.date));
+    if (!ex) { items.push(r); add++; return; }
+    let ch = false;
+    ["free", "unpaid", "falas"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = true; ch = true; } });
+    ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
+    if (r.dual && !ex.dual) { ex.dual = true; ch = true; }
+    if (r.cr && !ex.cr) { ex.cr = r.cr; ch = true; }
+    if (r.date > ex.date) { ex.date = r.date; ex.start = r.start || ex.start; ex.months = r.months || ex.months; ex.time = r.time || ex.time; ch = true; }
+    if (ch) upd++;
+  });
+  sync.sha = j.sha; sv("sync-v1", sync);
+  items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
+  sv(KEY, items); refreshPanels(); render();
+  return {add, upd};
+}
 /* tërheq listën nga GitHub. manual=true: me butonin (me konfirmim); manual=false: automatikisht, vetëm kur është e sigurt */
 async function pullNow(manual) {
   const msg = $("syncmsg");
@@ -915,7 +986,7 @@ async function pullNow(manual) {
     const j = await g.json();
     if (!manual) {
       if (j.sha === sync.sha) return false;                    // asgjë e re
-      if (sync.sha === "" && items.length) return false;       // pajisje me të dhëna që s'është sinkronizuar kurrë: vendos ti
+      if (sync.sha === "" && items.length) { const m = mergeRemote(j); msg.textContent = "✓ U bashkua me GitHub: " + m.add + " të rinj, " + m.upd + " të përditësuar (" + items.length + " gjithsej)"; return true; }   // pajisje e pasinkronizuar kurrë: bashkon, pa humbur asgjë
     } else if (items.length && !confirm("Lista e kësaj pajisjeje do të zëvendësohet me atë nga GitHub. Vazhdoj?")) return false;
     adoptRemote(j);
     msg.textContent = "✓ U ngarkuan " + items.length + " abonime nga GitHub (" + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + ")";
