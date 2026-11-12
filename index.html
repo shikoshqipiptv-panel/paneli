@@ -166,6 +166,23 @@ button.paybtn.ok{background:var(--green)}
   .sc.solo{min-height:calc(100vh - 330px);display:flex;flex-direction:column;justify-content:space-evenly}
   .sbar button{min-height:56px;font-size:18px}
 }
+
+/* ---- alarmi: abonime që skadojnë brenda 7 ditëve ---- */
+#alertbox{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;display:none;font-family:inherit}
+#alertbox .ap{width:min(360px,calc(100vw - 24px));max-height:min(70vh,520px);display:flex;flex-direction:column;background:var(--card);color:var(--text);border:2px solid var(--amber);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.28);overflow:hidden}
+#alertbox .ah{display:flex;align-items:center;gap:6px;padding:8px 8px 8px 12px;background:var(--amber);color:#000;font-weight:800}
+#alertbox .ah span{flex:1}
+#alertbox .ah button{min-height:0;width:32px;height:32px;padding:0;border-radius:8px;background:rgba(0,0,0,.14);color:#000;font-size:18px;line-height:1}
+#alertbox .al{overflow:auto;padding:4px 12px}
+#alertbox .ar{display:flex;gap:8px;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+#alertbox .ar:last-child{border-bottom:0}
+#alertbox .ar b{word-break:break-word}
+#alertbox .ar i{font-style:normal;font-weight:700;white-space:nowrap}
+#alertbox .af{padding:8px 12px;border-top:1px solid var(--line)}
+#alertbox .af button{width:100%}
+#alertbox .ab{display:none;position:relative;width:60px;height:60px;min-height:0;padding:0;border-radius:50%;background:var(--amber);color:#000;font-size:26px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#alertbox .ab em{position:absolute;top:-4px;right:-4px;min-width:24px;height:24px;padding:0 5px;border-radius:12px;background:var(--red);color:#fff;font:700 13px/24px system-ui;font-style:normal}
+#alertbox.min .ap{display:none}#alertbox.min .ab{display:block}
 </style>
 </head>
 <body>
@@ -176,6 +193,12 @@ button.paybtn.ok{background:var(--green)}
   <button id="pinbtn" type="button" style="display:none">Hap</button>
   <div id="pinmsg" style="min-height:20px;color:#dc2626;font-size:14px"></div>
 </div>
+
+<div id="alertbox"><div class="ap">
+  <div class="ah"><span id="alertttl"></span><button type="button" id="alertmin" title="Minimizo">—</button><button type="button" id="alertx" title="Mbyll">✕</button></div>
+  <div class="al" id="alertlist"></div>
+  <div class="af"><button type="button" id="alertgo">Shfaqi në listë</button></div>
+</div><button type="button" class="ab" id="alertbub" title="Hap alarmin">⏰<em id="alertcnt"></em></button></div>
 
 <header class="top"><div class="top-in">
   <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v11</small></span>
@@ -289,6 +312,7 @@ button.paybtn.ok{background:var(--green)}
         <button id="lionpull" type="button" style="margin-left:8px">Merr Lion/Mega nga GitHub</button>
         <button id="syncdiag" type="button" style="margin-left:8px">Diagnostiko</button>
         <p id="syncmsg" class="meta"></p>
+        <details style="margin-top:6px"><summary class="meta" style="cursor:pointer">🔄 Krahaso me GitHub</summary><div id="cmpbox"></div></details>
         <hr style="border:0;border-top:1px solid #e2e8f0;margin:14px 0">
         <b>Hyrje vetëm me PIN në pajisje të tjera (telefon, incognito)</b>
         <p class="meta">Përdoret në kompjuterin ku tokeni është i vendosur më sipër. Shkruaj një PIN/fjalëkalim të ri (min. 8 karaktere, jo PIN-in e vjetër). Programi e enkripton tokenin me të dhe të jep një rresht <code>const VAULT = "…";</code>. Ngjite te <code>index.html</code> në repo publike (zëvendëso rreshtin <code>const VAULT = "";</code>). Pastaj në telefon kërkohet vetëm PIN-i.</p>
@@ -745,11 +769,25 @@ function buildEditor(it, box) {
 const counts = a => { const by = {}; a.forEach(x => { const p = x.panel || "?"; by[p] = (by[p] || 0) + 1; }); return {n: a.length, by, fal: a.filter(x => x.falas).length, up: a.filter(x => x.unpaid).length, fr: a.filter(x => x.free).length}; };
 const cTxt = c => c.n + " abonentë (" + Object.entries(c.by).map(([p, k]) => p + " " + k).join(", ") + ") · 🎁 Falas " + c.fal + " · ❗ Pa paguar " + c.up + " · 🆓 Të lira " + c.fr;
 let cmpTxt = "", cmpDiff = false;
+let statOpen = false;
 function updStat() {
   const el = $("stat"); if (!el) return;
   try {
+    el.innerHTML = ""; el.style.padding = statOpen ? "" : "6px 12px";
+    const c0 = counts(items);
+    const top = document.createElement("div"); top.style.cssText = "display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:15px";
+    const t = document.createElement("span"); t.style.flex = "1"; t.textContent = "📊 " + (statOpen ? cTxt(c0) : c0.n + " abonentë");
+    const ar = document.createElement("span"); ar.textContent = statOpen ? "▲" : "▼"; ar.className = "meta";
+    top.append(t, ar); top.onclick = () => { statOpen = !statOpen; updStat(); };
+    el.appendChild(top);
+  } catch (e) {}
+  updCmp();
+}
+/* krahasimi me GitHub: vendoset te Konfigurimi (nën «Sinkronizo me emailin»), jo në listë */
+function updCmp() {
+  const el = $("cmpbox"); if (!el) return;
+  try {
     el.innerHTML = "";
-    const a = document.createElement("div"); a.style.cssText = "font-weight:700;font-size:17px"; a.textContent = "Gjithsej: " + cTxt(counts(items));
     const b = document.createElement("div"); b.className = "meta"; b.style.cssText = "margin-top:6px;white-space:pre-wrap";
     b.textContent = cmpTxt || ("Kjo pajisje: " + (isDirty() ? "ka ndryshime të pa dërguara" : "pa ndryshime të pa dërguara") + " · versioni: " + (sync.sha ? sync.sha.slice(0, 7) : "asnjë (s'është sinkronizuar kurrë)"));
     const w = document.createElement("div"); w.className = "btns"; w.style.marginTop = "8px";
@@ -763,19 +801,19 @@ function updStat() {
           if (!g.ok) throw new Error(await errMsg(g));
           const r = mergeRemote(await g.json()); cmpTxt = "✓ U bashkua: " + r.add + " të rinj, " + r.upd + " të përditësuar. Tani " + items.length + " gjithsej; po dërgohet te GitHub."; cmpDiff = false;
         } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); }
-        updStat();
+        updCmp();
       };
       w.appendChild(m);
       const p = document.createElement("button"); p.type = "button"; p.textContent = "⬇ Merr nga GitHub (zëvendëson listën e kësaj pajisjeje)";
-      p.onclick = async () => { readSync(); if (await pullNow(true)) { cmpTxt = ""; cmpDiff = false; } updStat(); }; w.appendChild(p);
+      p.onclick = async () => { readSync(); if (await pullNow(true)) { cmpTxt = ""; cmpDiff = false; } updCmp(); }; w.appendChild(p);
     }
-    el.append(a, b, w);
+    el.append(b, w);
   } catch (e) {}
 }
 async function compareGH() {
   readSync();
-  if (!syncReady()) { cmpTxt = "Plotëso repon dhe tokenin te Konfigurimi."; cmpDiff = false; updStat(); return; }
-  cmpTxt = "Po krahasoj me GitHub…"; updStat();
+  if (!syncReady()) { cmpTxt = "Plotëso repon dhe tokenin te Konfigurimi."; cmpDiff = false; updCmp(); return; }
+  cmpTxt = "Po krahasoj me GitHub…"; updCmp();
   try {
     const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
     if (!g.ok) throw new Error(await errMsg(g));
@@ -784,10 +822,10 @@ async function compareGH() {
     cmpDiff = !same;
     cmpTxt = "GitHub: " + cTxt(r) + "\nKjo pajisje: " + cTxt(l) + "\n" + (same ? "✓ Njësoj me GitHub." : "✗ Ndryshojnë" + (isDirty() ? " (kjo pajisje ka ndryshime të pa dërguara)" : sync.sha ? " (GitHub ka version tjetër)" : " (kjo pajisje s'është sinkronizuar kurrë me GitHub, prandaj s'e tërheq vetë)") + ".");
   } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); cmpDiff = false; }
-  updStat();
+  updCmp();
 }
 function render() {
-  rowEls.clear(); fillApps(); renderSide(); updStat();
+  rowEls.clear(); fillApps(); renderSide(); updStat(); if (typeof updAlert === "function") updAlert();
   const all = items.map(it => ({it, s: state(it)}));
   const soon = x => !x.s.over && daysLeft(x.it) <= 7;
   $("ch-all").textContent = "Të gjithë " + all.length;
@@ -837,6 +875,22 @@ function render() {
 const resetLim = () => { lim = 50; render(); };
 $("q").oninput = resetLim; $("pf").onchange = resetLim; $("sb").onchange = resetLim;
 document.querySelectorAll(".chip").forEach(c => c.onclick = () => { flt = c.dataset.f; resetLim(); });
+
+/* ---------- alarmi i javës së fundit (shfaqet kur hapet programi) ---------- */
+let alertGone = false, alertMin = false;
+function updAlert() {
+  const bx = $("alertbox"); if (!bx) return;
+  const list = items.filter(it => !it.free && !state(it).over && daysLeft(it) <= 7).sort((a, b) => endDT(a) - endDT(b));
+  if (!list.length || alertGone) { bx.style.display = "none"; return; }
+  bx.style.display = "block"; bx.classList.toggle("min", alertMin);
+  $("alertttl").textContent = "⏰ Skadojnë brenda 7 ditëve (" + list.length + ")";
+  $("alertcnt").textContent = list.length;
+  $("alertlist").innerHTML = list.map(it => '<div class="ar"><span><b>' + esc(it.name) + '</b>' + (it.panel ? ' <span class="meta">· ' + esc(it.panel) + '</span>' : '') + '</span><i style="color:' + state(it).c + '">' + esc(state(it).t) + '</i></div>').join("");
+}
+$("alertmin").onclick = () => { alertMin = true; updAlert(); };
+$("alertbub").onclick = () => { alertMin = false; updAlert(); };
+$("alertx").onclick = () => { alertGone = true; updAlert(); };
+$("alertgo").onclick = () => { flt = "soon"; alertMin = true; location.hash = "#lista"; resetLim(); };
 $("more").onclick = () => { lim += 50; render(); };
 
 /* ---------- krijo ---------- */
