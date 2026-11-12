@@ -79,6 +79,34 @@ button:disabled{opacity:.45;cursor:default}
   .lay.has #side{position:sticky;top:70px;max-height:calc(100vh - 84px);overflow:auto;margin-bottom:0}
 }
 @media (max-width:520px){.tools{grid-template-columns:1fr 1fr}.tools #q{grid-column:1/-1}}
+/* ---- PA PAGUAR ---- */
+.pay{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
+.item.unpaid{box-shadow:inset 4px 0 0 var(--red)}
+button.paybtn{background:var(--red);color:#fff}
+button.paybtn.ok{background:var(--green)}
+.sub,.lnk{display:none}
+/* ---- telefoni: kartë e qartë për çdo abonent ---- */
+@media (max-width:759px){
+  .head{grid-template-columns:1fr auto;grid-template-areas:"name state" "panel date" "sub sub" "lnk lnk";gap:6px 10px;padding:12px 14px}
+  .head .c-name{grid-area:name;min-width:0}
+  .head .nm{font-size:17px;line-height:1.25;overflow-wrap:anywhere}
+  .head .c-state{grid-area:state;grid-column:auto;align-self:start;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:12px}
+  .head .c-panel{grid-area:panel;display:block;justify-self:start;padding:2px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--muted)}
+  .head .c-panel:empty{display:none}
+  .head .c-date{grid-area:date;align-self:center;color:var(--muted)}
+  .head .sub{grid-area:sub;display:block;font-size:13px;overflow-wrap:anywhere}
+  .head .sub:empty{display:none}
+  .head .lnk{grid-area:lnk;display:block;font-size:12px;padding:6px 10px;border-radius:8px;background:var(--bg);color:var(--muted)}
+  .head .lnk:empty{display:none}
+  .chips{flex-wrap:wrap}.chip{flex:1 1 30%;padding:9px 6px;font-size:13px}
+  .sc{padding:14px 16px}.sh{font-size:22px}.big{font-size:20px}.sct{font-size:17px}.sr{font-size:15px}
+  .sedit .grid{grid-template-columns:1fr}
+  .sbar button{flex:1 1 30%}
+  .btns button,.btns a.btn{flex:1 1 45%}
+  main{padding:8px 8px calc(30px + env(safe-area-inset-bottom,0px))}
+}
+/* telefon/tablet: kur hapet një abonent, shfaqet vetëm ai (me «← Mbrapa») */
+@media (max-width:999px){.lay.has .lmain{display:none}}
 </style>
 </head>
 <body>
@@ -91,7 +119,7 @@ button:disabled{opacity:.45;cursor:default}
 </div>
 
 <header class="top"><div class="top-in">
-  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v8</small></span>
+  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v9</small></span>
   <a href="#lista" data-v="lista">Lista</a>
   <a href="#krijo" data-v="krijo">➕ Krijo</a>
   <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
@@ -109,6 +137,7 @@ button:disabled{opacity:.45;cursor:default}
     <button class="chip" data-f="soon" id="ch-soon"></button>
     <button class="chip" data-f="over" id="ch-over"></button>
     <button class="chip" data-f="free" id="ch-free"></button>
+    <button class="chip" data-f="unpaid" id="ch-unpaid"></button>
   </div>
   <div class="tools">
     <input id="q" placeholder="Kërko emër, username ose shënim" autocapitalize="none">
@@ -370,8 +399,11 @@ const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && cke
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 function refreshHead(el, it) {
   const s = state(it), dl = daysLeft(it), fr = it.free && !s.over;
-  el.querySelector(".nm").textContent = (it.free ? "🆓 " : "") + it.name;
-  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", it.panel || "", apps(it), macs(it), ...linked(it).map(o => "+ " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + " " + daysTxt(o) + " (" + fmt(o.date) + ")")].filter(Boolean).join(" · ");
+  const nmEl = el.querySelector(".nm"); nmEl.textContent = (it.free ? "🆓 " : "") + it.name;
+  if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
+  el.classList.toggle("unpaid", !!it.unpaid);
+  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
+  el.querySelector(".lnk").textContent = linked(it).map(o => "🔗 " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + ": " + daysTxt(o) + " (" + fmt(o.date) + ")").join("  ·  ");
   el.querySelector(".c-start").textContent = it.start ? fmt(it.start) : "—";
   el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
   el.querySelector(".c-panel").textContent = it.panel || "";
@@ -394,7 +426,7 @@ function fillInfo(it) {
     c.className = "sc" + (x === it ? " cur" : "");
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
-    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
+    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
     c.onclick = () => { openId = x.id; render(); };
     info.appendChild(c);
@@ -409,7 +441,10 @@ function renderSide() {
   bk.onclick = () => { openId = null; editing = false; render(); };
   const eb = document.createElement("button"); eb.textContent = editing ? "✓ Mbaro modifikimin" : "✏️ Modifiko të dhënat";
   eb.onclick = () => { editing = !editing; render(); };
-  bar.append(bk, eb);
+  const pb = document.createElement("button"); pb.className = "paybtn" + (it.unpaid ? "" : " ok");
+  pb.textContent = it.unpaid ? "✓ Shëno si të paguar" : "❗ Shëno PA PAGUAR";
+  pb.onclick = () => { if (it.unpaid) delete it.unpaid; else it.unpaid = true; sv(KEY, items); render(); };
+  bar.append(bk, pb, eb);
   const info = document.createElement("div"); info.id = "sinfo";
   side.append(bar, info); fillInfo(it);
   if (editing) { const box = document.createElement("div"); box.className = "sedit"; side.appendChild(box); buildEditor(it, box); }
@@ -608,11 +643,12 @@ function render() {
   $("ch-soon").textContent = "≤7 ditë " + all.filter(soon).length;
   $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
   $("ch-free").textContent = "Të lira " + all.filter(x => x.it.free && !x.s.over).length;
+  $("ch-unpaid").textContent = "❗ Pa paguar " + all.filter(x => x.it.unpaid).length;
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
   const q = $("q").value.trim().toLowerCase(), pf = $("pf").value, sb = $("sb").value;
   const rows = all.filter(x => (!pf || x.it.panel === pf) &&
     (!q || (x.it.name + " " + (x.it.client || "") + " " + (x.it.username || "") + " " + (x.it.note || "") + " " + (x.it.app || "") + " " + (x.it.mac || "") + " " + (x.it.mac2 || "") + " " + (x.it.app2 || "")).toLowerCase().includes(q)) &&
-    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : soon(x))));
+    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : flt === "unpaid" ? !!x.it.unpaid : soon(x))));
   rows.sort((a, b) => {
     if (sb === "name") return a.it.name.localeCompare(b.it.name, "sq", {sensitivity: "base"});
     if (sb === "panel") return (a.it.panel || "").localeCompare(b.it.panel || "") || endDT(a.it) - endDT(b.it);
@@ -639,7 +675,7 @@ function render() {
   shown.forEach(({it}) => {
     const el = document.createElement("div");
     el.className = "item" + (openId === it.id ? " open" : "");
-    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div><div class="sub"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div></div><div class="edit"></div>';
+    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
     refreshHead(el, it);
     el.querySelector(".head").onclick = () => { openId = openId === it.id ? null : it.id; editing = false; render(); if (openId && innerWidth < 1000) scrollTo(0, 0); };
     rowEls.set(it.id, el);
@@ -718,7 +754,7 @@ $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(
 function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
 function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -746,6 +782,7 @@ function adoptRemote(j) {
     const o = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "",
       dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
     if (x.free) o.free = true;
+    if (x.unpaid) o.unpaid = true;
     return o;
   });
   try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); } catch (e) {}
