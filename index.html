@@ -80,16 +80,19 @@ button:disabled{opacity:.45;cursor:default}
 }
 @media (max-width:520px){.tools{grid-template-columns:1fr 1fr}.tools #q{grid-column:1/-1}}
 /* ---- PA PAGUAR ---- */
-.pay{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
-.item.unpaid{box-shadow:inset 4px 0 0 var(--red)}
+.pay{--c:var(--red);display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 42%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
+.pay.nw{--c:var(--accent)}
+/* rreshta si xham: New / Pa paguar / Falas */
+.list{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 5%,var(--card)),var(--card))}
+.item.unpaid,.item.falas,.item.isnew{--t:var(--accent);margin:6px 8px;border:1px solid color-mix(in srgb,var(--t) 30%,transparent);border-left:4px solid var(--t);border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--t) 15%,transparent),color-mix(in srgb,var(--t) 4%,transparent));-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);box-shadow:0 2px 10px color-mix(in srgb,var(--t) 13%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.item.isnew{--t:var(--accent)}.item.falas{--t:var(--green)}.item.unpaid{--t:var(--red)}
 .payzone{margin-top:36px;padding-top:16px;border-top:1px dashed var(--line)}
 .payzone .ptitle{font-weight:700;margin-bottom:10px}
-.pay.fal{background:var(--green)}
-.item.falas{box-shadow:inset 4px 0 0 var(--green)}
+.pay.fal{--c:var(--green)}
 .payopts{display:flex;gap:8px;flex-wrap:wrap}
 .payopts button{flex:1 1 45%;background:transparent;color:var(--text);border:2px solid var(--line);font-size:14px}
-.payopts button.on.up{background:var(--red);border-color:var(--red);color:#fff}
-.payopts button.on.fa{background:var(--green);border-color:var(--green);color:#fff}
+.payopts button.on.up{background:color-mix(in srgb,var(--red) 16%,transparent);border-color:var(--red);color:var(--red)}
+.payopts button.on.fa{background:color-mix(in srgb,var(--green) 16%,transparent);border-color:var(--green);color:var(--green)}
 .payopts button.on.pd{background:var(--accent);border-color:var(--accent);color:#fff}
 button.paybtn{background:var(--red);color:#fff}
 button.paybtn.ok{background:var(--green)}
@@ -128,7 +131,7 @@ button.paybtn.ok{background:var(--green)}
 </div>
 
 <header class="top"><div class="top-in">
-  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v10</small></span>
+  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v11</small></span>
   <a href="#lista" data-v="lista">Lista</a>
   <a href="#krijo" data-v="krijo">➕ Krijo</a>
   <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
@@ -407,12 +410,14 @@ function renew(it, mo) {
 const ckey = x => (x.client || x.name || "").trim().toLowerCase();
 const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && ckey(x) === ckey(it));
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
 function refreshHead(el, it) {
   const s = state(it), dl = daysLeft(it), fr = it.free && !s.over;
   const nmEl = el.querySelector(".nm"); nmEl.textContent = (it.free ? "🆓 " : "") + it.name;
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
-  el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas);
+  if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
+  el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas); el.classList.toggle("isnew", isNew(it));
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
   el.querySelector(".lnk").textContent = linked(it).map(o => "🔗 " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + ": " + daysTxt(o) + " (" + fmt(o.date) + ")").join("  ·  ");
   el.querySelector(".c-start").textContent = it.start ? fmt(it.start) : "—";
@@ -437,7 +442,7 @@ function fillInfo(it) {
     c.className = "sc" + (x === it ? " cur" : "");
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
-    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
+    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
     c.onclick = () => { openId = x.id; render(); };
     if (x.pnm && nz(x.pnm) && x.pnm !== x.name) {
@@ -726,14 +731,14 @@ $("add").onclick = () => {
   if (!n || !s || !mo) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
   const du = $("du").checked;
   const ap = $("ap").value.trim(), mc = $("mc").value.trim().toUpperCase(), mc2 = $("mc2").value.trim().toUpperCase(), ap2 = $("ap2").value.trim(), tm = $("h").value || cfg.time;
-  items.push({id: Date.now() + Math.random(), name: n, username: u, app: ap, mac: mc, mac2: mc2, app2: ap2, mig: 1, dual: du, panel: p, date: addMonths(s, mo), start: s, months: mo, time: tm, note: $("t").value.trim()});
+  items.push({id: Date.now() + Math.random(), cr: Date.now(), name: n, username: u, app: ap, mac: mc, mac2: mc2, app2: ap2, mig: 1, dual: du, panel: p, date: addMonths(s, mo), start: s, months: mo, time: tm, note: $("t").value.trim()});
   if (du) items.forEach(x => { if (ckey(x) === n.toLowerCase()) x.dual = true; });
   const alsoIn = [];
   if (du) {
     const wApp = $("dapp") && $("dapp").checked, wMac = $("dmac") && $("dmac").checked;
     [...document.querySelectorAll("#dualopts .dp")].filter(c => c.checked).forEach(c => {
       let ex = items.find(x => ckey(x) === n.toLowerCase() && x.panel === c.value);
-      if (!ex) { ex = {id: Date.now() + Math.random(), name: n, client: n, dual: true, username: "", panel: c.value, date: addMonths(s, mo), start: s, months: mo, time: tm, note: "", mig: 1}; items.push(ex); }
+      if (!ex) { ex = {id: Date.now() + Math.random(), cr: Date.now(), name: n, client: n, dual: true, username: "", panel: c.value, date: addMonths(s, mo), start: s, months: mo, time: tm, note: "", mig: 1}; items.push(ex); }
       if (wApp && ap) ex.app = ap;
       if (wApp && ap2) ex.app2 = ap2;
       if (wMac && mc) ex.mac = mc;
@@ -780,7 +785,7 @@ $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(
 function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
 function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -811,6 +816,7 @@ function adoptRemote(j) {
     if (x.unpaid) o.unpaid = true;
     if (x.falas) o.falas = true;
     if (x.pnm) o.pnm = x.pnm;
+    if (x.cr) o.cr = x.cr;
     if (x.pnt) o.pnt = x.pnt;
     return o;
   });
@@ -904,7 +910,7 @@ async function pullFile(file, manual) {
     let last = ""; try { last = localStorage.getItem("sha-v1-" + file) || ""; } catch (e) {}
     if (!manual && j.sha === last) return false;
     const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = [];
+    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = []; const hadItems = items.length > 0;
     lines.forEach((ln, i) => {
       let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
       const pkm = parseInt(pk) || 0;   // kohëzgjatja nga paketa e panelit (muaj)
@@ -938,7 +944,10 @@ async function pullFile(file, manual) {
         const nw = {name: nm, pnm: n, pnt: nt || "", date, start: ex.start || s0 || "", months: mo || ex.months || pkm || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
-        items.push({id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0, months: mo || pkm || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1});
+        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0, months: mo || pkm || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
+        /* NEW vetëm për abonentë të rinj të vërtetë (jo gjatë ngarkimit të parë, jo për ata të krijuar para >3 ditësh) */
+        if (hadItems && (!s0 || Date.now() - parse(s0).getTime() < 3 * 864e5)) ni.cr = Date.now();
+        items.push(ni);
         add++;
       }
     });
@@ -1024,6 +1033,12 @@ function dayCheck() {
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
 setInterval(dayCheck, 60000);
+let newSig = items.filter(isNew).length;
+setInterval(() => {
+  const n = items.filter(isNew).length; if (n === newSig) return;
+  const a = document.activeElement; if (a && a.closest && a.closest(".edit,.sedit")) return;
+  newSig = n; render();
+}, 60000);
 </script>
 <script>
 /* PIN / vault: tokeni enkriptohet me PIN (PBKDF2 + AES-GCM). Në pajisje të reja kërkohet vetëm PIN-i. */
