@@ -183,6 +183,19 @@ button.paybtn.ok{background:var(--green)}
 #alertbox .ab{display:none;position:relative;width:60px;height:60px;min-height:0;padding:0;border-radius:50%;background:var(--amber);color:#000;font-size:26px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 #alertbox .ab em{position:absolute;top:-4px;right:-4px;min-width:24px;height:24px;padding:0 5px;border-radius:12px;background:var(--red);color:#fff;font:700 13px/24px system-ui;font-style:normal}
 #alertbox.min .ap{display:none}#alertbox.min .ab{display:block}
+
+/* ---- Lion = portokalli, Mega = vjollcë ---- */
+:root{--lion:#ea580c;--mega:#7c3aed}
+@media (prefers-color-scheme:dark){:root{--lion:#fb923c;--mega:#a78bfa}}
+[data-p="lion"]{--pc:var(--lion)}[data-p="mega"]{--pc:var(--mega)}
+.item[data-p]{border-left:6px solid var(--pc)}
+.item[data-p] .head .c-panel{display:block;justify-self:start;padding:2px 12px;border-radius:999px;border:0;background:var(--pc);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.item[data-p] .head .c-panel:empty{display:none}
+.sc[data-p]{border-left:10px solid var(--pc)}
+.sc[data-p] .sct b{background:var(--pc);color:#fff!important;padding:3px 14px;border-radius:999px;font-size:.9em;letter-spacing:.05em;text-transform:uppercase}
+.sc[data-p].cur{background:color-mix(in srgb,var(--pc) 9%,var(--card))}
+.sc .hint{margin-top:10px;text-align:center;font-size:13px}
+.sc .sedit{margin-top:14px;cursor:default;box-shadow:none}
 </style>
 </head>
 <body>
@@ -483,6 +496,8 @@ function renew(it, mo) {
 }
 const ckey = x => (x.client || x.name || "").trim().toLowerCase();
 const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && ckey(x) === ckey(it));
+const pkey = p => /lion/i.test(p || "") ? "lion" : /mega/i.test(p || "") ? "mega" : "";
+let editEl = null;   // kutia e modifikimit: rri brenda kartelës së abonimit që po modifikohet
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
 /* fshirje me pyetje konfirmimi */
@@ -520,6 +535,7 @@ function refreshHead(el, it) {
   const cd = el.querySelector(".c-del"); cd.textContent = "";
   const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
   rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
+  if (pkey(it.panel)) el.dataset.p = pkey(it.panel); else delete el.dataset.p;
   el.classList.toggle("isfree", !!fr);
   el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas); el.classList.toggle("isnew", isNew(it));
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
@@ -535,7 +551,9 @@ function refreshHead(el, it) {
 function fillApps() { $("appsdl").innerHTML = [...new Set(items.map(x => x.app).filter(Boolean))].map(x => '<option value="' + esc(x) + '">').join(""); }
 const rowEls = new Map();
 function fillInfo(it) {
-  const info = $("sinfo"); if (!info) return; info.innerHTML = "";
+  const info = $("sinfo"); if (!info) return;
+  const ae = document.activeElement, keep = editEl && ae && editEl.contains(ae) ? ae : null;   // mos e humb fokusin kur kutia e modifikimit rivendoset
+  info.innerHTML = "";
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
   const h = document.createElement("div"); h.className = "sh"; h.textContent = it.client || it.name; if (it.free) h.style.color = "var(--blue)";
   const sb = document.createElement("div"); sb.className = "meta"; sb.style.cssText = "margin:4px 0 14px;font-size:15px";
@@ -543,20 +561,26 @@ function fillInfo(it) {
   info.append(h, sb);
   g.forEach(x => {
     const s = state(x), dl = daysLeft(x), c = document.createElement("div");
-    c.className = "sc" + (g.length === 1 ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
+    const ed = editing && x === it && editEl;
+    c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
+    if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
-    c.onclick = () => { openId = x.id; render(); };
+    /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
+    c.onclick = () => { if (x.id !== openId) { openId = x.id; editing = false; } else if (!editing) editing = true; else return; render(); };
     if (x.pnm && nz(x.pnm) && x.pnm !== x.name) {
       const ub = document.createElement("button"); ub.type = "button"; ub.className = "ghost"; ub.style.cssText = "margin-top:10px;width:100%";
       ub.textContent = "↻ Emri në panel: «" + x.pnm + "» — përdore";
       ub.onclick = e => { e.stopPropagation(); x.name = x.pnm; if (x.pnt) x.note = x.pnt; sv(KEY, items); render(); };
       c.appendChild(ub);
     }
+    if (x === it && !editing) { const h = document.createElement("div"); h.className = "hint meta"; h.textContent = "✏️ Kliko sërish për ta modifikuar këtu"; c.appendChild(h); }
+    if (ed) c.appendChild(editEl);
     info.appendChild(c);
   });
+  if (keep && keep.isConnected) { try { keep.focus({preventScroll: true}); } catch (e) {} }
 }
 function renderSide() {
   const side = $("side"), lay = $("lay"), it = items.find(x => x.id === openId);
@@ -569,8 +593,11 @@ function renderSide() {
   eb.onclick = () => { editing = !editing; render(); };
   bar.append(bk, eb);
   const info = document.createElement("div"); info.id = "sinfo";
-  side.append(bar, info); fillInfo(it);
-  if (editing) { const box = document.createElement("div"); box.className = "sedit"; side.appendChild(box); buildEditor(it, box); }
+  if (editing) { editEl = document.createElement("div"); editEl.className = "sedit"; editEl.onclick = e => e.stopPropagation(); }
+  else editEl = null;
+  side.append(bar, info);
+  if (editEl) buildEditor(it, editEl);
+  fillInfo(it);
   /* butoni i pagesës: veçmas, në fund, larg butonit të modifikimit */
   const pz = document.createElement("div"); pz.className = "payzone";
   const pt = document.createElement("div"); pt.className = "ptitle"; pt.textContent = "Pagesa";
