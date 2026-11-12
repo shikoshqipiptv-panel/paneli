@@ -824,6 +824,7 @@ $("showtok").onclick = () => { const t = $("synctoken"), h = t.type === "passwor
 $("syncnow").onclick = () => { readSync(); syncNow(); };
 $("syncpull").onclick = () => { readSync(); pullNow(true); };
 /* ---------- lion.txt nga GitHub: bashkon abonentët (shton të rinj, përditëson ekzistuesit, s'fshin asgjë) ---------- */
+const nz = t => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "");
 async function pullFile(file, manual) {
   const msg = $("syncmsg");
   if (!syncReady()) { if (manual) msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
@@ -837,7 +838,7 @@ async function pullFile(file, manual) {
     let last = ""; try { last = localStorage.getItem("sha-v1-" + file) || ""; } catch (e) {}
     if (!manual && j.sha === last) return false;
     const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    let add = 0, upd = 0, same = 0, dup = 0; const seen = new Set(); const bad = [];
+    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = [];
     lines.forEach((ln, i) => {
       const [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2] = ln.split(/[;\t]/).map(x => x.trim());
       const s0 = normDate(ds), endD = normDate(ms);
@@ -850,11 +851,18 @@ async function pullFile(file, manual) {
       if (seen.has(key)) { dup++; return; }                 // rresht i përsëritur brenda skedarit
       seen.add(key);
       let ex = items.find(x => (x.panel || "") === p && (un ? (x.username || "").toLowerCase() === un.toLowerCase() : x.name === n && !x.username));
-      if (!ex) ex = items.find(x => (x.panel || "") === p && (x.name || "").trim().toLowerCase() === n.toLowerCase() && x.date === date && (!x.username || !un));   // identik: i njëjti emër, panel dhe datë
+      /* abonentët që ti i ke vendosur vetëm me emër (pa username): lidhen me emrin/shënimin dhe marrin username-in nga Lion/Mega */
+      if (!ex) {
+        const nn = nz(n), dd = x => Math.abs(Math.round((parse(x.date) - parse(date)) / 864e5));
+        const c = items.filter(x => (x.panel || "") === p && !x.username && nn.length >= 3 && (nz(x.name) === nn ||
+          (nn.length >= 4 && nz(x.name).length >= 4 && (nz(x.name).startsWith(nn) || nn.startsWith(nz(x.name))) && dd(x) <= 45)));
+        c.sort((a, b) => (nz(b.name) === nn) - (nz(a.name) === nn) || dd(a) - dd(b));
+        if (c.length) ex = c[0];
+      }
       if (ex) {
-        if (un && !ex.username) { ex.username = un; upd++; }
+        if (un && !ex.username) { ex.username = un; fill++; }
         /* Lion përditëson vetëm datat; emrin, shënimin, aplikacionin dhe MAC i plotëson vetëm kur janë bosh te ti */
-        const nw = {name: ex.name || n, date, start: s0 || ex.start || "", months: mo || 0, note: ex.note || nt || "", app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        const nw = {name: ex.name || n, date, start: s0 || ex.start || "", months: mo || ex.months || 0, note: ex.note || nt || "", app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
         items.push({id: Date.now() + Math.random(), name: n, username: un || "", panel: p, date, start: s0, months: mo || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1});
@@ -862,8 +870,8 @@ async function pullFile(file, manual) {
       }
     });
     try { localStorage.setItem("sha-v1-" + file, j.sha); } catch (e) {}
-    if (add || upd) { sv(KEY, items); sv(PKEY, panels); refreshPanels(); render(); }
-    if (manual || add || upd) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") : "") + ".";
+    if (add || upd || fill) { sv(KEY, items); sv(PKEY, panels); refreshPanels(); render(); }
+    if (manual || add || upd || fill) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + fill + " username të plotësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") : "") + ".";
     return true;
   } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
 }
