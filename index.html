@@ -190,6 +190,7 @@ button.paybtn.ok{background:var(--green)}
 
 <section id="v-lista" class="view">
   <h1>Lista e abonimeve</h1>
+  <div id="stat" class="card"></div>
   <div class="lay" id="lay"><aside id="side"></aside><div class="lmain">
   <div class="chips">
     <button class="chip" data-f="all" id="ch-all"></button>
@@ -740,8 +741,42 @@ function buildEditor(it, box) {
   b.appendChild(d);
   box.appendChild(b);
 }
+/* ---------- totali + krahasimi me GitHub ---------- */
+const counts = a => { const by = {}; a.forEach(x => { const p = x.panel || "?"; by[p] = (by[p] || 0) + 1; }); return {n: a.length, by, fal: a.filter(x => x.falas).length, up: a.filter(x => x.unpaid).length, fr: a.filter(x => x.free).length}; };
+const cTxt = c => c.n + " abonentë (" + Object.entries(c.by).map(([p, k]) => p + " " + k).join(", ") + ") · 🎁 Falas " + c.fal + " · ❗ Pa paguar " + c.up + " · 🆓 Të lira " + c.fr;
+let cmpTxt = "", cmpDiff = false;
+function updStat() {
+  const el = $("stat"); if (!el) return;
+  try {
+    el.innerHTML = "";
+    const a = document.createElement("div"); a.style.cssText = "font-weight:700;font-size:17px"; a.textContent = "Gjithsej: " + cTxt(counts(items));
+    const b = document.createElement("div"); b.className = "meta"; b.style.cssText = "margin-top:6px;white-space:pre-wrap";
+    b.textContent = cmpTxt || ("Kjo pajisje: " + (isDirty() ? "ka ndryshime të pa dërguara" : "pa ndryshime të pa dërguara") + " · versioni: " + (sync.sha ? sync.sha.slice(0, 7) : "asnjë (s'është sinkronizuar kurrë)"));
+    const w = document.createElement("div"); w.className = "btns"; w.style.marginTop = "8px";
+    const c = document.createElement("button"); c.type = "button"; c.className = "ghost"; c.textContent = "🔄 Krahaso me GitHub"; c.onclick = compareGH; w.appendChild(c);
+    if (cmpDiff) {
+      const p = document.createElement("button"); p.type = "button"; p.textContent = "⬇ Merr nga GitHub (zëvendëson listën e kësaj pajisjeje)";
+      p.onclick = async () => { readSync(); if (await pullNow(true)) { cmpTxt = ""; cmpDiff = false; } updStat(); }; w.appendChild(p);
+    }
+    el.append(a, b, w);
+  } catch (e) {}
+}
+async function compareGH() {
+  readSync();
+  if (!syncReady()) { cmpTxt = "Plotëso repon dhe tokenin te Konfigurimi."; cmpDiff = false; updStat(); return; }
+  cmpTxt = "Po krahasoj me GitHub…"; updStat();
+  try {
+    const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json(), r = counts(JSON.parse(fromB64(j.content))), l = counts(items);
+    const same = j.sha === sync.sha && !isDirty();
+    cmpDiff = !same;
+    cmpTxt = "GitHub: " + cTxt(r) + "\nKjo pajisje: " + cTxt(l) + "\n" + (same ? "✓ Njësoj me GitHub." : "✗ Ndryshojnë" + (isDirty() ? " (kjo pajisje ka ndryshime të pa dërguara)" : sync.sha ? " (GitHub ka version tjetër)" : " (kjo pajisje s'është sinkronizuar kurrë me GitHub, prandaj s'e tërheq vetë)") + ".");
+  } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); cmpDiff = false; }
+  updStat();
+}
 function render() {
-  rowEls.clear(); fillApps(); renderSide();
+  rowEls.clear(); fillApps(); renderSide(); updStat();
   const all = items.map(it => ({it, s: state(it)}));
   const soon = x => !x.s.over && daysLeft(x.it) <= 7;
   $("ch-all").textContent = "Të gjithë " + all.length;
