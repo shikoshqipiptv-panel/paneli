@@ -898,7 +898,10 @@ async function pullFile(file, manual) {
     const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
     let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = [];
     lines.forEach((ln, i) => {
-      const [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2] = ln.split(/[;\t]/).map(x => x.trim());
+      let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
+      const pkm = parseInt(pk) || 0;   // kohëzgjatja nga paketa e panelit (muaj)
+      if (!nz(n) && un) n = un;      // paneli shkruan «---» kur shënimi është bosh
+      if (!nz(nt)) nt = "";
       const s0 = normDate(ds), endD = normDate(ms);
       const mo = endD ? 0 : (/vit/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
       if (!n || !(endD || (s0 && mo > 0))) { bad.push(i + 1); return; }
@@ -920,10 +923,11 @@ async function pullFile(file, manual) {
       if (ex) {
         if (un && !ex.username) { ex.username = un; fill++; }
         /* Lion përditëson vetëm datat; emrin, shënimin, aplikacionin dhe MAC i plotëson vetëm kur janë bosh te ti */
-        const nw = {name: ex.name || n, date, start: s0 || ex.start || "", months: mo || ex.months || 0, note: ex.note || nt || "", app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        const un0 = nz(un || ex.username), nm = (!nz(ex.name) || nz(ex.name) === un0) ? n : ex.name;
+        const nw = {name: nm, date, start: ex.start || s0 || "", months: mo || ex.months || pkm || 0, note: nz(ex.note) ? ex.note : (nt || ""), app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
-        items.push({id: Date.now() + Math.random(), name: n, username: un || "", panel: p, date, start: s0, months: mo || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1});
+        items.push({id: Date.now() + Math.random(), name: n, username: un || "", panel: p, date, start: s0, months: mo || pkm || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1});
         add++;
       }
     });
