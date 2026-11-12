@@ -55,7 +55,7 @@ button:disabled{opacity:.45;cursor:default}
 .row{display:flex;gap:8px;align-items:center;padding:6px 0}
 .row input{flex:1}
 @media (min-width:760px){
-  .head,.lhead{display:grid;grid-template-columns:1.8fr .9fr 1.1fr .8fr 1fr 1fr 1.5fr;gap:0}
+  .head,.lhead{display:grid;grid-template-columns:1.8fr .9fr 1.1fr .8fr 1fr 1fr 1.5fr 46px;gap:0}
   .head>div,.lhead>span{padding:0 8px;border-left:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .head>div:first-child,.lhead>span:first-child{border-left:0;padding-left:0}
   .sub{display:none}.c-start,.c-panel,.c-app,.c-mac{display:block;font-size:14px}
@@ -99,7 +99,7 @@ button.paybtn.ok{background:var(--green)}
 .sub,.lnk{display:none}
 /* ---- telefoni: kartë e qartë për çdo abonent ---- */
 @media (max-width:759px){
-  .head{grid-template-columns:1fr auto;grid-template-areas:"name state" "panel date" "sub sub" "lnk lnk";gap:6px 10px;padding:12px 14px}
+  .head{grid-template-columns:1fr auto auto;grid-template-areas:"name state del" "panel date date" "sub sub sub" "lnk lnk lnk";gap:6px 10px;padding:12px 14px}
   .head .c-name{grid-area:name;min-width:0}
   .head .nm{font-size:17px;line-height:1.25;overflow-wrap:anywhere}
   .head .c-state{grid-area:state;grid-column:auto;align-self:start;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:12px}
@@ -148,6 +148,24 @@ button.paybtn.ok{background:var(--green)}
   .nm{flex-wrap:wrap}.head .nm .nt{white-space:normal;overflow-wrap:anywhere}
   .seg button{font-size:15px}
 }
+
+/* ---- ikona e fshirjes (kolona e fundit) ---- */
+.c-del{display:flex;justify-content:center}
+.head .c-del{grid-area:del;padding:0}
+.rdel{margin:0;padding:2px 6px;font-size:18px;line-height:1;min-height:0;background:transparent;border:0;color:var(--text);opacity:.45;border-radius:8px}
+.rdel:hover,.rdel:active{opacity:1;background:color-mix(in srgb,var(--red) 15%,transparent)}
+@media (min-width:760px){.head>.c-del{border-left:0}}
+/* ---- paneli i abonentit: PC gjysma e ekranit, telefon i plotë ---- */
+@media (min-width:1000px){
+  .lay.has{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .sh{font-size:40px}.sct{font-size:26px}.big{font-size:40px}.sr{font-size:22px;padding:14px 0}.sc{padding:28px 32px}
+  .sbar button{min-height:56px;font-size:18px}
+}
+@media (max-width:999px){
+  .sh{font-size:32px}.big{font-size:36px}.sct{font-size:24px}.sr{font-size:21px;padding:14px 0}.sc{padding:22px}
+  .sc.solo{min-height:calc(100vh - 330px);display:flex;flex-direction:column;justify-content:space-evenly}
+  .sbar button{min-height:56px;font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -191,7 +209,7 @@ button.paybtn.ok{background:var(--green)}
     </select>
   </div>
   <div class="list">
-    <div class="lhead"><span>Emri</span><span>Fillimi</span><span>Skadon</span><span>Paneli</span><span>Mbetet</span><span>Aplikacioni</span><span>MAC</span></div>
+    <div class="lhead"><span>Emri</span><span>Fillimi</span><span>Skadon</span><span>Paneli</span><span>Mbetet</span><span>Aplikacioni</span><span>MAC</span><span></span></div>
     <div id="list"></div>
   </div>
   <p id="cnt" class="meta" style="text-align:center"></p>
@@ -472,8 +490,9 @@ function refreshHead(el, it) {
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
-  const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑 Fshi"; rd.title = "Fshi këtë abonent";
-  rd.onclick = e => { e.stopPropagation(); delItem(it); }; nmEl.appendChild(rd);
+  const cd = el.querySelector(".c-del"); cd.textContent = "";
+  const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
+  rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
   el.classList.toggle("isfree", !!fr);
   el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas); el.classList.toggle("isnew", isNew(it));
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
@@ -497,7 +516,7 @@ function fillInfo(it) {
   info.append(h, sb);
   g.forEach(x => {
     const s = state(x), dl = daysLeft(x), c = document.createElement("div");
-    c.className = "sc" + (x === it ? " cur" : "") + (x.free ? " free" : "");
+    c.className = "sc" + (g.length === 1 ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
@@ -762,7 +781,7 @@ function render() {
   shown.forEach(({it}) => {
     const el = document.createElement("div");
     el.className = "item" + (openId === it.id ? " open" : "");
-    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
+    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="c-del"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
     refreshHead(el, it);
     el.querySelector(".head").onclick = () => { openId = openId === it.id ? null : it.id; editing = false; render(); if (openId && innerWidth < 1000) scrollTo(0, 0); };
     rowEls.set(it.id, el);
