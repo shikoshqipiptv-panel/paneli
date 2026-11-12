@@ -80,11 +80,11 @@ button:disabled{opacity:.45;cursor:default}
 }
 @media (max-width:520px){.tools{grid-template-columns:1fr 1fr}.tools #q{grid-column:1/-1}}
 /* ---- PA PAGUAR ---- */
-.pay{--c:var(--red);display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 42%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
+.pay{--c:var(--red);display:inline-block;margin-left:8px;padding:1px 8px;border-radius:6px;color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);font-size:11px;font-weight:700;vertical-align:middle;white-space:nowrap;flex:none}
 .pay.nw{--c:var(--accent)}
 /* rreshta si xham: New / Pa paguar / Falas */
-.list{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 5%,var(--card)),var(--card))}
-.item.unpaid,.item.falas,.item.isnew{--t:var(--accent);margin:6px 8px;border:1px solid color-mix(in srgb,var(--t) 30%,transparent);border-left:4px solid var(--t);border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--t) 15%,transparent),color-mix(in srgb,var(--t) 4%,transparent));-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);box-shadow:0 2px 10px color-mix(in srgb,var(--t) 13%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.list{background:var(--card)}
+.item.unpaid,.item.falas,.item.isnew{--t:var(--accent);border-left:3px solid var(--t);background:color-mix(in srgb,var(--t) 6%,transparent)}
 .item.isnew{--t:var(--accent)}.item.falas{--t:var(--green)}.item.unpaid{--t:var(--red)}
 .payzone{margin-top:36px;padding-top:16px;border-top:1px dashed var(--line)}
 .payzone .ptitle{font-weight:700;margin-bottom:10px}
@@ -119,6 +119,35 @@ button.paybtn.ok{background:var(--green)}
 }
 /* telefon/tablet: kur hapet një abonent, shfaqet vetëm ai (me «← Mbrapa») */
 @media (max-width:999px){.lay.has .lmain{display:none}}
+
+/* ---- FREE: shkrim blu + aura blu ---- */
+:root{--blue:#2563eb}
+@media (prefers-color-scheme:dark){:root{--blue:#60a5fa}}
+#side{padding:8px}
+.nm{display:flex;align-items:center;min-width:0}
+.nm .nt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.item.isfree .nt{color:var(--blue)}
+.item.open.isfree{background:color-mix(in srgb,var(--blue) 8%,var(--card))}
+.sc.free{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue),0 0 28px 4px color-mix(in srgb,var(--blue) 45%,transparent)}
+.sc.free .sct b{color:var(--blue)}
+/* ---- butoni Fshi në rresht ---- */
+.rdel{flex:none;margin-left:8px;min-height:0;padding:1px 8px;font-size:13px;line-height:1.4;background:transparent;color:var(--red);border:1px solid color-mix(in srgb,var(--red) 40%,transparent);border-radius:8px}
+/* ---- zgjedhja e kohëzgjatjes me klik ---- */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seg button{min-height:54px;padding:6px;font-size:17px;background:transparent;color:var(--text);border:2px solid var(--line)}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* ---- abonimi i hapur: më i madh ---- */
+.sh{font-size:32px}.sc{padding:22px 24px}.sct{font-size:22px}.big{font-size:32px}.sr{font-size:19px;padding:10px 0}
+.sbar button{min-height:50px;font-size:17px}
+.sedit{padding:18px;font-size:17px}.sedit .f{font-size:15px}
+.sedit input,.sedit select,.sedit textarea{min-height:52px;font-size:17px}
+.sedit .btns button,.sedit .btns a.btn{min-height:50px;font-size:16px}
+.payopts button{min-height:52px;font-size:16px}
+@media (max-width:759px){
+  .sh{font-size:27px}.sc{padding:18px}.big{font-size:26px}.sr{font-size:17px}
+  .nm{flex-wrap:wrap}.head .nm .nt{white-space:normal;overflow-wrap:anywhere}
+  .seg button{font-size:15px}
+}
 </style>
 </head>
 <body>
@@ -411,12 +440,41 @@ const ckey = x => (x.client || x.name || "").trim().toLowerCase();
 const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && ckey(x) === ckey(it));
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
+/* fshirje me pyetje konfirmimi */
+function delItem(it) {
+  const lk = linked(it).length;
+  const msg = "🗑 A je i sigurt që dëshiron ta fshish këtë abonent?\n\n«" + it.name + "»" + (it.username ? "  (@" + it.username + ")" : "") + (it.panel ? "  ·  " + it.panel : "") + (it.date ? "\nSkadon: " + fmt(it.date) : "") +
+    (lk ? "\n\nAbonimet e lidhura në panel tjetër NUK fshihen." : "") + "\n\nKy veprim nuk kthehet.";
+  if (!confirm(msg)) return;
+  items = items.filter(x => x.id !== it.id);
+  if (openId === it.id) { openId = null; editing = false; }
+  sv(KEY, items); refreshPanels(); render();
+}
+/* zëvendëson një <select> me butona që zgjidhen me klik (1 vit, 6 muaj, 3 muaj, 1 muaj) */
+function segify(sel) {
+  if (sel._seg) { sel._sync(); return; }
+  const box = document.createElement("div"); box.className = "seg"; sel._seg = box;
+  sel.style.display = "none"; sel.after(box);
+  sel._sync = () => {
+    box.innerHTML = "";
+    [...sel.options].filter(o => +o.value > 0).sort((a, b) => b.value - a.value).forEach(o => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o.textContent; b.className = String(o.value) === sel.value ? "on" : "";
+      b.onclick = e => { e.preventDefault(); sel.value = o.value; sel.dispatchEvent(new Event("input", {bubbles: true})); sel.dispatchEvent(new Event("change", {bubbles: true})); sel._sync(); };
+      box.appendChild(b);
+    });
+  };
+  sel._sync();
+}
 function refreshHead(el, it) {
   const s = state(it), dl = daysLeft(it), fr = it.free && !s.over;
-  const nmEl = el.querySelector(".nm"); nmEl.textContent = (it.free ? "🆓 " : "") + it.name;
+  const nmEl = el.querySelector(".nm"); nmEl.textContent = "";
+  const ntEl = document.createElement("span"); ntEl.className = "nt"; ntEl.textContent = (it.free ? "🆓 " : "") + it.name; nmEl.appendChild(ntEl);
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
+  const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑 Fshi"; rd.title = "Fshi këtë abonent";
+  rd.onclick = e => { e.stopPropagation(); delItem(it); }; nmEl.appendChild(rd);
+  el.classList.toggle("isfree", !!fr);
   el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas); el.classList.toggle("isnew", isNew(it));
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
   el.querySelector(".lnk").textContent = linked(it).map(o => "🔗 " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + ": " + daysTxt(o) + " (" + fmt(o.date) + ")").join("  ·  ");
@@ -433,13 +491,13 @@ const rowEls = new Map();
 function fillInfo(it) {
   const info = $("sinfo"); if (!info) return; info.innerHTML = "";
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
-  const h = document.createElement("div"); h.className = "sh"; h.textContent = it.client || it.name;
+  const h = document.createElement("div"); h.className = "sh"; h.textContent = it.client || it.name; if (it.free) h.style.color = "var(--blue)";
   const sb = document.createElement("div"); sb.className = "meta"; sb.style.cssText = "margin:4px 0 14px;font-size:15px";
   sb.textContent = g.length > 1 ? "ka " + g.length + " abonime: " + g.map(x => x.panel || "?").join(" + ") : "ka 1 abonim";
   info.append(h, sb);
   g.forEach(x => {
     const s = state(x), dl = daysLeft(x), c = document.createElement("div");
-    c.className = "sc" + (x === it ? " cur" : "");
+    c.className = "sc" + (x === it ? " cur" : "") + (x.free ? " free" : "");
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
@@ -581,7 +639,8 @@ function buildEditor(it, box) {
   mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
   startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
   const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
-  monI = mk("Kohëzgjatja: zgjidh 1 muaj / 3 / 6 / 1 vit (llogarit fillimin nga skadimi)", sel(mopts, it.months || 0, v => { it.months = +v; recalcStart(); }));
+  monI = mk("Kohëzgjatja (kliko: 1 vit / 6 muaj / 3 muaj / 1 muaj)", sel(mopts, it.months || 0, v => { it.months = +v; recalcStart(); }));
+  segify(monI);
   const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
   ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
   mk("Shënim", ta, "wide");
@@ -657,11 +716,8 @@ function buildEditor(it, box) {
   const cl = document.createElement("button"); cl.className = "ghost"; cl.textContent = "Mbyll";
   cl.onclick = () => { editing = false; render(); };
   b.appendChild(cl);
-  const d = document.createElement("button"); d.className = "del"; d.textContent = "Fshi";
-  d.onclick = () => {
-    if (d.dataset.s) { items = items.filter(x => x.id !== it.id); openId = null; editing = false; sv(KEY, items); refreshPanels(); render(); }
-    else { d.dataset.s = "1"; d.textContent = "Prek sërish për ta fshirë"; }
-  };
+  const d = document.createElement("button"); d.className = "del"; d.textContent = "🗑 Fshi abonentin";
+  d.onclick = () => delItem(it);
   b.appendChild(d);
   box.appendChild(b);
 }
@@ -778,6 +834,7 @@ $("imp").onclick = () => {
 function applyCfg() {
   $("ctime").value = cfg.time; $("cmonths").value = String(cfg.months);
   $("h").value = cfg.time; $("m").value = String(cfg.months); updPrev();
+  [$("m"), $("cmonths")].forEach(x => x._sync && x._sync());
 }
 $("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, cfg); applyCfg(); };
 $("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
@@ -1016,7 +1073,9 @@ items.forEach(x => {
 if (mg) sv(KEY, items);
 /* ---------- nisja ---------- */
 fillSelect($("m"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+segify($("m"));
 fillSelect($("cmonths"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+segify($("cmonths"));
 $("d").value = todayIso();
 applyCfg(); refreshPanels(); render(); showView();
 const pullAll = async () => { await pullNow(false); await pullLion(false); };
