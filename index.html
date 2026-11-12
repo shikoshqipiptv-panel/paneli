@@ -426,6 +426,18 @@ function daysLeft(it) {
   return Math.round((parse(it.date) - td) / 864e5);
 }
 function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
+/* ditët e mbetura: parazgjedhje «45 ditë»; pas klikimit mbi to → «1 muaj dhe 15 ditë» */
+const longDur = new Set();
+let autoLong = false;   // slide automatik: çdo minutë të gjitha ditët kalojnë për pak sekonda në «muaj dhe ditë»
+function dayStr(it, dl) {
+  if (!(autoLong || longDur.has(it.id)) || dl <= 0) return dl + " ditë";
+  const t0 = todayIso(), end = parse(it.date);
+  let k = 0;
+  while (parse(addMonths(t0, k + 1)) <= end) k++;
+  const d = Math.round((end - parse(addMonths(t0, k))) / 864e5);
+  if (!k) return d + " ditë";
+  return k + " muaj" + (d ? " dhe " + d + " ditë" : "");
+}
 function state(it) {
   if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
   const l = daysLeft(it);
@@ -566,8 +578,12 @@ function refreshHead(el, it) {
   el.querySelector(".c-panel").textContent = it.panel || "";
   el.querySelector(".c-app").textContent = apps(it);
   el.querySelector(".c-mac").textContent = macs(it);
-  const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dl + " ditë";
+  const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dayStr(it, dl);
   const st = el.querySelector(".c-state"); st.textContent = fr ? "I LIRË · " + t : t; st.style.color = fr ? "var(--accent)" : s.c;
+  if (!s.over && dl > 0) {
+    st.style.cursor = "pointer"; st.title = "Kliko për muaj + ditë";
+    st.onclick = e => { e.stopPropagation(); longDur.has(it.id) ? longDur.delete(it.id) : longDur.add(it.id); refreshHead(el, it); };
+  } else { st.onclick = null; st.style.cursor = ""; st.title = ""; }
 }
 function fillApps() { $("appsdl").innerHTML = [...new Set(items.map(x => x.app).filter(Boolean))].map(x => '<option value="' + esc(x) + '">').join(""); }
 const rowEls = new Map();
@@ -585,10 +601,15 @@ function fillInfo(it) {
     const ed = editing && x === it && editEl;
     c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
     if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
-    const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
+    const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dayStr(x, dl);
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
+    const bg = c.querySelector(".big");
+    if (bg && !s.over && dl > 0) {
+      bg.style.cursor = "pointer"; bg.title = "Kliko për muaj + ditë";
+      bg.onclick = e => { e.stopPropagation(); longDur.has(x.id) ? longDur.delete(x.id) : longDur.add(x.id); fillInfo(it); };
+    }
     /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
     c.onclick = () => { if (x.id !== openId) { openId = x.id; editing = false; } else if (!editing) editing = true; else return; render(); };
     if (x.pnm && nz(x.pnm) && x.pnm !== x.name) {
@@ -1360,6 +1381,25 @@ function dayCheck() {
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
 setInterval(dayCheck, 60000);
+/* slide: çdo SLIDE_EVERY ditët rrëshqasin te «X muaj dhe Y ditë», qëndrojnë SLIDE_HOLD dhe rrëshqasin mbrapsht */
+const SLIDE_EVERY = 60000, SLIDE_HOLD = 6000;
+function daySlide(done) {
+  const els = [...document.querySelectorAll(".head .c-state, .sc .big")].filter(e => e.offsetParent);
+  const out = [{transform: "translateY(0)", opacity: 1}, {transform: "translateY(-80%)", opacity: 0}];
+  const inn = [{transform: "translateY(80%)", opacity: 0}, {transform: "translateY(0)", opacity: 1}];
+  const a = els.map(e => e.animate(out, {duration: 260, easing: "ease-in", fill: "forwards"}));
+  setTimeout(() => {
+    done(); render();
+    document.querySelectorAll(".head .c-state, .sc .big").forEach(e => e.animate(inn, {duration: 260, easing: "ease-out"}));
+  }, els.length ? 270 : 0);
+}
+function dayCycle() {
+  if (document.hidden || editing) return;
+  const a = document.activeElement; if (a && a.closest && a.closest(".edit,.sedit")) return;
+  daySlide(() => { autoLong = true; });
+  setTimeout(() => { if (editing) { autoLong = false; render(); return; } daySlide(() => { autoLong = false; }); }, SLIDE_HOLD + 600);
+}
+setInterval(dayCycle, SLIDE_EVERY);
 let newSig = items.filter(isNew).length;
 setInterval(() => {
   const n = items.filter(isNew).length; if (n === newSig) return;
