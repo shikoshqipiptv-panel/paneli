@@ -196,6 +196,27 @@ button.paybtn.ok{background:var(--green)}
 .sc[data-p].cur{background:color-mix(in srgb,var(--pc) 9%,var(--card))}
 .sc .hint{margin-top:10px;text-align:center;font-size:13px}
 .sc .sedit{margin-top:14px;cursor:default;box-shadow:none}
+
+/* ---- butoni «Të lira»: xham blu, pulson lehtë, slide me abonimet ---- */
+.chip.freechip{position:relative;overflow:hidden;color:#fff;border:1px solid rgba(255,255,255,.5);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 82%,#fff 18%),color-mix(in srgb,var(--blue) 60%,transparent));
+  -webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),inset 0 -8px 16px rgba(255,255,255,.08),0 4px 16px color-mix(in srgb,var(--blue) 35%,transparent);
+  text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.chip.freechip::after{content:"";position:absolute;left:0;right:0;top:0;height:48%;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0))}
+.chip.freechip.has{animation:freepulse 2.8s ease-in-out infinite}
+.chip.freechip.on{border-color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 2px color-mix(in srgb,var(--blue) 70%,#fff),0 6px 22px color-mix(in srgb,var(--blue) 55%,transparent)}
+@keyframes freepulse{
+  0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 14px color-mix(in srgb,var(--blue) 30%,transparent),0 0 0 0 color-mix(in srgb,var(--blue) 45%,transparent)}
+  50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 22px color-mix(in srgb,var(--blue) 55%,transparent),0 0 0 7px color-mix(in srgb,var(--blue) 0%,transparent)}
+}
+.freechip .cl,.freechip .ct{display:block;position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .45s ease,opacity .45s ease}
+.freechip .ct{position:absolute;left:8px;right:8px;top:50%;margin-top:-.7em;line-height:1.4;text-align:center;transform:translateY(160%);opacity:0}
+.freechip.tick .cl{transform:translateY(-160%);opacity:0}
+.freechip .ct.run{animation:ftrun 2.6s ease both}
+@keyframes ftrun{0%{transform:translateY(160%);opacity:0}16%,84%{transform:translateY(0);opacity:1}100%{transform:translateY(-160%);opacity:0}}
+@media (prefers-reduced-motion:reduce){.chip.freechip.has{animation:none}}
 </style>
 </head>
 <body>
@@ -232,7 +253,7 @@ button.paybtn.ok{background:var(--green)}
     <button class="chip" data-f="all" id="ch-all"></button>
     <button class="chip" data-f="soon" id="ch-soon"></button>
     <button class="chip" data-f="over" id="ch-over"></button>
-    <button class="chip" data-f="free" id="ch-free"></button>
+    <button class="chip freechip" data-f="free" id="ch-free"><span class="cl"></span><span class="ct"></span></button>
     <button class="chip" data-f="unpaid" id="ch-unpaid"></button>
     <button class="chip" data-f="falas" id="ch-falas"></button>
   </div>
@@ -614,13 +635,46 @@ function groupMsg(it) {
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
   return (it.client || it.name) + ": " + g.map(x => (x.panel || "?") + (x.free ? " (i lirë)" : "") + " " + daysTxt(x)).join(" · ");
 }
-/* kthen false nëse përdoruesi nuk e konfirmon; nëse po, e shkëput nga paneli tjetër (që mbetet i paprekur) */
-function askGive(it, newName) {
+/* dritare me disa zgjedhje (confirm() ka vetëm 2) */
+function choose(msg, opts) {
+  return new Promise(res => {
+    const ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px";
+    const bx = document.createElement("div"); bx.style.cssText = "background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:18px;max-width:440px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.35)";
+    const p = document.createElement("div"); p.style.cssText = "white-space:pre-wrap;margin-bottom:14px;font-size:16px;line-height:1.4"; p.textContent = msg;
+    const row = document.createElement("div"); row.style.cssText = "display:flex;flex-direction:column;gap:8px";
+    const done = v => { ov.remove(); res(v); };
+    opts.forEach(([v, l, cls]) => { const b = document.createElement("button"); b.type = "button"; b.className = cls || ""; b.textContent = l; b.onclick = () => done(v); row.appendChild(b); });
+    ov.onclick = e => { if (e.target === ov) done(null); };
+    bx.append(p, row); ov.appendChild(bx); document.body.appendChild(ov);
+  });
+}
+/* kthen false nëse anulohet; true = vazhdo; "both" = ndrysho emrin edhe te abonimi i lidhur. fromName=true: vjen nga fusha «Emri» */
+async function askGive(it, newName, fromName) {
   const oth = linked(it);
-  if (!oth.length || newName.trim().toLowerCase() === ckey(it)) return true;
-  const ok = confirm("Ky abonim është i lidhur me «" + (it.client || it.name) + "» (" + groupMsg(it) + ").\n\nA don t'ia japësh dikujt tjetër («" + newName + "»)?\n\n" + oth.map(o => o.panel || "?").join(", ") + " mbetet te «" + (it.client || it.name) + "» pa u ndryshuar.");
+  if (newName.trim().toLowerCase() === ckey(it)) return true;
+  const old = it.client || it.name;
+  if (fromName && it.free) {
+    const q = "🆓 «" + old + "» është abonim i lirë." + (oth.length ? "\n" + groupMsg(it) : "") + "\n\nPo e ndryshon emrin në «" + newName + "».\n\nA don t'ia japësh dikujt tjetër, apo don të ndryshosh emrin?";
+    const a = await choose(q, [["give", "👤 Ia jap dikujt tjetër"], ["rename", "✏️ Ndryshoj emrin", "ghost"], [null, "Anulo", "ghost"]]);
+    if (!a) return false;
+    if (a === "give") { it.client = ""; it.dual = false; delete it.free; return true; }
+    if (!oth.length) return true;
+    const b = await choose("A don të ndryshoj të dy emrat?\n\n" + [it, ...oth].map(o => (o.panel || "?") + ": «" + o.name + "»").join("\n") + "\n\nEmri i ri: «" + newName + "»",
+      [["both", "Po, ndrysho të dy emrat"], ["one", "Jo, vetëm këtë (" + (it.panel || "?") + ")", "ghost"], [null, "Anulo", "ghost"]]);
+    if (!b) return false;
+    return b === "both" ? "both" : true;
+  }
+  if (!oth.length) return true;
+  const ok = confirm("Ky abonim është i lidhur me «" + old + "» (" + groupMsg(it) + ").\n\nA don t'ia japësh dikujt tjetër («" + newName + "»)?\n\n" + oth.map(o => o.panel || "?").join(", ") + " mbetet te «" + old + "» pa u ndryshuar.");
   if (ok) { it.client = ""; it.dual = false; }
   return ok;
+}
+/* ndryshon emrin; both = edhe te abonimet e lidhura; përndryshe lidhja ruhet përmes fushës «Klienti» */
+function applyRename(it, nv, both) {
+  const old = ckey(it), grp = linked(it);
+  if (!both && grp.length && !it.client) it.client = it.name;
+  it.name = nv;
+  if (both) [it, ...grp].forEach(x => { x.name = nv; if (x.client && x.client.trim().toLowerCase() === old) x.client = nv; });
 }
 function buildEditor(it, box) {
   box.innerHTML = "";
@@ -659,11 +713,12 @@ function buildEditor(it, box) {
   };
 
   const ni = document.createElement("input"); ni.type = "text"; ni.autocapitalize = "none"; ni.value = it.name;
-  ni.addEventListener("change", () => {
+  ni.addEventListener("change", async () => {
     const nv = ni.value.trim();
     if (!nv || nv === it.name) { ni.value = it.name; return; }
-    if (!askGive(it, nv)) { ni.value = it.name; return; }
-    it.name = nv; sv(KEY, items); render();
+    const r = await askGive(it, nv, true);
+    if (!r) { ni.value = it.name; return; }
+    applyRename(it, nv, r === "both"); sv(KEY, items); render();
   });
   mk("Emri", ni);
   const fw = document.createElement("label"); fw.className = "f wide"; fw.style.cssText = "flex-direction:row;align-items:center;gap:8px";
@@ -695,9 +750,9 @@ function buildEditor(it, box) {
   dw.append(dc, dt, dh, ds); g.appendChild(dw);
   const ci = document.createElement("input"); ci.type = "text"; ci.setAttribute("list", "clientsdl"); ci.autocapitalize = "none";
   ci.value = it.client || ""; ci.placeholder = it.name;
-  ci.addEventListener("change", () => {
+  ci.addEventListener("change", async () => {
     const nv = ci.value.trim();
-    if (!askGive(it, nv || it.name)) { ci.value = it.client || ""; return; }
+    if (!(await askGive(it, nv || it.name))) { ci.value = it.client || ""; return; }
     it.client = nv; sv(KEY, items); render();
   });
   mk("Klienti (shkruaj të njëjtin emër në Lion dhe Mega për t'i lidhur)", ci, "wide");
@@ -853,6 +908,19 @@ async function compareGH() {
   } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); cmpDiff = false; }
   updCmp();
 }
+/* slide: herë pas here butoni «Të lira» shfaq një nga një abonimet e lira (emri + ditët) dhe kthehet te teksti */
+let ftList = [], ftBusy = false;
+function ftCycle() {
+  if (ftBusy || document.hidden || !ftList.length) return;
+  const b = $("ch-free"), tk = b.querySelector(".ct"), names = ftList.slice(0, 12); ftBusy = true;
+  const step = i => {
+    if (i >= names.length) { tk.classList.remove("run"); b.classList.remove("tick"); setTimeout(() => { ftBusy = false; }, 600); return; }
+    tk.classList.remove("run"); void tk.offsetWidth; tk.textContent = names[i]; b.classList.add("tick"); tk.classList.add("run");
+    setTimeout(() => step(i + 1), 2650);
+  };
+  step(0);
+}
+setTimeout(ftCycle, 3500); setInterval(ftCycle, 14000);
 function render() {
   rowEls.clear(); fillApps(); renderSide(); updStat(); if (typeof updAlert === "function") updAlert();
   const all = items.map(it => ({it, s: state(it)}));
@@ -860,7 +928,10 @@ function render() {
   $("ch-all").textContent = "Të gjithë " + all.length;
   $("ch-soon").textContent = "≤7 ditë " + all.filter(soon).length;
   $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
-  $("ch-free").textContent = "Të lira " + all.filter(x => x.it.free && !x.s.over).length;
+  const frl = all.filter(x => x.it.free && !x.s.over);
+  $("ch-free").querySelector(".cl").textContent = "Të lira " + frl.length;
+  $("ch-free").classList.toggle("has", frl.length > 0);
+  ftList = frl.map(x => x.it).sort((a, b) => endDT(a) - endDT(b)).map(it => it.name + " " + daysTxt(it));
   $("ch-unpaid").textContent = "❗ Pa paguar " + all.filter(x => x.it.unpaid).length;
   $("ch-falas").textContent = "🎁 Falas " + all.filter(x => x.it.falas).length;
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
@@ -1025,7 +1096,7 @@ function adoptRemote(j) {
     if (x.pnt) o.pnt = x.pnt;
     return o;
   });
-  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); localStorage.removeItem("sha-v1-lion.txt"); localStorage.removeItem("sha-v1-mega.txt"); } catch (e) {}
   sync.sha = j.sha; sv("sync-v1", sync);
   items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
   openId = null; editing = false; refreshPanels(); render();
@@ -1126,6 +1197,20 @@ $("showtok").onclick = () => { const t = $("synctoken"), h = t.type === "passwor
 $("syncnow").onclick = () => { readSync(); syncNow(); };
 $("syncpull").onclick = () => { readSync(); pullNow(true); };
 /* ---------- lion.txt nga GitHub: bashkon abonentët (shton të rinj, përditëson ekzistuesit, s'fshin asgjë) ---------- */
+/* paketa -> muaj: «6 Months» = 6, «1 Month» = 1, «1 Year» = 12; ditët/orët nuk numërohen si muaj */
+function pkgMonths(t) {
+  t = String(t || "").trim(); if (!t) return 0;
+  let m = t.match(/(\d+)\s*(?:years?|yrs?|vit(?:e|et)?|v)\b/i); if (m) return 12 * +m[1];
+  m = t.match(/(\d+)\s*(?:months?|mo|muaj)\b/i); if (m) return +m[1];
+  if (/day|hour|ditë|dite|ore|orë/i.test(t)) return 0;
+  m = t.match(/^\d+$/); return m ? +m[0] : 0;
+}
+/* ora nga data e skadimit, p.sh. «2027-05-11 21:53» -> «21:53» */
+function timeOf(t) {
+  t = String(t || "").trim();
+  if (/^\d{10}(\d{3})?$/.test(t)) { const d = new Date(t.length === 13 ? +t : t * 1000); return isNaN(d) ? "" : p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  const m = t.match(/(?:^|[T\s,])(\d{1,2}):(\d{2})(?::\d{2})?/); return m && +m[1] < 24 && +m[2] < 60 ? p2(m[1]) + ":" + m[2] : "";
+}
 const nz = t => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "");
 async function pullFile(file, manual) {
   const msg = $("syncmsg");
@@ -1143,11 +1228,18 @@ async function pullFile(file, manual) {
     let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = []; let badEx = ""; const hadItems = items.length > 0;
     lines.forEach((ln, i) => {
       let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
-      const pkm = parseInt(pk) || 0;   // kohëzgjatja nga paketa e panelit (muaj)
+      let pkm = pkgMonths(pk);   // kohëzgjatja nga paketa e panelit (muaj)
       if (!nz(n) && un) n = un;      // paneli shkruan «---» kur shënimi është bosh
       if (!nz(nt)) nt = "";
-      const s0 = normDate(ds), endD = normDate(ms);
-      const mo0 = endD ? 0 : (/vit|year/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
+      let s0 = normDate(ds), endD = normDate(ms), tm = endD ? timeOf(ms) : "";
+      let mo0 = endD ? 0 : pkgMonths(ms);
+      if (!endD && !(s0 && mo0 > 0)) {
+        /* rresht me rend tjetër fushash: kërko vetë datat (e para = fillimi, e fundit = skadimi) dhe paketën */
+        const cells = ln.split(/[;\t]/).map(x => x.trim()), dts = cells.filter(c => normDate(c)).sort((a, b) => (normDate(a) + " " + timeOf(a)).localeCompare(normDate(b) + " " + timeOf(b)));
+        if (dts.length) { endD = normDate(dts[dts.length - 1]); tm = timeOf(dts[dts.length - 1]); s0 = dts.length > 1 ? normDate(dts[0]) : s0; }
+        if (!pkm) pkm = cells.map(pkgMonths).find(v => v > 0) || 0;
+        mo0 = 0;
+      }
       if (!n || !(endD || (s0 && mo0 > 0))) { bad.push(i + 1); if (badEx === "") badEx = "«" + ln.slice(0, 90) + "»"; return; }
       /* kohëzgjatja: nga paketa, ose e llogaritur nga data e fillimit dhe e mbarimit kur ajo s'është shkruar */
       const calc = (s0 && endD) ? Math.round((parse(endD) - parse(s0)) / (864e5 * 30.44)) : 0;
@@ -1174,10 +1266,10 @@ async function pullFile(file, manual) {
         /* emri/shënimi nga paneli përditësohen vetë kur ti s'i ke ndryshuar dorazi (janë bosh, si username-i, ose njësoj si herën e kaluar nga paneli) */
         const nm = (!nz(ex.name) || nz(ex.name) === un0 || (ex.pnm !== undefined && ex.name === ex.pnm)) ? n : ex.name;
         const nn2 = (!nz(ex.note) || (ex.pnt !== undefined && ex.note === ex.pnt)) ? (nt || "") : ex.note;
-        const nw = {name: nm, pnm: n, pnt: nt || "", date, start: s0 || ex.start || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || ex.months || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        const nw = {name: nm, pnm: n, pnt: nt || "", date, time: tm || ex.time || cfg.time, start: s0 || ex.start || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || ex.months || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
-        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
+        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: tm || cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
         /* NEW vetëm për abonentë të rinj të vërtetë (jo gjatë ngarkimit të parë, jo për ata të krijuar para >3 ditësh) */
         if (hadItems && (!s0 || Date.now() - parse(s0).getTime() < 3 * 864e5)) ni.cr = Date.now();
         items.push(ni);
