@@ -82,6 +82,15 @@ button:disabled{opacity:.45;cursor:default}
 /* ---- PA PAGUAR ---- */
 .pay{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
 .item.unpaid{box-shadow:inset 4px 0 0 var(--red)}
+.payzone{margin-top:36px;padding-top:16px;border-top:1px dashed var(--line)}
+.payzone .ptitle{font-weight:700;margin-bottom:10px}
+.pay.fal{background:var(--green)}
+.item.falas{box-shadow:inset 4px 0 0 var(--green)}
+.payopts{display:flex;gap:8px;flex-wrap:wrap}
+.payopts button{flex:1 1 45%;background:transparent;color:var(--text);border:2px solid var(--line);font-size:14px}
+.payopts button.on.up{background:var(--red);border-color:var(--red);color:#fff}
+.payopts button.on.fa{background:var(--green);border-color:var(--green);color:#fff}
+.payopts button.on.pd{background:var(--accent);border-color:var(--accent);color:#fff}
 button.paybtn{background:var(--red);color:#fff}
 button.paybtn.ok{background:var(--green)}
 .sub,.lnk{display:none}
@@ -138,6 +147,7 @@ button.paybtn.ok{background:var(--green)}
     <button class="chip" data-f="over" id="ch-over"></button>
     <button class="chip" data-f="free" id="ch-free"></button>
     <button class="chip" data-f="unpaid" id="ch-unpaid"></button>
+    <button class="chip" data-f="falas" id="ch-falas"></button>
   </div>
   <div class="tools">
     <input id="q" placeholder="Kërko emër, username ose shënim" autocapitalize="none">
@@ -401,7 +411,8 @@ function refreshHead(el, it) {
   const s = state(it), dl = daysLeft(it), fr = it.free && !s.over;
   const nmEl = el.querySelector(".nm"); nmEl.textContent = (it.free ? "🆓 " : "") + it.name;
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
-  el.classList.toggle("unpaid", !!it.unpaid);
+  if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
+  el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas);
   el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
   el.querySelector(".lnk").textContent = linked(it).map(o => "🔗 " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + ": " + daysTxt(o) + " (" + fmt(o.date) + ")").join("  ·  ");
   el.querySelector(".c-start").textContent = it.start ? fmt(it.start) : "—";
@@ -426,7 +437,7 @@ function fillInfo(it) {
     c.className = "sc" + (x === it ? " cur" : "");
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
     const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
-    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
+    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
     c.onclick = () => { openId = x.id; render(); };
     info.appendChild(c);
@@ -441,13 +452,21 @@ function renderSide() {
   bk.onclick = () => { openId = null; editing = false; render(); };
   const eb = document.createElement("button"); eb.textContent = editing ? "✓ Mbaro modifikimin" : "✏️ Modifiko të dhënat";
   eb.onclick = () => { editing = !editing; render(); };
-  const pb = document.createElement("button"); pb.className = "paybtn" + (it.unpaid ? "" : " ok");
-  pb.textContent = it.unpaid ? "✓ Shëno si të paguar" : "❗ Shëno PA PAGUAR";
-  pb.onclick = () => { if (it.unpaid) delete it.unpaid; else it.unpaid = true; sv(KEY, items); render(); };
-  bar.append(bk, pb, eb);
+  bar.append(bk, eb);
   const info = document.createElement("div"); info.id = "sinfo";
   side.append(bar, info); fillInfo(it);
   if (editing) { const box = document.createElement("div"); box.className = "sedit"; side.appendChild(box); buildEditor(it, box); }
+  /* butoni i pagesës: veçmas, në fund, larg butonit të modifikimit */
+  const pz = document.createElement("div"); pz.className = "payzone";
+  const pt = document.createElement("div"); pt.className = "ptitle"; pt.textContent = "Pagesa";
+  const po = document.createElement("div"); po.className = "payopts";
+  const cur = it.unpaid ? "up" : it.falas ? "fa" : "";
+  [["up", "❗ Pa paguar"], ["fa", "🎁 Falas"]].forEach(([k, l]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = k + (cur === k ? " on" : ""); b.textContent = l;
+    b.onclick = () => { delete it.unpaid; delete it.falas; if (cur !== k) { if (k === "up") it.unpaid = true; else it.falas = true; } sv(KEY, items); render(); };
+    po.appendChild(b);
+  });
+  pz.append(pt, po); side.appendChild(pz);
 }
 function groupMsg(it) {
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
@@ -644,11 +663,12 @@ function render() {
   $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
   $("ch-free").textContent = "Të lira " + all.filter(x => x.it.free && !x.s.over).length;
   $("ch-unpaid").textContent = "❗ Pa paguar " + all.filter(x => x.it.unpaid).length;
+  $("ch-falas").textContent = "🎁 Falas " + all.filter(x => x.it.falas).length;
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
   const q = $("q").value.trim().toLowerCase(), pf = $("pf").value, sb = $("sb").value;
   const rows = all.filter(x => (!pf || x.it.panel === pf) &&
     (!q || (x.it.name + " " + (x.it.client || "") + " " + (x.it.username || "") + " " + (x.it.note || "") + " " + (x.it.app || "") + " " + (x.it.mac || "") + " " + (x.it.mac2 || "") + " " + (x.it.app2 || "")).toLowerCase().includes(q)) &&
-    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : flt === "unpaid" ? !!x.it.unpaid : soon(x))));
+    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : flt === "unpaid" ? !!x.it.unpaid : flt === "falas" ? !!x.it.falas : soon(x))));
   rows.sort((a, b) => {
     if (sb === "name") return a.it.name.localeCompare(b.it.name, "sq", {sensitivity: "base"});
     if (sb === "panel") return (a.it.panel || "").localeCompare(b.it.panel || "") || endDT(a.it) - endDT(b.it);
@@ -754,7 +774,7 @@ $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(
 function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
 function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -783,6 +803,7 @@ function adoptRemote(j) {
       dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
     if (x.free) o.free = true;
     if (x.unpaid) o.unpaid = true;
+    if (x.falas) o.falas = true;
     return o;
   });
   try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); } catch (e) {}
