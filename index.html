@@ -380,9 +380,11 @@ function addMonths(s, mo) {
 }
 function normDate(s) {
   s = (s || "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
-  return m ? m[3] + "-" + p2(m[2]) + "-" + p2(m[1]) : "";
+  if (/^\d{10}(\d{3})?$/.test(s)) { const d = new Date(s.length === 13 ? +s : s * 1000); return isNaN(d) ? "" : iso(d); }   // timestamp
+  let m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:$|[T\s,])/);                                                  // 2026-03-05, 2026-03-05 14:20, 2026-03-05T14:20:00Z
+  if (m) return m[1] + "-" + p2(m[2]) + "-" + p2(m[3]);
+  m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2}|\d{4})(?:$|[T\s,])/);                                                // 05.03.2026, 5/3/26 14:20
+  return m ? (m[3].length === 2 ? "20" + m[3] : m[3]) + "-" + p2(m[2]) + "-" + p2(m[1]) : "";
 }
 const endDT = it => new Date(it.date + "T" + (it.time || "23:59"));
 function daysLeft(it) {
@@ -1111,18 +1113,21 @@ async function pullFile(file, manual) {
     let last = ""; try { last = localStorage.getItem("sha-v1-" + file) || ""; } catch (e) {}
     if (!manual && j.sha === last) return false;
     const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = []; const hadItems = items.length > 0;
+    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = []; let badEx = ""; const hadItems = items.length > 0;
     lines.forEach((ln, i) => {
       let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
       const pkm = parseInt(pk) || 0;   // kohëzgjatja nga paketa e panelit (muaj)
       if (!nz(n) && un) n = un;      // paneli shkruan «---» kur shënimi është bosh
       if (!nz(nt)) nt = "";
       const s0 = normDate(ds), endD = normDate(ms);
-      const mo = endD ? 0 : (/vit/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
-      if (!n || !(endD || (s0 && mo > 0))) { bad.push(i + 1); return; }
+      const mo0 = endD ? 0 : (/vit|year/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
+      if (!n || !(endD || (s0 && mo0 > 0))) { bad.push(i + 1); if (badEx === "") badEx = "«" + ln.slice(0, 90) + "»"; return; }
+      /* kohëzgjatja: nga paketa, ose e llogaritur nga data e fillimit dhe e mbarimit kur ajo s'është shkruar */
+      const calc = (s0 && endD) ? Math.round((parse(endD) - parse(s0)) / (864e5 * 30.44)) : 0;
+      const mo = mo0 || pkm || (calc > 0 ? calc : 0);
       let p = "";
       if (pr) { p = panels.find(x => x.toLowerCase() === pr.toLowerCase()) || pr; addPanel(p); }
-      const date = endD || addMonths(s0, mo);
+      const date = endD || addMonths(s0, mo0);
       const key = p.toLowerCase() + "|" + (un ? un.toLowerCase() : n.toLowerCase() + "|" + date);
       if (seen.has(key)) { dup++; return; }                 // rresht i përsëritur brenda skedarit
       seen.add(key);
@@ -1142,10 +1147,10 @@ async function pullFile(file, manual) {
         /* emri/shënimi nga paneli përditësohen vetë kur ti s'i ke ndryshuar dorazi (janë bosh, si username-i, ose njësoj si herën e kaluar nga paneli) */
         const nm = (!nz(ex.name) || nz(ex.name) === un0 || (ex.pnm !== undefined && ex.name === ex.pnm)) ? n : ex.name;
         const nn2 = (!nz(ex.note) || (ex.pnt !== undefined && ex.note === ex.pnt)) ? (nt || "") : ex.note;
-        const nw = {name: nm, pnm: n, pnt: nt || "", date, start: ex.start || s0 || "", months: mo || ex.months || pkm || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        const nw = {name: nm, pnm: n, pnt: nt || "", date, start: s0 || ex.start || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || ex.months || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
-        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0, months: mo || pkm || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
+        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
         /* NEW vetëm për abonentë të rinj të vërtetë (jo gjatë ngarkimit të parë, jo për ata të krijuar para >3 ditësh) */
         if (hadItems && (!s0 || Date.now() - parse(s0).getTime() < 3 * 864e5)) ni.cr = Date.now();
         items.push(ni);
@@ -1154,7 +1159,7 @@ async function pullFile(file, manual) {
     });
     try { localStorage.setItem("sha-v1-" + file, j.sha); } catch (e) {}
     if (add || upd || fill) { sv(KEY, items); sv(PKEY, panels); refreshPanels(); render(); }
-    if (manual || add || upd || fill) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + fill + " username të plotësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") : "") + ".";
+    if (manual || add || upd || fill) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + fill + " username të plotësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") + " (p.sh. " + badEx + " — s'kuptohet data ose kohëzgjatja)" : "") + ".";
     return true;
   } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
 }
