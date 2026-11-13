@@ -221,6 +221,132 @@ button.paybtn.ok{background:var(--green)}
 .freechip .ct.run{animation:ftrun 2.6s ease both}
 @keyframes ftrun{0%{transform:translateY(160%);opacity:0}16%,84%{transform:translateY(0);opacity:1}100%{transform:translateY(-160%);opacity:0}}
 @media (prefers-reduced-motion:reduce){.chip.freechip.has{animation:none}}
+
+/* =====================================================================
+   PAMJE E LehtË & E PASTËR (si programi i inventarit) — vetëm stil, pa ndryshuar funksionet
+   ===================================================================== */
+:root,:root:not([data-theme="light"]){
+  --bg:#f7f8fa;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;
+  --accent:#3b6fe0;--blue:#3b6fe0;--red:#d9534f;--amber:#d98a1f;--green:#2f9e63;
+  --lion:#e0803a;--mega:#8b6fd6;--soft:#eef3ff;--soft-line:#cfdcfb;color-scheme:light}
+@media (prefers-color-scheme:dark){
+  :root,:root:not([data-theme="light"]){
+    --bg:#f7f8fa;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;
+    --accent:#3b6fe0;--blue:#3b6fe0;--red:#d9534f;--amber:#d98a1f;--green:#2f9e63;
+    --lion:#e0803a;--mega:#8b6fd6;color-scheme:light}}
+
+body{font-size:14px;line-height:1.4;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Inter,sans-serif}
+main{max-width:1200px;padding-top:16px}
+h1{font-size:20px;font-weight:700;margin:4px 0 14px}
+h2{font-size:15px;font-weight:700}
+
+/* menuja lart */
+.top{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{gap:8px;padding:8px 14px;max-width:1200px;margin:0 auto}
+.brand{font-weight:700;font-size:15px}
+.top a{padding:6px 14px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:500;font-size:14px;color:var(--text)}
+.top a.on{background:var(--soft);color:var(--accent);border-color:var(--soft-line)}
+
+/* butonat: të bardhë me kontur të hollë */
+button,a.btn{min-height:36px;padding:7px 14px;border-radius:8px;background:#fff;color:var(--text);border:1px solid var(--line);font-weight:500;font-size:14px;transition:background .15s,border-color .15s}
+button:hover,a.btn:hover{background:#f3f4f6}
+button.ghost,a.ghost{background:#fff;color:var(--text)}
+button.del,.rdel{background:#fff;color:var(--red);border-color:#f3d0ce}
+#add,#imp,#addp,#pinbtn,#alertgo{background:var(--soft);color:var(--accent);border-color:var(--soft-line);font-weight:600}
+#add:hover,#imp:hover,#addp:hover,#pinbtn:hover,#alertgo:hover{background:#e3ebff}
+button.paybtn{background:#fdeeed;color:var(--red);border-color:#f3d0ce}
+button.paybtn.ok{background:#e8f6ee;color:var(--green);border-color:#c5e8d3}
+
+/* fusha */
+input,select,textarea{background:#fff;border:1px solid var(--line);border-radius:8px;min-height:38px;padding:8px 10px;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);box-shadow:0 0 0 3px rgba(59,111,224,.12)}
+.f{font-size:12px;font-weight:500}
+
+/* karta */
+.card,.list,.sc,.sedit{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:none}
+.card{padding:14px 16px}
+
+/* filtrat */
+.chips{gap:8px;margin-bottom:10px}
+.chip{border-radius:10px;min-height:40px;font-weight:600;background:#fff;color:var(--text)}
+.chip.on{background:var(--soft);color:var(--accent);border-color:var(--soft-line)}
+.chip.freechip{background:#f1f7ff;color:var(--accent);border:1px solid var(--soft-line);box-shadow:none;text-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;animation:none!important;min-height:44px;font-size:14px}
+.chip.freechip::after{display:none}
+.chip.freechip.on{background:var(--soft);box-shadow:0 0 0 2px var(--soft-line)}
+.freechip .ct{font-size:14px;font-weight:600}
+.tools{gap:8px}
+
+/* lista */
+.list{overflow:hidden}
+.lhead{background:#fff;color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;font-size:12px;padding:12px 14px!important}
+.head{padding:12px 14px}
+.head>div,.lhead>span{border-left:0!important}
+.item{border-bottom:1px solid #eef0f3}
+.head:hover{background:#fafbfc}
+.nm{font-weight:600}
+.c-mac,.c-app{color:var(--muted);font-size:12px!important}
+.expgrp{background:#f1f5fd;color:#374151;font-weight:600;font-size:13px;padding:10px 14px;border-color:var(--line)}
+
+/* statusi si pill i lehtë */
+.head>.c-state{justify-self:start;align-self:center;display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;
+  background:color-mix(in srgb,currentColor 11%,#fff)}
+.item.open{background:#f6f9ff}
+.item.unpaid,.item.falas,.item.isnew{border-left:3px solid color-mix(in srgb,var(--t) 45%,#fff);background:color-mix(in srgb,var(--t) 3%,#fff)}
+.item.open.isfree,.item.isfree{background:#f6f9ff}
+.item.isfree .nt{color:var(--accent)}
+
+/* panel Lion / Mega: pastel, jo dominues */
+.item[data-p]{border-left:3px solid color-mix(in srgb,var(--pc) 50%,#fff)}
+.item[data-p] .head .c-panel{padding:2px 10px;font-size:11px;font-weight:600;letter-spacing:.02em;
+  background:color-mix(in srgb,var(--pc) 13%,#fff);color:color-mix(in srgb,var(--pc) 85%,#000)}
+.sc[data-p]{border-left:4px solid color-mix(in srgb,var(--pc) 50%,#fff)}
+.sc[data-p] .sct b{background:color-mix(in srgb,var(--pc) 13%,#fff);color:color-mix(in srgb,var(--pc) 85%,#000)!important;
+  padding:2px 12px;font-size:.8em;letter-spacing:.02em;font-weight:600}
+.sc[data-p].cur{background:#fff}
+
+/* badge-t */
+.pay,.bd{border-radius:999px;border:0;padding:2px 9px;font-size:11px;font-weight:600;
+  color:var(--c,var(--accent));background:color-mix(in srgb,var(--c,var(--accent)) 11%,#fff)}
+.bd[style]{background:color-mix(in srgb,var(--red) 11%,#fff)}
+.pay.fal{--c:var(--green)}
+
+/* abonimi i hapur: madhësi të buta */
+.sc,.sc.solo{padding:18px 20px;min-height:0}
+.sc.cur{border-color:var(--soft-line);box-shadow:0 0 0 3px rgba(59,111,224,.08)}
+.sc.free{border-color:var(--soft-line);box-shadow:0 0 0 3px rgba(59,111,224,.08)}
+.sh{font-size:22px;font-weight:700}
+.sct{font-size:16px}
+.big{font-size:22px;font-weight:700}
+.sr{font-size:14px;padding:9px 0;border-top:1px solid #eef0f3}
+.sr span:last-child{font-weight:500}
+.sbar button{min-height:38px;font-size:14px}
+.sedit{padding:14px;font-size:14px}
+.sedit .f{font-size:12px}
+.sedit input,.sedit select,.sedit textarea{min-height:38px;font-size:14px}
+.sedit .btns button,.sedit .btns a.btn{min-height:38px;font-size:14px}
+.seg button{min-height:42px;font-size:14px;border:1px solid var(--line);border-radius:8px}
+.seg button.on{background:var(--soft);color:var(--accent);border-color:var(--soft-line)}
+.payopts button{min-height:40px;font-size:14px;border:1px solid var(--line)}
+.payopts button.on.up{background:#fdeeed;border-color:#f3d0ce;color:var(--red)}
+.payopts button.on.fa{background:#e8f6ee;border-color:#c5e8d3;color:var(--green)}
+.payopts button.on.pd{background:var(--soft);border-color:var(--soft-line);color:var(--accent)}
+.payzone{border-top:1px solid var(--line)}
+@media (min-width:1000px){.sh{font-size:24px}.sct{font-size:17px}.big{font-size:24px}.sr{font-size:14px;padding:9px 0}.sc{padding:20px 22px}.sbar button{min-height:38px;font-size:14px}}
+@media (max-width:999px){.sh{font-size:22px}.big{font-size:22px}.sct{font-size:16px}.sr{font-size:14px;padding:9px 0}.sc{padding:16px}.sbar button{min-height:40px;font-size:14px}}
+@media (max-width:759px){
+  input,select,textarea,.sedit input,.sedit select,.sedit textarea{font-size:16px}
+  .head .c-state{background:color-mix(in srgb,currentColor 11%,#fff)}
+  .head .c-panel{border:0}
+  .head .lnk{background:#f7f8fa}
+}
+
+/* alarmi: i butë */
+#alertbox .ap{border:1px solid #f1dfb8;border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.12)}
+#alertbox .ah{background:#fff7e6;color:#8a5a12;font-weight:700;border-bottom:1px solid #f1dfb8}
+#alertbox .ah button{background:#fff;color:#8a5a12;border:1px solid #f1dfb8}
+#alertbox .ab{background:#fff;border:1px solid #f1dfb8;color:#8a5a12;box-shadow:0 6px 16px rgba(17,24,39,.14)}
+#alertbox .ab em{background:var(--red)}
 </style>
 </head>
 <body>
@@ -719,6 +845,15 @@ function groupMsg(it) {
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
   return (it.client || it.name) + ": " + g.map(x => (x.panel || "?") + (x.free ? " (i lirë)" : "") + " " + daysTxt(x)).join(" · ");
 }
+/* ---- LION → MEGA: viti numërohet nga fillimi i Lion; Mega merr vetëm ditët që mungojnë për ta plotësuar vitin ---- */
+function yearPlan(it, panel, from) {
+  if (pkey(panel) === "lion") return null;                                  // baza është gjithmonë Lion
+  const b0 = [it, ...linked(it)].find(y => pkey(y.panel) === "lion" && y.start);
+  const base = b0 || (it.bs ? {start: it.bs, panel: "Lion"} : null);   // bs = kur filloi Lion-i që i kaloi dikujt tjetër
+  if (!base) return null;
+  const end = addMonths(base.start, 12), days = Math.round((parse(end) - parse(from)) / 864e5);
+  return days > 0 ? {base, end, days, time: base.time || cfg.time} : null;
+}
 /* dritare me disa zgjedhje (confirm() ka vetëm 2) */
 function choose(msg, opts) {
   return new Promise(res => {
@@ -732,6 +867,22 @@ function choose(msg, opts) {
     bx.append(p, row); ov.appendChild(bx); document.body.appendChild(ov);
   });
 }
+/* Lion i kalon dikujt tjetër: Mega e mbetur mban mend kur filloi Lion (bs) dhe pyet a ta bëjë vitin nga ajo datë */
+async function orphanMega(it, oth) {
+  if (pkey(it.panel) !== "lion" || !it.start) return;
+  const end = addMonths(it.start, 12), days = Math.round((parse(end) - parse(todayIso())) / 864e5), who = it.client || it.name;
+  for (const o of oth) {
+    if (pkey(o.panel) === "lion") continue;
+    o.bs = it.start;
+    if (days <= 0 || o.date === end) continue;
+    const opts = [["yr", "Po, 1 vit nga Lion · deri më " + fmt(end), ""]];
+    if (o.start) opts.push(["own", "1 vit nga fillimi i " + o.panel + " · deri më " + fmt(addMonths(o.start, 12)), "ghost"]);
+    opts.push(["keep", "Lëre siç është (" + fmt(o.date) + ")", "ghost"]);
+    const ch = await choose("«" + who + "» · " + o.panel + " mbeti pa Lion.\nLion filloi më " + fmt(it.start) + ", pra viti mbaron më " + fmt(end) + " (" + days + " ditë nga sot).\n" + o.panel + " tani skadon më " + fmt(o.date) + ".\n\nA ta bëj abonim 1-vjeçar?", opts);
+    if (ch === "yr") { o.date = end; o.months = 0; o.time = it.time || o.time; delete o.tp; delete o.tpk; }
+    else if (ch === "own") { o.date = addMonths(o.start, 12); o.months = 12; delete o.tp; delete o.tpk; }
+  }
+}
 /* kthen false nëse anulohet; true = vazhdo; "both" = ndrysho emrin edhe te abonimi i lidhur. fromName=true: vjen nga fusha «Emri» */
 async function askGive(it, newName, fromName) {
   const oth = linked(it);
@@ -741,7 +892,7 @@ async function askGive(it, newName, fromName) {
     const q = "🆓 «" + old + "» është abonim i lirë." + (oth.length ? "\n" + groupMsg(it) : "") + "\n\nPo e ndryshon emrin në «" + newName + "».\n\nA don t'ia japësh dikujt tjetër, apo don të ndryshosh emrin?";
     const a = await choose(q, [["give", "👤 Ia jap dikujt tjetër"], ["rename", "✏️ Ndryshoj emrin", "ghost"], [null, "Anulo", "ghost"]]);
     if (!a) return false;
-    if (a === "give") { it.client = ""; it.dual = false; delete it.free; return true; }
+    if (a === "give") { await orphanMega(it, oth); it.client = ""; it.dual = false; delete it.free; return true; }
     if (!oth.length) return true;
     const b = await choose("A don të ndryshoj të dy emrat?\n\n" + [it, ...oth].map(o => (o.panel || "?") + ": «" + o.name + "»").join("\n") + "\n\nEmri i ri: «" + newName + "»",
       [["both", "Po, ndrysho të dy emrat"], ["one", "Jo, vetëm këtë (" + (it.panel || "?") + ")", "ghost"], [null, "Anulo", "ghost"]]);
@@ -750,7 +901,7 @@ async function askGive(it, newName, fromName) {
   }
   if (!oth.length) return true;
   const ok = confirm("Ky abonim është i lidhur me «" + old + "» (" + groupMsg(it) + ").\n\nA don t'ia japësh dikujt tjetër («" + newName + "»)?\n\n" + oth.map(o => o.panel || "?").join(", ") + " mbetet te «" + old + "» pa u ndryshuar.");
-  if (ok) { it.client = ""; it.dual = false; }
+  if (ok) { await orphanMega(it, oth); it.client = ""; it.dual = false; }
   return ok;
 }
 /* ndryshon emrin; both = edhe te abonimet e lidhura; përndryshe lidhja ruhet përmes fushës «Klienti» */
@@ -896,14 +1047,16 @@ function buildEditor(it, box) {
         let ex = items.find(x => x !== it && ckey(x) === ckey(it) && x.panel === pn), made = false;
         if (!ex) {
           const t = todayIso(); it.client = it.client || it.name; it.dual = true; made = true;
-          ex = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: pn, date: addMonths(t, cfg.months), start: t, months: cfg.months, time: cfg.time, note: "", mig: 1};
+          const yp = yearPlan(it, pn, t);
+          ex = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: pn, date: yp ? yp.end : addMonths(t, cfg.months), start: t, months: yp ? 0 : cfg.months, time: yp ? yp.time : cfg.time, note: "", mig: 1};
+          if (yp) made = "yr:" + yp.days;
           items.push(ex);
         }
         if (cApp.checked && it.app) ex.app = it.app;
         if (cApp.checked && it.app2) ex.app2 = it.app2;
         if (cMac.checked && it.mac) ex.mac = it.mac;
         if (cMac.checked && it.mac2) ex.mac2 = it.mac2;
-        done.push(pn + (made ? " (i ri, kontrollo datën)" : ""));
+        done.push(pn + (typeof made === "string" ? " (i ri, " + made.slice(3) + " ditë deri në plotësimin e vitit nga Lion)" : made ? " (i ri, kontrollo datën)" : ""));
       });
       copyMsg = "✓ U kopjua te: " + done.join(", ");
       sv(KEY, items); render();
@@ -926,12 +1079,29 @@ function buildEditor(it, box) {
     const x = document.createElement("button"); x.className = "ghost"; x.textContent = "Hap " + (o.panel || "?") + " · " + fmt(o.date);
     x.onclick = () => { openId = o.id; render(); }; b.appendChild(x);
   });
+  { const yp = yearPlan(it, it.panel, todayIso());
+    if (yp && it.date !== yp.end) {
+      const y = document.createElement("button"); y.className = "ghost"; y.textContent = "📅 Plotëso vitin nga Lion (" + fmt(yp.end) + ")";
+      y.onclick = () => {
+        if (!confirm("Lion filloi më " + fmt(yp.base.start) + ".\nViti plotësohet më " + fmt(yp.end) + ".\n\n«" + it.name + "» te " + it.panel + " do të skadojë më " + fmt(yp.end) + " (tani: " + fmt(it.date) + "). Vazhdo?")) return;
+        it.date = yp.end; it.months = 0; it.time = yp.time; delete it.tp; delete it.tpk; sv(KEY, items); render();
+      };
+      b.appendChild(y);
+    } }
   const free = allPanels().filter(p => !items.some(x => ckey(x) === ckey(it) && x.panel === p));
   if (free.length) {
     const x = document.createElement("button"); x.className = "ghost"; x.textContent = "➕ Shto edhe në " + free[0];
-    x.onclick = () => {
+    x.onclick = async () => {
+      const s = todayIso(), yp = yearPlan(it, free[0], s);
+      let date = addMonths(s, cfg.months), months = cfg.months, time = cfg.time;
+      if (yp) {
+        const ch = await choose("Lion filloi më " + fmt(yp.base.start) + ". Viti plotësohet më " + fmt(yp.end) + ".\n\nTe " + free[0] + " duhen " + yp.days + " ditë (nga sot " + fmt(s) + " deri më " + fmt(yp.end) + ").",
+          [["rest", "Plotëso vitin · " + yp.days + " ditë", ""], ["full", "Abonim i plotë " + cfg.months + " muaj nga sot", "ghost"], [null, "Anulo", "ghost"]]);
+        if (!ch) return;
+        if (ch === "rest") { date = yp.end; months = 0; time = yp.time; }
+      }
       it.client = it.client || it.name; it.dual = true;
-      const s = todayIso(), n = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: free[0], date: addMonths(s, cfg.months), start: s, months: cfg.months, time: cfg.time, note: ""};
+      const n = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: free[0], date, start: s, months, time, note: ""};
       items.push(n); sv(KEY, items); openId = n.id; render();
     };
     b.appendChild(x);
@@ -1190,7 +1360,7 @@ $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(
 function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
 function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || "", tp: x.tp || "", tpk: x.tpk || 0})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || "", tp: x.tp || "", tpk: x.tpk || 0, bs: x.bs || ""})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -1217,6 +1387,7 @@ function adoptRemote(j) {
   items = arr.map(x => {
     const o = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "",
       dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
+    if (x.bs) o.bs = x.bs;
     if (x.free) o.free = true;
     if (x.unpaid) o.unpaid = true;
     if (x.falas) o.falas = true;
@@ -1239,14 +1410,14 @@ function mergeRemote(j) {
   let add = 0, upd = 0;
   arr.forEach(x => {
     const r = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "", dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
-    ["free", "unpaid", "falas", "pnm", "pnt", "cr"].forEach(k => { if (x[k]) r[k] = x[k]; });
+    ["free", "unpaid", "falas", "pnm", "pnt", "cr", "bs"].forEach(k => { if (x[k]) r[k] = x[k]; });
     if (x.tp) { r.tp = x.tp; r.tpk = x.tpk || 0; }
     if (!r.date) return;
     const ex = items.find(y => y.id === r.id) || items.find(y => low(y.panel) === low(r.panel) && (r.username ? low(y.username) === low(r.username) : low(y.name) === low(r.name) && y.date === r.date));
     if (!ex) { if (isGone(r)) return; items.push(r); add++; return; }
     let ch = false;
     ["free", "unpaid", "falas"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = true; ch = true; } });
-    ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
+    ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username", "bs"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
     if (r.dual && !ex.dual) { ex.dual = true; ch = true; }
     if (r.tp && ex.tp && (r.tpk || 0) > (ex.tpk || 0)) { ex.tpk = r.tpk; ch = true; }
     if (r.cr && !ex.cr) { ex.cr = r.cr; ch = true; }
