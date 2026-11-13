@@ -676,6 +676,32 @@ function renderSide() {
   side.append(bar, info);
   if (editEl) buildEditor(it, editEl);
   fillInfo(it);
+  /* ⏰ kujtesa për plotësim: e dukshme, menjëherë poshtë të dhënave */
+  const tz = document.createElement("div"); tz.className = "payzone"; tz.style.marginTop = "20px";
+  const tt = document.createElement("div"); tt.className = "ptitle"; tt.textContent = "⏰ Kujtesa për plotësim";
+  const ti = document.createElement("div"); ti.className = "meta"; ti.style.marginBottom = "10px";
+  const to = document.createElement("div"); to.className = "payopts";
+  const base = it.start || todayIso();
+  if (tpActive(it)) {
+    ti.textContent = "✅ Aktive. Duhet plotësuar deri më " + fmt(it.tp) + " (mungojnë " + tpMiss(it) + " ditë). Do të të kujtoj më " + fmt(addMonths(base, 1 + (it.tpk || 0))) + " dhe pastaj çdo muaj, si dhe kur mbeten ≤7 ditë: në alertin e aplikacionit dhe në Telegram.";
+    const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova 1 muaj"; ba.onclick = () => tpExtend(it);
+    const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
+    to.append(ba, bd);
+  } else {
+    ti.textContent = "Pa kujtesë. Zgjidh deri në sa muaj duhet ta plotësosh këtë abonim; do të të kujtoj çdo muaj sa të mos mbarojë më herët.";
+    [6, 12, 24].forEach(n => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = "⏳ Plotëso në " + n + " muaj";
+      b.onclick = () => {
+        const tp = addMonths(base, n);
+        if (it.date >= tp) { alert("Ky abonim i ka tashmë " + n + " muaj ose më shumë."); return; }
+        if (!it.start) it.start = base;
+        let k = 1; while (addMonths(it.start, k) <= todayIso()) k++;
+        it.tp = tp; it.tpk = k - 1; sv(KEY, items); render();
+      };
+      to.appendChild(b);
+    });
+  }
+  tz.append(tt, ti, to); side.appendChild(tz);
   /* butoni i pagesës: veçmas, në fund, larg butonit të modifikimit */
   const pz = document.createElement("div"); pz.className = "payzone";
   const pt = document.createElement("div"); pt.className = "ptitle"; pt.textContent = "Pagesa";
@@ -687,22 +713,6 @@ function renderSide() {
     po.appendChild(b);
   });
   pz.append(pt, po); side.appendChild(pz);
-  /* plotësimi me muaj (abonim i shkurtër) */
-  const tz = document.createElement("div"); tz.className = "payzone";
-  const tt = document.createElement("div"); tt.className = "ptitle"; tt.textContent = "⏳ Plotësimi në 12 muaj";
-  const to = document.createElement("div"); to.className = "payopts";
-  if (tpActive(it)) {
-    const inf = document.createElement("div"); inf.className = "meta"; inf.style.marginBottom = "8px";
-    inf.textContent = "Mungojnë " + tpMiss(it) + " ditë deri më " + fmt(it.tp) + ". Kujtesa e radhës: " + fmt(addMonths(it.start, 1 + (it.tpk || 0))) + " (ose kur mbeten ≤7 ditë).";
-    const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova 1 muaj"; ba.onclick = () => tpExtend(it);
-    const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
-    to.append(ba, bd); tz.append(tt, inf, to);
-  } else if (it.start) {
-    const ba = document.createElement("button"); ba.type = "button"; ba.className = "ghost"; ba.textContent = "Aktivizo kujtesën (deri në 12 muaj nga fillimi)";
-    ba.onclick = () => { it.tp = addMonths(it.start, 12); it.tpk = 0; if (it.date >= it.tp) { delete it.tp; delete it.tpk; } sv(KEY, items); render(); };
-    to.append(ba); tz.append(tt, to);
-  }
-  if (tz.childNodes.length) side.appendChild(tz);
 }
 function groupMsg(it) {
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
