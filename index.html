@@ -443,8 +443,8 @@ function tpDue(it) {
   if (!tpActive(it) || !it.start || state(it).over) return false;
   return todayIso() >= addMonths(it.start, 1 + (it.tpk || 0)) || daysLeft(it) <= 7;
 }
-function tpExtend(it) {
-  const nd = addMonths(it.date, 1);
+function tpExtend(it, n = 1) {
+  const nd = addMonths(it.date, n);
   if (nd >= it.tp) { it.date = it.tp; delete it.tp; delete it.tpk; }
   else {
     it.date = nd;
@@ -684,12 +684,12 @@ function renderSide() {
   const base = it.start || todayIso();
   if (tpActive(it)) {
     ti.textContent = "✅ Aktive. Duhet plotësuar deri më " + fmt(it.tp) + " (mungojnë " + tpMiss(it) + " ditë). Do të të kujtoj më " + fmt(addMonths(base, 1 + (it.tpk || 0))) + " dhe pastaj çdo muaj, si dhe kur mbeten ≤7 ditë: në alertin e aplikacionit dhe në Telegram.";
-    const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova 1 muaj"; ba.onclick = () => tpExtend(it);
     const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
-    to.append(ba, bd);
+    [1, 3, 6, 12].forEach(n => { const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova " + n + (n === 1 ? " muaj" : " muaj"); ba.onclick = () => tpExtend(it, n); to.appendChild(ba); });
+    to.appendChild(bd);
   } else {
-    ti.textContent = "Pa kujtesë. Zgjidh deri në sa muaj duhet ta plotësosh këtë abonim; do të të kujtoj çdo muaj sa të mos mbarojë më herët.";
-    [6, 12, 24].forEach(n => {
+    ti.textContent = "Pa kujtesë. Zgjidh sa muaj gjithsej duhet të ketë ky abonim (nga fillimi); do të të kujtoj çdo muaj derisa ta plotësosh.";
+    [1, 3, 6, 12].forEach(n => {
       const b = document.createElement("button"); b.type = "button"; b.textContent = "⏳ Plotëso në " + n + " muaj";
       b.onclick = () => {
         const tp = addMonths(base, n);
