@@ -610,6 +610,14 @@ function dualDiff(it) {
   const d = Math.round((parse(m.date) - parse(le)) / 864e5);
   return d ? {d, l, m, le} : null;
 }
+/* ditët që mungojnë: nga tp (i shënuar) ose automatikisht kur abonimi nga fillimi është 300–364 ditë (më pak se një vit) */
+function missDays(it) {
+  if (tpActive(it)) return tpMiss(it);
+  if (!it.start || !it.date || state(it).over) return 0;
+  const len = Math.round((parse(it.date) - parse(it.start)) / 864e5);
+  if (len < 300 || len >= 365) return 0;
+  return Math.max(0, Math.round((parse(addMonths(it.start, 12)) - parse(it.date)) / 864e5));
+}
 const dd = n => (n > 0 ? "+" : "−") + Math.abs(n);
 function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
 function state(it) {
@@ -748,7 +756,7 @@ function refreshHead(el, it) {
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
-  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ mungojnë " + tpMiss(it) + " ditë"; nmEl.appendChild(tb); }
+  if (missDays(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ mungojnë " + missDays(it) + " ditë"; nmEl.appendChild(tb); }
   const df = dualDiff(it);
   if (df) {
     const isL = pkey(it.panel) === "lion", b = document.createElement("span"); b.className = "pay df";
@@ -773,7 +781,7 @@ function refreshHead(el, it) {
   const cdf = el.querySelector(".c-diff"); cdf.textContent = "";
   { const dfx = dualDiff(it);
     if (dfx) { const a = document.createElement("div"); a.textContent = (pkey(it.panel) === "lion" ? "Mega " : "") + dd(dfx.d) + " ditë"; a.style.color = dfx.d > 0 ? "var(--green)" : "var(--red)"; cdf.appendChild(a); }
-    if (tpActive(it)) { const a = document.createElement("div"); a.textContent = "⏳ mungojnë " + tpMiss(it) + " d"; a.style.color = "var(--amber)"; cdf.appendChild(a); } }
+    if (missDays(it)) { const a = document.createElement("div"); a.textContent = "⏳ mungojnë " + missDays(it) + " d"; a.style.color = "var(--amber)"; cdf.appendChild(a); } }
   const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dl + " ditë";
   const st = el.querySelector(".c-state"); st.textContent = fr ? "I LIRË · " + t : t; st.style.color = fr ? "var(--accent)" : s.c;
 }
@@ -794,7 +802,7 @@ function fillInfo(it) {
     c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
     if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
-    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Diferenca", (df0 => !df0 ? "" : (pkey(x.panel) === "lion" ? "Lion (primar) · Mega " : "Mega (mbështetës) · ") + dd(df0.d) + " ditë\nLion mbaron " + fmt(df0.le) + " · Mega mbaron " + fmt(df0.m.date))(dualDiff(x))], ["Mungojnë", tpActive(x) ? tpMiss(x) + " ditë deri më " + fmt(x.tp) : ""], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
+    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Diferenca", (df0 => !df0 ? "" : (pkey(x.panel) === "lion" ? "Lion (primar) · Mega " : "Mega (mbështetës) · ") + dd(df0.d) + " ditë\nLion mbaron " + fmt(df0.le) + " · Mega mbaron " + fmt(df0.m.date))(dualDiff(x))], ["Mungojnë", missDays(x) ? missDays(x) + " ditë deri më " + fmt(tpActive(x) ? x.tp : addMonths(x.start, 12)) : ""], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
     /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
