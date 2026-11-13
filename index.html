@@ -327,9 +327,15 @@ button.paybtn.ok{background:var(--green)}
         </div>
       </div>
 
+      <h2>Të fshirët</h2>
+      <div class="card">
+        <p id="gonetxt" class="meta" style="margin-top:0"></p>
+        <button type="button" id="goneclr" class="ghost">Harro listën (lejo t'i ngarkojë përsëri)</button>
+      </div>
+
       <h2>Telegram (kujtesa për abonimet e shkurtra)</h2>
       <div class="card">
-        <p class="meta" style="margin-top:0">Boti dërgon mesazh kur një abonim i shkurtër (p.sh. 344 ditë) duhet plotësuar: çdo muaj dhe kur mbeten ≤7 ditë, një herë në ditë. Vlerat ruhen vetëm në këtë pajisje. <b>Dërgohet kur aplikacioni është i hapur.</b></p>
+        <p class="meta" style="margin-top:0">Boti dërgon mesazh për abonimet që mbarojnë sot ose nesër, dhe për ato të shkurtrat (p.sh. 344 ditë) që duhen plotësuar (çdo muaj dhe kur mbeten ≤7 ditë). Maksimumi një herë në ditë për abonim. Vlerat ruhen vetëm në këtë pajisje. <b>Dërgohet kur aplikacioni është i hapur.</b></p>
         <div class="grid">
           <label class="f wide">Bot token (nga @BotFather)<input id="tgtoken" type="password" autocapitalize="none" autocomplete="off"></label>
           <label class="f wide">Chat ID (numri yt, nga @userinfobot)<input id="tgchat" autocapitalize="none" autocomplete="off"></label>
@@ -562,13 +568,22 @@ const pkey = p => /lion/i.test(p || "") ? "lion" : /mega/i.test(p || "") ? "mega
 let editEl = null;   // kutia e modifikimit: rri brenda kartelës së abonimit që po modifikohet
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
+/* ---- lista e të fshirëve: nuk ngarkohen më nga Lion/Mega pa të pyetur ---- */
+const goneKey = o => (o.panel || "").toLowerCase() + "|" + ((o.username || "").trim() ? o.username.trim().toLowerCase() : (o.name || "").trim().toLowerCase());
+const gList = k => { const v = ld(k, []); return Array.isArray(v) ? v : []; };
+const gSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const isGone = o => gList("del-v1").includes(goneKey(o));
+const isDeclined = o => gList("decl-v1").includes(goneKey(o));
+function addGone(o) { const k = goneKey(o); const d = gList("del-v1"); if (!d.includes(k)) { d.push(k); gSave("del-v1", d); } gSave("decl-v1", gList("decl-v1").filter(x => x !== k)); }
+function delGone(o) { const k = goneKey(o); gSave("del-v1", gList("del-v1").filter(x => x !== k)); gSave("decl-v1", gList("decl-v1").filter(x => x !== k)); }
+function updGoneTxt() { const e = $("gonetxt"); if (e) e.textContent = "Të fshirë të mbajtur mend: " + gList("del-v1").length + " (nuk ngarkohen nga Lion/Mega pa të pyetur)."; }
 /* fshirje me pyetje konfirmimi */
 function delItem(it) {
   const lk = linked(it).length;
   const msg = "🗑 A je i sigurt që dëshiron ta fshish këtë abonent?\n\n«" + it.name + "»" + (it.username ? "  (@" + it.username + ")" : "") + (it.panel ? "  ·  " + it.panel : "") + (it.date ? "\nSkadon: " + fmt(it.date) : "") +
     (lk ? "\n\nAbonimet e lidhura në panel tjetër NUK fshihen." : "") + "\n\nKy veprim nuk kthehet.";
   if (!confirm(msg)) return;
-  items = items.filter(x => x.id !== it.id);
+  addGone(it); items = items.filter(x => x.id !== it.id);
   if (openId === it.id) { openId = null; editing = false; }
   sv(KEY, items); refreshPanels(); render();
 }
@@ -981,6 +996,7 @@ function ftCycle() {
 setTimeout(ftCycle, 3500); setInterval(ftCycle, 14000);
 let expOpen = false;
 function render() {
+  updGoneTxt();
   rowEls.clear(); fillApps(); renderSide(); updStat(); if (typeof updAlert === "function") updAlert();
   const all = items.map(it => ({it, s: state(it)}));
   const soon = x => !x.s.over && daysLeft(x.it) <= 7;
@@ -1202,7 +1218,7 @@ function mergeRemote(j) {
     if (x.tp) { r.tp = x.tp; r.tpk = x.tpk || 0; }
     if (!r.date) return;
     const ex = items.find(y => y.id === r.id) || items.find(y => low(y.panel) === low(r.panel) && (r.username ? low(y.username) === low(r.username) : low(y.name) === low(r.name) && y.date === r.date));
-    if (!ex) { items.push(r); add++; return; }
+    if (!ex) { if (isGone(r)) return; items.push(r); add++; return; }
     let ch = false;
     ["free", "unpaid", "falas"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = true; ch = true; } });
     ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
@@ -1316,7 +1332,7 @@ async function pullFile(file, manual) {
     let last = ""; try { last = localStorage.getItem("sha-v1-" + file) || ""; } catch (e) {}
     if (!manual && j.sha === last) return false;
     const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const seen = new Set(); const bad = []; let badEx = ""; const hadItems = items.length > 0;
+    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const held = []; const seen = new Set(); const bad = []; let badEx = ""; const hadItems = items.length > 0;
     lines.forEach((ln, i) => {
       let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
       let pkm = pkgMonths(pk);   // kohëzgjatja nga paketa e panelit (muaj)
@@ -1363,10 +1379,17 @@ async function pullFile(file, manual) {
         const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: tm || cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
         /* NEW vetëm për abonentë të rinj të vërtetë (jo gjatë ngarkimit të parë, jo për ata të krijuar para >3 ditësh) */
         if (hadItems && (!s0 || Date.now() - parse(s0).getTime() < 3 * 864e5)) ni.cr = Date.now();
+        if (isGone(ni)) { if (!isDeclined(ni)) held.push(ni); return; }   // fshirë më parë nga ti
         items.push(ni);
         add++;
       }
     });
+    if (held.length) {
+      const lst = held.slice(0, 12).map(x => "• " + x.name + (x.username ? " (@" + x.username + ")" : "") + " · " + (x.panel || "?") + " · " + fmt(x.date)).join("\n");
+      if (confirm("Këta abonentë i ke fshirë më parë, por janë përsëri te " + file + ":\n\n" + lst + (held.length > 12 ? "\n… dhe " + (held.length - 12) + " të tjerë" : "") + "\n\nA t'i vendos përsëri?\n\nOK = po, i vendos\nCancel = jo, mos i vendos (as mos më pyet për ta)")) {
+        held.forEach(x => { delGone(x); items.push(x); add++; });
+      } else { const dd = gList("decl-v1"); held.forEach(x => { const k = goneKey(x); if (!dd.includes(k)) dd.push(k); }); gSave("decl-v1", dd); }
+    }
     try { localStorage.setItem("sha-v1-" + file, j.sha); } catch (e) {}
     if (add || upd || fill) { sv(KEY, items); sv(PKEY, panels); refreshPanels(); render(); }
     if (manual || add || upd || fill) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + fill + " username të plotësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") + " (p.sh. " + badEx + " — s'kuptohet data ose kohëzgjatja)" : "") + ".";
@@ -1441,6 +1464,8 @@ const pullAll = async () => { await pullNow(false); await pullLion(false); };
 pullAll();
 document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAll(); });
 setInterval(() => { if (!document.hidden) pullAll(); }, 120000);
+$("goneclr").onclick = () => { if (confirm("Të harrohen të gjithë të fshirët? Pas kësaj Lion/Mega mund t'i vendosë përsëri.")) { gSave("del-v1", []); gSave("decl-v1", []); updGoneTxt(); } };
+updGoneTxt();
 /* ---------- Telegram ---------- */
 let tg = Object.assign({token: "", chat: ""}, ld("tg-v1", {}));
 $("tgtoken").value = tg.token; $("tgchat").value = tg.chat;
@@ -1457,10 +1482,15 @@ async function tpNotify() {
   if (tgBusy || !tg.token || !tg.chat) return; tgBusy = true;
   try {
     const sent = ld("tgsent-v1", {}), td = todayIso();
+    const send = async (k, msg) => { if (sent[k] === td) return; if (await tgSend(msg)) sent[k] = td; };
+    /* 1) abonime që mbarojnë sot ose nesër (edhe kur ora e skadimit ka kaluar, por dita është sot) */
+    for (const it of items.filter(x => !x.free && daysLeft(x) >= 0 && daysLeft(x) <= 1)) {
+      const dl = daysLeft(it);
+      await send("exp:" + it.id, (dl === 0 ? "🔴 Mbaron SOT" : "🟠 Mbaron nesër") + ": " + it.name + (it.panel ? " (" + it.panel + ")" : "") + (it.username ? " @" + it.username : "") + " · " + fmt(it.date) + (it.time ? " " + it.time : ""));
+    }
+    /* 2) abonime të shkurtra që duhen plotësuar */
     for (const it of items.filter(tpDue)) {
-      const k = String(it.id); if (sent[k] === td) continue;
-      const msg = "⏳ " + it.name + (it.panel ? " (" + it.panel + ")" : "") + ": abonimi skadon më " + fmt(it.date) + " (" + daysTxt(it) + "). Mungojnë " + tpMiss(it) + " ditë për ta plotësuar deri më " + fmt(it.tp) + ". Shto 1 muaj.";
-      if (await tgSend(msg)) sent[k] = td;
+      await send("tp:" + it.id, "⏳ " + it.name + (it.panel ? " (" + it.panel + ")" : "") + ": abonimi skadon më " + fmt(it.date) + " (" + daysTxt(it) + "). Mungojnë " + tpMiss(it) + " ditë për ta plotësuar deri më " + fmt(it.tp) + ". Shto 1 muaj.");
     }
     try { localStorage.setItem("tgsent-v1", JSON.stringify(sent)); } catch (e) {}
   } finally { tgBusy = false; }
