@@ -44,7 +44,7 @@ button:disabled{opacity:.45;cursor:default}
 .item{border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
 .head{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;cursor:pointer;align-items:center}
 .nm{font-weight:700}.sub{color:var(--muted);font-size:13px}
-.c-start,.c-panel,.c-app,.c-mac,.c-diff{display:none}
+.c-start,.c-panel,.c-app,.c-mac{display:none}
 .c-mac{font-family:ui-monospace,Menlo,monospace}
 .c-date{text-align:right;font-size:13px;white-space:nowrap}
 .c-state{grid-column:2;text-align:right;font-weight:700;font-size:13px;white-space:nowrap}
@@ -58,8 +58,7 @@ button:disabled{opacity:.45;cursor:default}
   .head,.lhead{display:grid;grid-template-columns:1.8fr .9fr 1.1fr .8fr 1fr 1fr 1.5fr 46px;gap:0}
   .head>div,.lhead>span{padding:0 8px;border-left:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .head>div:first-child,.lhead>span:first-child{border-left:0;padding-left:0}
-  .sub{display:none}.c-start,.c-panel,.c-app,.c-diff{display:block;font-size:14px}.c-mac{display:none!important}
-  .head>.c-app{white-space:pre-line;line-height:1.3}.head>.c-diff{white-space:normal;line-height:1.3;font-weight:700;font-size:13px}.nm .pay.df{display:none}
+  .sub{display:none}.c-start,.c-panel,.c-app,.c-mac{display:block;font-size:14px}
   .c-date{text-align:left;font-size:14px}.c-state{grid-column:auto;text-align:left}
   .lhead{padding:8px 12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
 }
@@ -73,7 +72,7 @@ button:disabled{opacity:.45;cursor:default}
 .big{margin-left:auto;font-weight:800;font-size:24px}
 .bd{font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:2px 8px}
 .sr{display:flex;justify-content:space-between;gap:12px;font-size:16px;padding:7px 0;border-top:1px dashed var(--line)}
-.sr span:first-child{color:var(--muted)}.sr span:last-child{text-align:right;word-break:break-all;font-weight:600;white-space:pre-line}
+.sr span:first-child{color:var(--muted)}.sr span:last-child{text-align:right;word-break:break-all;font-weight:600}
 .sedit{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
 @media (min-width:1000px){
   .lay.has{display:grid;grid-template-columns:430px minmax(0,1fr);gap:16px;align-items:start}
@@ -348,6 +347,36 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);
 #alertbox .ah button{background:#fff;color:#8a5a12;border:1px solid #f1dfb8}
 #alertbox .ab{background:#fff;border:1px solid #f1dfb8;color:#8a5a12;box-shadow:0 6px 16px rgba(17,24,39,.14)}
 #alertbox .ab em{background:var(--red)}
+/* historiku */
+.hday{padding:12px 14px 4px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg)}
+.hrow{display:flex;gap:12px;padding:10px 14px;border-top:1px solid var(--line);border-left:4px solid var(--pc,transparent);background:var(--card)}
+.htm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:42px}
+.hrow .meta{overflow-wrap:anywhere;margin-top:2px}
+/* telefon: menuja poshtë, kartela të ndara, filtrat me rrëshqitje */
+@media (max-width:759px){
+  html{scroll-padding-top:12px}
+  .top{position:fixed;top:auto;bottom:0;left:0;right:0;border-bottom:0;border-top:1px solid var(--line);padding:0 0 env(safe-area-inset-bottom,0px);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:saturate(1.6) blur(16px);-webkit-backdrop-filter:saturate(1.6) blur(16px)}
+  .top-in{justify-content:space-around;gap:0;padding:6px;overflow:visible}
+  .brand{display:none}
+  .top a{flex:1;text-align:center;padding:8px 2px;border-radius:12px;font-size:11px;font-weight:700;line-height:1.3}
+  .top a.on{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+  main{padding:14px 12px calc(86px + env(safe-area-inset-bottom,0px))}
+  h1{font-size:28px;letter-spacing:-.02em;margin:4px 2px 14px}
+  #alertbox{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .list{background:transparent;border:0;border-radius:0;overflow:visible}
+  #hlist.list{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+  .item:last-child{border-bottom:1px solid var(--line)}
+  .item[data-p]{border-left:1px solid var(--line);box-shadow:inset 5px 0 0 var(--pc),0 1px 2px rgba(16,24,40,.05)}
+  .head{padding:14px 14px 14px 18px}
+  .head .c-state{background:color-mix(in srgb,currentColor 12%,transparent)}
+  .head .lnk{background:var(--bg)}
+  .card{border-radius:18px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:0 -12px 10px;padding:0 12px 4px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;border-radius:999px;padding:9px 16px;white-space:nowrap}
+  input,select,textarea,button,a.btn{border-radius:14px}
+}
 </style>
 </head>
 <body>
@@ -370,6 +399,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);
   <a href="#lista" data-v="lista">Lista</a>
   <a href="#krijo" data-v="krijo">➕ Krijo</a>
   <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
+  <a href="#historiku" data-v="historiku">🕘 Historiku</a>
 </div></header>
 
 <main>
@@ -398,7 +428,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);
     </select>
   </div>
   <div class="list">
-    <div class="lhead"><span>Emri</span><span>Fillimi</span><span>Skadon</span><span>Paneli</span><span>Mbetet</span><span>Diferenca</span><span>Aplikacioni / MAC</span><span></span></div>
+    <div class="lhead"><span>Emri</span><span>Fillimi</span><span>Skadon</span><span>Paneli</span><span>Mbetet</span><span>Aplikacioni</span><span>MAC</span><span></span></div>
     <div id="list"></div>
   </div>
   <p id="cnt" class="meta" style="text-align:center"></p>
@@ -439,6 +469,12 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);
     <button id="imp" style="margin-top:8px">Importo</button>
     <p id="impmsg" class="meta"></p>
   </div>
+</section>
+
+<section id="v-historiku" class="view">
+  <h1>Historiku i modifikimeve</h1>
+  <div class="tools" style="grid-template-columns:1fr auto"><input id="hq" placeholder="Kërko emër ose ndryshim" autocapitalize="none"><button class="del" id="hclr" type="button">Pastro</button></div>
+  <div id="hlist" class="list"></div>
 </section>
 
 <section id="v-konfigurimi" class="view">
@@ -537,10 +573,46 @@ const $ = id => document.getElementById(id);
 const p2 = n => String(n).padStart(2, "0");
 function ld(k, def) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : def; } catch (e) { return def; } }
 let ver = 0;
-function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) { ver++; try { localStorage.setItem("dirty-v1", "1"); } catch (e) {} schedSync(); } }
+function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) { histLog(); ver++; try { localStorage.setItem("dirty-v1", "1"); } catch (e) {} schedSync(); } }
 function schedSync() { if (typeof sync === "undefined" || !sync.auto || !sync.token) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 3000); }
 
 let items = ld(KEY, []);
+/* ---------- historiku i modifikimeve (ruhet në këtë pajisje, max 800 ndryshime) ---------- */
+const HK = "hist-v1", HF = {name: "Emri", client: "Klienti", username: "Username", panel: "Paneli", start: "Fillimi", date: "Skadimi", time: "Ora", months: "Muaj", free: "I lirë", unpaid: "Pa paguar", falas: "Falas", app: "Aplikacioni", mac: "MAC", note: "Shënim", tp: "Kujtesa deri", bs: "Lion filloi"};
+const hsnapOf = a => { const m = {}; (a || []).forEach(x => { const o = {}; Object.keys(HF).forEach(k => { o[k] = x[k] == null || x[k] === false || x[k] === 0 ? "" : String(x[k]); }); m[x.id] = o; }); return m; };
+let hsnap = hsnapOf(items);
+function hv(k, v) { if (!v) return "—"; if (["start", "date", "tp", "bs"].includes(k)) return fmt(v); if (["free", "unpaid", "falas"].includes(k)) return "Po"; return v; }
+function histLog() {
+  try {
+    const now = hsnapOf(items), out = [], t = Date.now();
+    for (const id in now) {
+      const n = now[id], o = hsnap[id];
+      if (!o) { out.push({t, n: n.name, p: n.panel, a: "➕ U shtua · skadon " + hv("date", n.date)}); continue; }
+      const ch = Object.keys(HF).filter(k => n[k] !== o[k]).map(k => HF[k] + ": " + hv(k, o[k]) + " → " + hv(k, n[k]));
+      if (ch.length) out.push({t, n: n.name, p: n.panel, a: ch.join(" · ")});
+    }
+    for (const id in hsnap) if (!now[id]) out.push({t, n: hsnap[id].name, p: hsnap[id].panel, a: "🗑 U fshi · skadonte më " + hv("date", hsnap[id].date)});
+    hsnap = now;
+    if (out.length) localStorage.setItem(HK, JSON.stringify(ld(HK, []).concat(out).slice(-800)));
+  } catch (e) {}
+}
+function renderHist() {
+  const box = $("hlist"), q = ($("hq").value || "").trim().toLowerCase();
+  const h = ld(HK, []).slice().reverse().filter(e => !q || (e.n + " " + e.p + " " + e.a).toLowerCase().includes(q));
+  box.textContent = "";
+  if (!h.length) { const d = document.createElement("div"); d.className = "empty"; d.textContent = "Ende pa modifikime."; box.appendChild(d); return; }
+  let day = "";
+  h.slice(0, 300).forEach(e => {
+    const dt = new Date(e.t), dk = iso(dt);
+    if (dk !== day) { day = dk; const g = document.createElement("div"); g.className = "hday"; g.textContent = fmt(dk); box.appendChild(g); }
+    const r = document.createElement("div"); r.className = "hrow"; if (pkey(e.p)) r.dataset.p = pkey(e.p);
+    const tm = document.createElement("span"); tm.className = "htm"; tm.textContent = p2(dt.getHours()) + ":" + p2(dt.getMinutes());
+    const b = document.createElement("div"), nm = document.createElement("b"), ac = document.createElement("div");
+    nm.textContent = e.n + (e.p ? " · " + e.p : ""); ac.className = "meta"; ac.textContent = e.a; b.append(nm, ac); r.append(tm, b); box.appendChild(r);
+  });
+}
+$("hq").addEventListener("input", renderHist);
+$("hclr").onclick = () => { if (confirm("Të pastrohet historiku?")) { try { localStorage.removeItem(HK); } catch (e) {} renderHist(); } };
 items.forEach(x => { if (x.dual === undefined) x.dual = !!x.client; }); // lidhja tani bëhet me tick; ata me Klient të shkruar mbeten të lidhur
 let panels = ld(PKEY, ["Mega", "Lion"]);
 let cfg = Object.assign({time: "14:00", months: 1}, ld(CKEY, {}));
@@ -600,25 +672,6 @@ function mdLeft(it) {
   const d = Math.round((parse(it.date) - parse(addMonths(td, m))) / 864e5);
   return (m ? m + " muaj" : "") + (m && d ? " e " : "") + (d || !m ? d + " ditë" : "");
 }
-/* ---- Lion (primar) vs Mega (mbështetës): diferenca në ditë = Mega − Lion ---- */
-function dualDiff(it) {
-  if (!it.dual) return null;
-  const g = [it, ...linked(it)];
-  const l = g.find(x => pkey(x.panel) === "lion"), m = g.find(x => pkey(x.panel) === "mega");
-  if (!l || !m || (state(l).over && state(m).over)) return null;   // njëri mund të ketë mbaruar: Lion mbaroi → Mega mbetet plus; Mega mbaroi para Lion → minus
-  const le = tpActive(l) ? l.tp : l.date;   // mbarimi i Lion = fundi i vitit nga fillimi i tij (nëse ka ditë që mungojnë, deri te tp)
-  const d = Math.round((parse(m.date) - parse(le)) / 864e5);
-  return d ? {d, l, m, le} : null;
-}
-/* ditët që mungojnë: nga tp (i shënuar) ose automatikisht kur abonimi nga fillimi është 300–364 ditë (më pak se një vit) */
-function missDays(it) {
-  if (tpActive(it)) return tpMiss(it);
-  if (!it.start || !it.date || state(it).over) return 0;
-  const len = Math.round((parse(it.date) - parse(it.start)) / 864e5);
-  if (len < 300 || len >= 365) return 0;
-  return Math.max(0, Math.round((parse(addMonths(it.start, 12)) - parse(it.date)) / 864e5));
-}
-const dd = n => (n > 0 ? "+" : "−") + Math.abs(n);
 function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
 function state(it) {
   if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
@@ -651,7 +704,7 @@ function fillSelect(sel, opts, keep) {
 }
 
 /* ---------- pamjet (menuja lart) ---------- */
-const VIEWS = ["lista", "krijo", "konfigurimi"];
+const VIEWS = ["lista", "krijo", "konfigurimi", "historiku"];
 function showView() {
   let v = location.hash.slice(1);
   if (!VIEWS.includes(v)) v = "lista";
@@ -659,6 +712,7 @@ function showView() {
     $("v-" + x).classList.toggle("on", x === v);
     document.querySelector('.top a[data-v="' + x + '"]').classList.toggle("on", x === v);
   });
+  if (v === "historiku") renderHist();
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", showView);
@@ -756,15 +810,7 @@ function refreshHead(el, it) {
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
-  if (missDays(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ mungojnë " + missDays(it) + " ditë"; nmEl.appendChild(tb); }
-  const df = dualDiff(it);
-  if (df) {
-    const isL = pkey(it.panel) === "lion", b = document.createElement("span"); b.className = "pay df";
-    b.style.setProperty("--c", df.d > 0 ? "var(--green)" : "var(--red)");
-    b.textContent = (isL ? "Mega " : "") + dd(df.d) + " ditë" + (isL ? "" : " vs Lion");
-    b.title = "Lion (primar) mbaron " + fmt(df.le) + " · Mega (mbështetës) mbaron " + fmt(df.m.date);
-    nmEl.appendChild(b);
-  }
+  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ +" + tpMiss(it) + " d"; nmEl.appendChild(tb); }
   const cd = el.querySelector(".c-del"); cd.textContent = "";
   const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
   rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
@@ -776,12 +822,8 @@ function refreshHead(el, it) {
   el.querySelector(".c-start").textContent = it.start ? fmt(it.start) : "—";
   el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
   el.querySelector(".c-panel").textContent = it.panel || "";
-  el.querySelector(".c-app").textContent = [apps(it), macs(it)].filter(Boolean).join("\n");
+  el.querySelector(".c-app").textContent = apps(it);
   el.querySelector(".c-mac").textContent = macs(it);
-  const cdf = el.querySelector(".c-diff"); cdf.textContent = "";
-  { const dfx = dualDiff(it);
-    if (dfx) { const a = document.createElement("div"); a.textContent = (pkey(it.panel) === "lion" ? "Mega " : "") + dd(dfx.d) + " ditë"; a.style.color = dfx.d > 0 ? "var(--green)" : "var(--red)"; cdf.appendChild(a); }
-    if (missDays(it)) { const a = document.createElement("div"); a.textContent = "⏳ mungojnë " + missDays(it) + " d"; a.style.color = "var(--amber)"; cdf.appendChild(a); } }
   const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dl + " ditë";
   const st = el.querySelector(".c-state"); st.textContent = fr ? "I LIRË · " + t : t; st.style.color = fr ? "var(--accent)" : s.c;
 }
@@ -802,7 +844,7 @@ function fillInfo(it) {
     c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
     if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
     const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
-    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Diferenca", (df0 => !df0 ? "" : (pkey(x.panel) === "lion" ? "Lion (primar) · Mega " : "Mega (mbështetës) · ") + dd(df0.d) + " ditë\nLion mbaron " + fmt(df0.le) + " · Mega mbaron " + fmt(df0.m.date))(dualDiff(x))], ["Mungojnë", missDays(x) ? missDays(x) + " ditë deri më " + fmt(tpActive(x) ? x.tp : addMonths(x.start, 12)) : ""], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
+    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
     /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
@@ -1293,7 +1335,7 @@ function render() {
     if (s.over && grp && !headDone) { box.appendChild(expHead()); headDone = true; }
     const el = document.createElement("div");
     el.className = "item" + (openId === it.id ? " open" : "");
-    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-diff"></div><div class="c-app"></div><div class="c-mac"></div><div class="c-del"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
+    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="c-del"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
     refreshHead(el, it);
     el.querySelector(".head").onclick = () => { openId = openId === it.id ? null : it.id; editing = false; render(); if (openId && innerWidth < 1000) scrollTo(0, 0); };
     rowEls.set(it.id, el);
