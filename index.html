@@ -441,6 +441,7 @@ const tpActive = it => !!it.tp && it.date < it.tp;
 const tpMiss = it => Math.max(0, Math.round((parse(it.tp) - parse(it.date)) / 864e5));
 function tpDue(it) {
   if (!tpActive(it) || !it.start || state(it).over) return false;
+  if (tpMiss(it) <= 31) return daysLeft(it) <= 7;   // mungojnë pak ditë: një kujtesë para skadimit, pa kujtesa mujore
   return todayIso() >= addMonths(it.start, 1 + (it.tpk || 0)) || daysLeft(it) <= 7;
 }
 function tpExtend(it, n = 1) {
@@ -683,7 +684,7 @@ function renderSide() {
   const to = document.createElement("div"); to.className = "payopts";
   const base = it.start || todayIso();
   if (tpActive(it)) {
-    ti.textContent = "✅ Aktive. Duhet plotësuar deri më " + fmt(it.tp) + " (mungojnë " + tpMiss(it) + " ditë). Do të të kujtoj më " + fmt(addMonths(base, 1 + (it.tpk || 0))) + " dhe pastaj çdo muaj, si dhe kur mbeten ≤7 ditë: në alertin e aplikacionit dhe në Telegram.";
+    ti.textContent = "✅ Aktive. Duhet plotësuar deri më " + fmt(it.tp) + " (mungojnë " + tpMiss(it) + " ditë). " + (tpMiss(it) <= 31 ? "Do të të kujtoj kur të mbeten ≤7 ditë deri në skadim" : "Do të të kujtoj më " + fmt(addMonths(base, 1 + (it.tpk || 0))) + " dhe pastaj çdo muaj, si dhe kur mbeten ≤7 ditë") + ": në alertin e aplikacionit dhe në Telegram.";
     const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
     [1, 3, 6, 12].forEach(n => { const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova " + n + (n === 1 ? " muaj" : " muaj"); ba.onclick = () => tpExtend(it, n); to.appendChild(ba); });
     to.appendChild(bd);
@@ -790,6 +791,20 @@ function buildEditor(it, box) {
     if (!it.start && it.months > 0) { it.start = todayIso(); startI.value = it.start; }
     if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; }
   };
+  /* kohëzgjatja e zgjedhur (p.sh. 1 vit) është më e gjatë se ç'ka vërtet abonimi (p.sh. i lirë me 335 ditë): kujtesë automatike për plotësim */
+  const autoTp = () => {
+    const m = it.months, td = todayIso();
+    if (!(m > 0) || !it.date || it.date <= td) return false;
+    const full = addMonths(td, m);
+    if (it.date >= full) return false;
+    if (it.tp === full) return true;
+    const miss = Math.round((parse(full) - parse(it.date)) / 864e5);
+    if (!confirm("⏳ Abonimi skadon më " + fmt(it.date) + ", por " + durLabel(m) + " nga sot është " + fmt(full) + ".\nMungojnë " + miss + " ditë.\n\nA ta vendos kujtesën që t'i shtosh para skadimit?\n\n(Anulo = vetëm ndryshon kohëzgjatjen, pa kujtesë)")) return false;
+    if (!it.start) it.start = td;
+    it.tp = full; let k = 1; while (addMonths(it.start, k) <= td) k++; it.tpk = k - 1;
+    setTimeout(() => { sv(KEY, items); render(); }, 0);
+    return true;
+  };
   /* kur ndryshon kohëzgjatja: skadimi mbetet ai që është, fillimi llogaritet prapa nga skadimi */
   const recalcStart = () => {
     if (it.date && it.months > 0) { it.start = addMonths(it.date, -it.months); startI.value = it.start; }
@@ -850,7 +865,7 @@ function buildEditor(it, box) {
   mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
   startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
   const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
-  monI = mk("Kohëzgjatja (kliko: 1 vit / 6 muaj / 3 muaj / 1 muaj)", sel(mopts, it.months || 0, v => { it.months = +v; recalcStart(); }));
+  monI = mk("Kohëzgjatja (kliko: 1 vit / 6 muaj / 3 muaj / 1 muaj)", sel(mopts, it.months || 0, v => { it.months = +v; if (!autoTp()) recalcStart(); }));
   segify(monI);
   const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
   ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
