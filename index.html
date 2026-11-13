@@ -215,6 +215,7 @@ button.paybtn.ok{background:var(--green)}
 .freechip .ct{position:absolute;left:10px;right:10px;top:0;bottom:0;display:flex;align-items:center;justify-content:center;white-space:pre-line;overflow:visible;text-overflow:clip;line-height:1.2;font-size:15px;font-weight:800;text-align:center;transform:translateY(160%);opacity:0}
 .chips{flex-wrap:wrap}
 .chip.freechip{flex:1 1 100%;order:-1;min-height:64px;font-size:16px}
+.expgrp{padding:12px;background:var(--bg);color:var(--muted);font-weight:700;cursor:pointer;border-top:1px solid var(--line);border-bottom:1px solid var(--line);user-select:none}
 .head>.c-state,.head>.c-date{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .freechip.tick .cl{transform:translateY(-160%);opacity:0}
 .freechip .ct.run{animation:ftrun 2.6s ease both}
@@ -433,7 +434,7 @@ function addDays(s, n) { const [y, m, d] = s.split("-").map(Number); return iso(
 const tpActive = it => !!it.tp && it.date < it.tp;
 const tpMiss = it => Math.max(0, Math.round((parse(it.tp) - parse(it.date)) / 864e5));
 function tpDue(it) {
-  if (!tpActive(it) || !it.start) return false;
+  if (!tpActive(it) || !it.start || state(it).over) return false;
   return todayIso() >= addMonths(it.start, 1 + (it.tpk || 0)) || daysLeft(it) <= 7;
 }
 function tpExtend(it) {
@@ -978,6 +979,7 @@ function ftCycle() {
   step(0);
 }
 setTimeout(ftCycle, 3500); setInterval(ftCycle, 14000);
+let expOpen = false;
 function render() {
   rowEls.clear(); fillApps(); renderSide(); updStat(); if (typeof updAlert === "function") updAlert();
   const all = items.map(it => ({it, s: state(it)}));
@@ -1002,11 +1004,22 @@ function render() {
     if (!!a.s.over !== !!b.s.over) return a.s.over ? 1 : -1;
     return a.s.over ? endDT(b.it) - endDT(a.it) : endDT(a.it) - endDT(b.it);
   });
+  /* të mbaruarit gjithmonë në fund, në grupin «Expired» (të mbyllur; hapen me klik ose kur kërkon) */
+  const grp = flt !== "over";
+  const act = grp ? rows.filter(x => !x.s.over) : rows, exp = grp ? rows.filter(x => x.s.over) : [];
+  const expShow = exp.length && (expOpen || !!q || (openId && exp.some(x => x.it.id === openId)));
+  rows.length = 0; rows.push(...act, ...(expShow ? exp : []));
   const shown = rows.slice(0, lim);
   const box = $("list"); box.innerHTML = "";
   $("cnt").textContent = rows.length ? "Shfaqen " + shown.length + " nga " + rows.length : "";
   $("more").style.display = rows.length > lim ? "block" : "none";
-  if (!rows.length) { box.innerHTML = '<div class="empty">Asnjë abonent.</div>'; return; }
+  const expHead = () => {
+    const h = document.createElement("div"); h.className = "expgrp";
+    h.textContent = (expShow ? "▾ " : "▸ ") + "📦 Expired · " + exp.length + (expShow ? "" : " (kliko për t'i parë)");
+    h.onclick = () => { expOpen = !expOpen; render(); };
+    return h;
+  };
+  if (!rows.length && !exp.length) { box.innerHTML = '<div class="empty">Asnjë abonent.</div>'; return; }
   if (q) {
     const seen = new Set();
     shown.forEach(({it}) => {
@@ -1019,7 +1032,9 @@ function render() {
       box.appendChild(nb);
     });
   }
-  shown.forEach(({it}) => {
+  let headDone = false;
+  shown.forEach(({it, s}) => {
+    if (s.over && grp && !headDone) { box.appendChild(expHead()); headDone = true; }
     const el = document.createElement("div");
     el.className = "item" + (openId === it.id ? " open" : "");
     el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="c-del"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
@@ -1028,6 +1043,7 @@ function render() {
     rowEls.set(it.id, el);
     box.appendChild(el);
   });
+  if (exp.length && grp && !headDone) box.appendChild(expHead());
 }
 const resetLim = () => { lim = 50; render(); };
 $("q").oninput = resetLim; $("pf").onchange = resetLim; $("sb").onchange = resetLim;
