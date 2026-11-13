@@ -68,7 +68,7 @@ button:disabled{opacity:.45;cursor:default}
 .sh{font-size:26px;font-weight:800;line-height:1.15}
 .sc{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px;background:var(--card);cursor:pointer}
 .sc.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
-.sct{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:19px}
+.sct{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;font-size:19px}
 .big{margin-left:auto;font-weight:800;font-size:24px}
 .bd{font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:2px 8px}
 .sr{display:flex;justify-content:space-between;gap:12px;font-size:16px;padding:7px 0;border-top:1px dashed var(--line)}
@@ -212,7 +212,10 @@ button.paybtn.ok{background:var(--green)}
   50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 22px color-mix(in srgb,var(--blue) 55%,transparent),0 0 0 7px color-mix(in srgb,var(--blue) 0%,transparent)}
 }
 .freechip .cl,.freechip .ct{display:block;position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .45s ease,opacity .45s ease}
-.freechip .ct{position:absolute;left:8px;right:8px;top:50%;margin-top:-.7em;line-height:1.4;text-align:center;transform:translateY(160%);opacity:0}
+.freechip .ct{position:absolute;left:10px;right:10px;top:0;bottom:0;display:flex;align-items:center;justify-content:center;white-space:pre-line;overflow:visible;text-overflow:clip;line-height:1.2;font-size:15px;font-weight:800;text-align:center;transform:translateY(160%);opacity:0}
+.chips{flex-wrap:wrap}
+.chip.freechip{flex:1 1 100%;order:-1;min-height:64px;font-size:16px}
+.head>.c-state,.head>.c-date{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .freechip.tick .cl{transform:translateY(-160%);opacity:0}
 .freechip .ct.run{animation:ftrun 2.6s ease both}
 @keyframes ftrun{0%{transform:translateY(160%);opacity:0}16%,84%{transform:translateY(0);opacity:1}100%{transform:translateY(-160%);opacity:0}}
@@ -292,6 +295,8 @@ button.paybtn.ok{background:var(--green)}
       <label class="f">MAC 2 (aparati i dytë, opsionale)<input id="mc2" placeholder="AA:BB:CC:DD:EE:FF" autocapitalize="none"></label>
       <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="du" type="checkbox" style="width:22px;height:22px">🔗 Është edhe në panel tjetër (lidhet me abonimin tjetër me të njëjtin emër)</label>
       <div id="dualopts" class="wide" style="display:none;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)"></div>
+      <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="tp" type="checkbox" style="width:22px;height:22px">⏳ Abonim i shkurtër (e plotësoj me muaj më vonë, me kujtesë në alert + Telegram)</label>
+      <label class="f" id="tpdw" style="display:none">Ditë gjithsej (p.sh. 344)<input id="tpd" type="number" min="1" max="364" value="344"></label>
       <label class="f wide">Shënim (opsionale)<input id="t"></label>
     </div>
     <div id="prev" class="meta" style="margin:10px 0"></div>
@@ -319,6 +324,17 @@ button.paybtn.ok{background:var(--green)}
           <input id="newp" placeholder="Panel i ri">
           <button id="addp">Shto</button>
         </div>
+      </div>
+
+      <h2>Telegram (kujtesa për abonimet e shkurtra)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Boti dërgon mesazh kur një abonim i shkurtër (p.sh. 344 ditë) duhet plotësuar: çdo muaj dhe kur mbeten ≤7 ditë, një herë në ditë. Vlerat ruhen vetëm në këtë pajisje. <b>Dërgohet kur aplikacioni është i hapur.</b></p>
+        <div class="grid">
+          <label class="f wide">Bot token (nga @BotFather)<input id="tgtoken" type="password" autocapitalize="none" autocomplete="off"></label>
+          <label class="f wide">Chat ID (numri yt, nga @userinfobot)<input id="tgchat" autocapitalize="none" autocomplete="off"></label>
+        </div>
+        <button type="button" id="tgtest" style="margin-top:8px">Dërgo mesazh prove</button>
+        <p id="tgmsg" class="meta"></p>
       </div>
 
       <h2>Vlerat e paracaktuara</h2>
@@ -412,6 +428,24 @@ function addMonths(s, mo) {
   const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
   return iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, last)));
 }
+function addDays(s, n) { const [y, m, d] = s.split("-").map(Number); return iso(new Date(y, m - 1, d + n)); }
+/* ---- abonim i shkurtër (p.sh. 344 ditë) që plotësohet me muaj deri në 12 muaj ---- */
+const tpActive = it => !!it.tp && it.date < it.tp;
+const tpMiss = it => Math.max(0, Math.round((parse(it.tp) - parse(it.date)) / 864e5));
+function tpDue(it) {
+  if (!tpActive(it) || !it.start) return false;
+  return todayIso() >= addMonths(it.start, 1 + (it.tpk || 0)) || daysLeft(it) <= 7;
+}
+function tpExtend(it) {
+  const nd = addMonths(it.date, 1);
+  if (nd >= it.tp) { it.date = it.tp; delete it.tp; delete it.tpk; }
+  else {
+    it.date = nd;
+    let k = 1; while (addMonths(it.start, k) <= todayIso()) k++;
+    it.tpk = k - 1;
+  }
+  sv(KEY, items); render();
+}
 function normDate(s) {
   s = (s || "").trim();
   if (/^\d{10}(\d{3})?$/.test(s)) { const d = new Date(s.length === 13 ? +s : s * 1000); return isNaN(d) ? "" : iso(d); }   // timestamp
@@ -425,19 +459,13 @@ function daysLeft(it) {
   const n = new Date(), td = new Date(n.getFullYear(), n.getMonth(), n.getDate());
   return Math.round((parse(it.date) - td) / 864e5);
 }
-function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
-/* ditët e mbetura: parazgjedhje «45 ditë»; pas klikimit mbi to → «1 muaj dhe 15 ditë» */
-const longDur = new Set();
-let autoLong = false;   // slide automatik: çdo minutë të gjitha ditët kalojnë për pak sekonda në «muaj dhe ditë»
-function dayStr(it, dl) {
-  if (!(autoLong || longDur.has(it.id)) || dl <= 0) return dl + " ditë";
-  const t0 = todayIso(), end = parse(it.date);
-  let k = 0;
-  while (parse(addMonths(t0, k + 1)) <= end) k++;
-  const d = Math.round((end - parse(addMonths(t0, k))) / 864e5);
-  if (!k) return d + " ditë";
-  return k + " muaj" + (d ? " dhe " + d + " ditë" : "");
+function mdLeft(it) {
+  if (state(it).over) return "";
+  const td = todayIso(); let m = 0; while (m < 600 && addMonths(td, m + 1) <= it.date) m++;
+  const d = Math.round((parse(it.date) - parse(addMonths(td, m))) / 864e5);
+  return (m ? m + " muaj" : "") + (m && d ? " e " : "") + (d || !m ? d + " ditë" : "");
 }
+function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
 function state(it) {
   if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
   const l = daysLeft(it);
@@ -565,6 +593,7 @@ function refreshHead(el, it) {
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
+  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ +" + tpMiss(it) + " d"; nmEl.appendChild(tb); }
   const cd = el.querySelector(".c-del"); cd.textContent = "";
   const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
   rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
@@ -578,12 +607,8 @@ function refreshHead(el, it) {
   el.querySelector(".c-panel").textContent = it.panel || "";
   el.querySelector(".c-app").textContent = apps(it);
   el.querySelector(".c-mac").textContent = macs(it);
-  const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dayStr(it, dl);
+  const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dl + " ditë";
   const st = el.querySelector(".c-state"); st.textContent = fr ? "I LIRË · " + t : t; st.style.color = fr ? "var(--accent)" : s.c;
-  if (!s.over && dl > 0) {
-    st.style.cursor = "pointer"; st.title = "Kliko për muaj + ditë";
-    st.onclick = e => { e.stopPropagation(); longDur.has(it.id) ? longDur.delete(it.id) : longDur.add(it.id); refreshHead(el, it); };
-  } else { st.onclick = null; st.style.cursor = ""; st.title = ""; }
 }
 function fillApps() { $("appsdl").innerHTML = [...new Set(items.map(x => x.app).filter(Boolean))].map(x => '<option value="' + esc(x) + '">').join(""); }
 const rowEls = new Map();
@@ -601,15 +626,10 @@ function fillInfo(it) {
     const ed = editing && x === it && editEl;
     c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
     if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
-    const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dayStr(x, dl);
-    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
+    const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
+    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
     c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
       rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
-    const bg = c.querySelector(".big");
-    if (bg && !s.over && dl > 0) {
-      bg.style.cursor = "pointer"; bg.title = "Kliko për muaj + ditë";
-      bg.onclick = e => { e.stopPropagation(); longDur.has(x.id) ? longDur.delete(x.id) : longDur.add(x.id); fillInfo(it); };
-    }
     /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
     c.onclick = () => { if (x.id !== openId) { openId = x.id; editing = false; } else if (!editing) editing = true; else return; render(); };
     if (x.pnm && nz(x.pnm) && x.pnm !== x.name) {
@@ -651,6 +671,22 @@ function renderSide() {
     po.appendChild(b);
   });
   pz.append(pt, po); side.appendChild(pz);
+  /* plotësimi me muaj (abonim i shkurtër) */
+  const tz = document.createElement("div"); tz.className = "payzone";
+  const tt = document.createElement("div"); tt.className = "ptitle"; tt.textContent = "⏳ Plotësimi në 12 muaj";
+  const to = document.createElement("div"); to.className = "payopts";
+  if (tpActive(it)) {
+    const inf = document.createElement("div"); inf.className = "meta"; inf.style.marginBottom = "8px";
+    inf.textContent = "Mungojnë " + tpMiss(it) + " ditë deri më " + fmt(it.tp) + ". Kujtesa e radhës: " + fmt(addMonths(it.start, 1 + (it.tpk || 0))) + " (ose kur mbeten ≤7 ditë).";
+    const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova 1 muaj"; ba.onclick = () => tpExtend(it);
+    const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
+    to.append(ba, bd); tz.append(tt, inf, to);
+  } else if (it.start) {
+    const ba = document.createElement("button"); ba.type = "button"; ba.className = "ghost"; ba.textContent = "Aktivizo kujtesën (deri në 12 muaj nga fillimi)";
+    ba.onclick = () => { it.tp = addMonths(it.start, 12); it.tpk = 0; if (it.date >= it.tp) { delete it.tp; delete it.tpk; } sv(KEY, items); render(); };
+    to.append(ba); tz.append(tt, to);
+  }
+  if (tz.childNodes.length) side.appendChild(tz);
 }
 function groupMsg(it) {
   const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
@@ -952,7 +988,7 @@ function render() {
   const frl = all.filter(x => x.it.free && !x.s.over);
   $("ch-free").querySelector(".cl").textContent = "Të lira " + frl.length;
   $("ch-free").classList.toggle("has", frl.length > 0);
-  ftList = frl.map(x => x.it).sort((a, b) => endDT(a) - endDT(b)).map(it => it.name + " " + daysTxt(it));
+  ftList = frl.map(x => x.it).sort((a, b) => endDT(a) - endDT(b)).map(it => it.name + "\n" + daysTxt(it));
   $("ch-unpaid").textContent = "❗ Pa paguar " + all.filter(x => x.it.unpaid).length;
   $("ch-falas").textContent = "🎁 Falas " + all.filter(x => x.it.falas).length;
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
@@ -1001,13 +1037,17 @@ document.querySelectorAll(".chip").forEach(c => c.onclick = () => { flt = c.data
 let alertGone = false, alertMin = false;
 function updAlert() {
   const bx = $("alertbox"); if (!bx) return;
-  const list = items.filter(it => !it.free && !state(it).over && daysLeft(it) <= 7).sort((a, b) => endDT(a) - endDT(b));
+  const soon = items.filter(it => !it.free && !state(it).over && daysLeft(it) <= 7);
+  const tps = items.filter(tpDue);
+  const list = [...new Set([...soon, ...tps])].sort((a, b) => endDT(a) - endDT(b));
   if (!list.length || alertGone) { bx.style.display = "none"; return; }
   bx.style.display = "block"; bx.classList.toggle("min", alertMin);
-  $("alertttl").textContent = "⏰ Skadojnë brenda 7 ditëve (" + list.length + ")";
+  $("alertttl").textContent = (tps.length ? "⏰ Kujtesa" : "⏰ Skadojnë brenda 7 ditëve") + " (" + list.length + ")";
   $("alertcnt").textContent = list.length;
-  $("alertlist").innerHTML = list.map(it => '<div class="ar"><span><b>' + esc(it.name) + '</b>' + (it.panel ? ' <span class="meta">· ' + esc(it.panel) + '</span>' : '') + '</span><i style="color:' + state(it).c + '">' + esc(state(it).t) + '</i></div>').join("");
+  $("alertlist").innerHTML = list.map(it => '<div class="ar" style="flex-wrap:wrap"><span><b>' + esc(it.name) + '</b>' + (it.panel ? ' <span class="meta">· ' + esc(it.panel) + '</span>' : '') + '</span><i style="color:' + state(it).c + '">' + esc(state(it).t) + '</i>' +
+    (tpDue(it) ? '<div style="width:100%;display:flex;gap:8px;align-items:center;justify-content:space-between"><span class="meta">⏳ Mungojnë ' + tpMiss(it) + ' ditë deri më ' + esc(fmt(it.tp)) + '</span><button type="button" class="tpadd" data-id="' + esc(it.id) + '" style="min-height:0;padding:5px 10px;font-size:13px">➕ Shtova 1 muaj</button></div>' : '') + '</div>').join("");
 }
+$("alertlist").onclick = e => { const bt = e.target.closest(".tpadd"); if (!bt) return; const it = items.find(x => String(x.id) === bt.dataset.id); if (it) tpExtend(it); };
 $("alertmin").onclick = () => { alertMin = true; updAlert(); };
 $("alertbub").onclick = () => { alertMin = false; updAlert(); };
 $("alertx").onclick = () => { alertGone = true; updAlert(); };
@@ -1017,17 +1057,28 @@ $("more").onclick = () => { lim += 50; render(); };
 /* ---------- krijo ---------- */
 function updPrev() {
   const s = $("d").value, mo = +$("m").value;
+  $("tpdw").style.display = $("tp").checked ? "" : "none";
+  if ($("tp").checked) {
+    const n = +$("tpd").value || 344;
+    $("prev").textContent = s ? "Skadon më " + fmt(addDays(s, n)) + " " + ($("h").value || "") + " (" + n + " ditë). Për 12 muaj mungojnë " + Math.max(0, Math.round((parse(addMonths(s, 12)) - parse(addDays(s, n))) / 864e5)) + " ditë; do të të kujtoj çdo muaj." : "";
+    return;
+  }
   $("prev").textContent = s && mo ? "Skadon më " + fmt(addMonths(s, mo)) + " " + ($("h").value || "") : "";
 }
-["d", "m", "h"].forEach(i => $(i).addEventListener("input", updPrev));
+["d", "m", "h", "tp", "tpd"].forEach(i => $(i).addEventListener("input", updPrev));
+$("tp").addEventListener("change", updPrev);
 $("du").addEventListener("change", renderDualOpts); $("p").addEventListener("change", renderDualOpts);
 $("add").onclick = () => {
   const n = $("n").value.trim(), u = $("u").value.trim(), p = $("p").value;
   const s = $("d").value, mo = +$("m").value;
-  if (!n || !s || !mo) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
+  const tpOn = $("tp").checked, tpDays = Math.min(364, Math.max(1, +$("tpd").value || 344));
+  if (!n || !s || (!mo && !tpOn)) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
   const du = $("du").checked;
   const ap = $("ap").value.trim(), mc = $("mc").value.trim().toUpperCase(), mc2 = $("mc2").value.trim().toUpperCase(), ap2 = $("ap2").value.trim(), tm = $("h").value || cfg.time;
-  items.push({id: Date.now() + Math.random(), cr: Date.now(), name: n, username: u, app: ap, mac: mc, mac2: mc2, app2: ap2, mig: 1, dual: du, panel: p, date: addMonths(s, mo), start: s, months: mo, time: tm, note: $("t").value.trim()});
+  const endS = tpOn ? addDays(s, tpDays) : addMonths(s, mo);
+  const nit = {id: Date.now() + Math.random(), cr: Date.now(), name: n, username: u, app: ap, mac: mc, mac2: mc2, app2: ap2, mig: 1, dual: du, panel: p, date: endS, start: s, months: tpOn ? 0 : mo, time: tm, note: $("t").value.trim()};
+  if (tpOn) { nit.tp = addMonths(s, 12); nit.tpk = 0; }
+  items.push(nit);
   if (du) items.forEach(x => { if (ckey(x) === n.toLowerCase()) x.dual = true; });
   const alsoIn = [];
   if (du) {
@@ -1043,7 +1094,7 @@ $("add").onclick = () => {
     });
   }
   sv(KEY, items);
-  $("du").checked = false;
+  $("du").checked = false; $("tp").checked = false; updPrev();
   ["n", "u", "t", "ap", "mc", "mc2", "ap2"].forEach(i => $(i).value = "");
   $("addmsg").textContent = "✓ U shtua: " + n + (alsoIn.length ? " (dhe te " + alsoIn.join(", ") + ")" : "");
   refreshPanels(); render(); $("n").focus();
@@ -1082,7 +1133,7 @@ $("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(
 function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
 function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
 function remindersJson() {
-  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || ""})), null, 2);
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || "", tp: x.tp || "", tpk: x.tpk || 0})), null, 2);
 }
 $("exp").onclick = () => {
   const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
@@ -1115,6 +1166,7 @@ function adoptRemote(j) {
     if (x.pnm) o.pnm = x.pnm;
     if (x.cr) o.cr = x.cr;
     if (x.pnt) o.pnt = x.pnt;
+    if (x.tp) { o.tp = x.tp; o.tpk = x.tpk || 0; }
     return o;
   });
   try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); localStorage.removeItem("sha-v1-lion.txt"); localStorage.removeItem("sha-v1-mega.txt"); } catch (e) {}
@@ -1131,6 +1183,7 @@ function mergeRemote(j) {
   arr.forEach(x => {
     const r = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "", dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
     ["free", "unpaid", "falas", "pnm", "pnt", "cr"].forEach(k => { if (x[k]) r[k] = x[k]; });
+    if (x.tp) { r.tp = x.tp; r.tpk = x.tpk || 0; }
     if (!r.date) return;
     const ex = items.find(y => y.id === r.id) || items.find(y => low(y.panel) === low(r.panel) && (r.username ? low(y.username) === low(r.username) : low(y.name) === low(r.name) && y.date === r.date));
     if (!ex) { items.push(r); add++; return; }
@@ -1138,6 +1191,7 @@ function mergeRemote(j) {
     ["free", "unpaid", "falas"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = true; ch = true; } });
     ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
     if (r.dual && !ex.dual) { ex.dual = true; ch = true; }
+    if (r.tp && ex.tp && (r.tpk || 0) > (ex.tpk || 0)) { ex.tpk = r.tpk; ch = true; }
     if (r.cr && !ex.cr) { ex.cr = r.cr; ch = true; }
     if (r.date > ex.date) { ex.date = r.date; ex.start = r.start || ex.start; ex.months = r.months || ex.months; ex.time = r.time || ex.time; ch = true; }
     if (ch) upd++;
@@ -1371,6 +1425,32 @@ const pullAll = async () => { await pullNow(false); await pullLion(false); };
 pullAll();
 document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAll(); });
 setInterval(() => { if (!document.hidden) pullAll(); }, 120000);
+/* ---------- Telegram ---------- */
+let tg = Object.assign({token: "", chat: ""}, ld("tg-v1", {}));
+$("tgtoken").value = tg.token; $("tgchat").value = tg.chat;
+function readTg() { tg.token = $("tgtoken").value.trim(); tg.chat = $("tgchat").value.trim(); try { localStorage.setItem("tg-v1", JSON.stringify(tg)); } catch (e) {} }
+["tgtoken", "tgchat"].forEach(id => { $(id).oninput = readTg; $(id).onchange = readTg; });
+async function tgSend(text) {
+  if (!tg.token || !tg.chat) return false;
+  try { const r = await fetch("https://api.telegram.org/bot" + tg.token + "/sendMessage", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({chat_id: tg.chat, text})}); return r.ok; }
+  catch (e) { return false; }
+}
+$("tgtest").onclick = async () => { readTg(); $("tgmsg").textContent = "Po dërgohet…"; $("tgmsg").textContent = (await tgSend("✅ Promemori: Telegram u lidh me sukses.")) ? "✓ U dërgua. Shiko Telegramin." : "✗ S'u dërgua. Kontrollo token-in, Chat ID dhe që i ke shkruar /start botit."; };
+let tgBusy = false;
+async function tpNotify() {
+  if (tgBusy || !tg.token || !tg.chat) return; tgBusy = true;
+  try {
+    const sent = ld("tgsent-v1", {}), td = todayIso();
+    for (const it of items.filter(tpDue)) {
+      const k = String(it.id); if (sent[k] === td) continue;
+      const msg = "⏳ " + it.name + (it.panel ? " (" + it.panel + ")" : "") + ": abonimi skadon më " + fmt(it.date) + " (" + daysTxt(it) + "). Mungojnë " + tpMiss(it) + " ditë për ta plotësuar deri më " + fmt(it.tp) + ". Shto 1 muaj.";
+      if (await tgSend(msg)) sent[k] = td;
+    }
+    try { localStorage.setItem("tgsent-v1", JSON.stringify(sent)); } catch (e) {}
+  } finally { tgBusy = false; }
+}
+tpNotify(); setInterval(tpNotify, 600000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) tpNotify(); });
 /* ---------- rifreskim kur ndryshon dita (numërimi "pas X ditësh") ---------- */
 let lastDay = todayIso();
 function dayCheck() {
@@ -1381,25 +1461,6 @@ function dayCheck() {
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
 setInterval(dayCheck, 60000);
-/* slide: çdo SLIDE_EVERY ditët rrëshqasin te «X muaj dhe Y ditë», qëndrojnë SLIDE_HOLD dhe rrëshqasin mbrapsht */
-const SLIDE_EVERY = 60000, SLIDE_HOLD = 6000;
-function daySlide(done) {
-  const els = [...document.querySelectorAll(".head .c-state, .sc .big")].filter(e => e.offsetParent);
-  const out = [{transform: "translateY(0)", opacity: 1}, {transform: "translateY(-80%)", opacity: 0}];
-  const inn = [{transform: "translateY(80%)", opacity: 0}, {transform: "translateY(0)", opacity: 1}];
-  const a = els.map(e => e.animate(out, {duration: 260, easing: "ease-in", fill: "forwards"}));
-  setTimeout(() => {
-    done(); render();
-    document.querySelectorAll(".head .c-state, .sc .big").forEach(e => e.animate(inn, {duration: 260, easing: "ease-out"}));
-  }, els.length ? 270 : 0);
-}
-function dayCycle() {
-  if (document.hidden || editing) return;
-  const a = document.activeElement; if (a && a.closest && a.closest(".edit,.sedit")) return;
-  daySlide(() => { autoLong = true; });
-  setTimeout(() => { if (editing) { autoLong = false; render(); return; } daySlide(() => { autoLong = false; }); }, SLIDE_HOLD + 600);
-}
-setInterval(dayCycle, SLIDE_EVERY);
 let newSig = items.filter(isNew).length;
 setInterval(() => {
   const n = items.filter(isNew).length; if (n === newSig) return;
