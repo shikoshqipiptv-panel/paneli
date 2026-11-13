@@ -867,6 +867,12 @@ function choose(msg, opts) {
     bx.append(p, row); ov.appendChild(bx); document.body.appendChild(ov);
   });
 }
+/* muaj + ditë ndërmjet dy datave, p.sh. «10 muaj e 5 ditë» */
+function mdBetween(a, b) {
+  let m = 0; while (m < 600 && addMonths(a, m + 1) <= b) m++;
+  const d = Math.round((parse(b) - parse(addMonths(a, m))) / 864e5);
+  return (m ? m + " muaj" : "") + (m && d ? " e " : "") + (d || !m ? d + " ditë" : "");
+}
 /* Lion i kalon dikujt tjetër: Mega e mbetur mban mend kur filloi Lion (bs) dhe pyet a ta bëjë vitin nga ajo datë */
 async function orphanMega(it, oth) {
   if (pkey(it.panel) !== "lion" || !it.start) return;
@@ -874,13 +880,13 @@ async function orphanMega(it, oth) {
   for (const o of oth) {
     if (pkey(o.panel) === "lion") continue;
     o.bs = it.start;
-    if (days <= 0 || o.date === end) continue;
-    const opts = [["yr", "Po, 1 vit nga Lion · deri më " + fmt(end), ""]];
-    if (o.start) opts.push(["own", "1 vit nga fillimi i " + o.panel + " · deri më " + fmt(addMonths(o.start, 12)), "ghost"]);
-    opts.push(["keep", "Lëre siç është (" + fmt(o.date) + ")", "ghost"]);
-    const ch = await choose("«" + who + "» · " + o.panel + " mbeti pa Lion.\nLion filloi më " + fmt(it.start) + ", pra viti mbaron më " + fmt(end) + " (" + days + " ditë nga sot).\n" + o.panel + " tani skadon më " + fmt(o.date) + ".\n\nA ta bëj abonim 1-vjeçar?", opts);
-    if (ch === "yr") { o.date = end; o.months = 0; o.time = it.time || o.time; delete o.tp; delete o.tpk; }
-    else if (ch === "own") { o.date = addMonths(o.start, 12); o.months = 12; delete o.tp; delete o.tpk; }
+    const miss = Math.round((parse(end) - parse(o.date)) / 864e5);
+    if (days <= 0 || miss <= 0) continue;
+    const td = todayIso(), act = o.date > td ? "Mega është aktive edhe " + mdBetween(td, o.date) + " (deri " + fmt(o.date) + "), pastaj" : o.panel + " skadoi më " + fmt(o.date) + ", dhe";
+    const opts = [["rem", "⏰ Lëre siç është dhe më kujto sa mungojnë", ""], ["yr", "Plotëso vitin tani · skadon " + fmt(end) + " (+" + miss + " ditë)", "ghost"], ["keep", "Pa kujtesë", "ghost"]];
+    const ch = await choose("«" + who + "» · " + o.panel + " mbeti pa Lion.\nLion filloi më " + fmt(it.start) + ", pra viti mbaron më " + fmt(end) + ".\n" + act + " i mungojnë " + mdBetween(o.date, end) + " (" + miss + " ditë) për ta plotësuar vitin.\n\nA ta vendos kujtesën?", opts);
+    if (ch === "rem") { if (!o.start) o.start = td; o.tp = end; let k = 1; while (addMonths(o.start, k) <= td) k++; o.tpk = k - 1; }
+    else if (ch === "yr") { o.date = end; o.months = 0; o.time = it.time || o.time; delete o.tp; delete o.tpk; }
   }
 }
 /* kthen false nëse anulohet; true = vazhdo; "both" = ndrysho emrin edhe te abonimi i lidhur. fromName=true: vjen nga fusha «Emri» */
@@ -913,6 +919,13 @@ function applyRename(it, nv, both) {
 }
 function buildEditor(it, box) {
   box.innerHTML = "";
+  if (!linked(it).length && it.bs && pkey(it.panel) !== "lion") {
+    const e = addMonths(it.bs, 12), m = Math.round((parse(e) - parse(it.date)) / 864e5);
+    const nb = document.createElement("div");
+    nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+    nb.textContent = "ℹ️ Lion filloi më " + fmt(it.bs) + " (iu dha dikujt tjetër) · viti mbaron më " + fmt(e) + (m > 0 ? " · mungojnë " + mdBetween(it.date, e) + " pas " + fmt(it.date) : " · viti është i plotë");
+    box.appendChild(nb);
+  }
   if (linked(it).length) {
     const nb = document.createElement("div");
     nb.className = "nbin"; nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
@@ -1081,7 +1094,7 @@ function buildEditor(it, box) {
   });
   { const yp = yearPlan(it, it.panel, todayIso());
     if (yp && it.date !== yp.end) {
-      const y = document.createElement("button"); y.className = "ghost"; y.textContent = "📅 Plotëso vitin nga Lion (" + fmt(yp.end) + ")";
+      const y = document.createElement("button"); y.className = "ghost"; y.textContent = "📅 Plotëso vitin nga Lion (" + fmt(yp.end) + ")" + (d => d > 0 ? " · +" + d + " ditë" : "")(Math.round((parse(yp.end) - parse(it.date)) / 864e5));
       y.onclick = () => {
         if (!confirm("Lion filloi më " + fmt(yp.base.start) + ".\nViti plotësohet më " + fmt(yp.end) + ".\n\n«" + it.name + "» te " + it.panel + " do të skadojë më " + fmt(yp.end) + " (tani: " + fmt(it.date) + "). Vazhdo?")) return;
         it.date = yp.end; it.months = 0; it.time = yp.time; delete it.tp; delete it.tpk; sv(KEY, items); render();
