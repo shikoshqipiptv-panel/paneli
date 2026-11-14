@@ -821,7 +821,11 @@ function refreshHead(el, it) {
   if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
   if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
   if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
-  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ +" + tpMiss(it) + " d"; nmEl.appendChild(tb); }
+  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ −" + tpMiss(it) + " d"; nmEl.appendChild(tb); }
+  { /* ditë shtesë: abonim jo-Lion që mbaron pas mbarimit të Lion (viti nga fillimi i Lion) */
+    const lb = pkey(it.panel) !== "lion" && !state(it).over ? ([it, ...linked(it)].find(y => pkey(y.panel) === "lion" && y.start) || (it.bs ? {start: it.bs} : null)) : null;
+    if (lb) { const ex = Math.round((parse(it.date) - parse(addMonths(lb.start, 12))) / 864e5);
+      if (ex > 0) { const xb = document.createElement("span"); xb.className = "pay"; xb.style.setProperty("--c", "var(--green)"); xb.textContent = "＋" + ex + " d"; xb.title = "Ditë mbi mbarimin e Lion"; nmEl.appendChild(xb); } } }
   const cd = el.querySelector(".c-del"); cd.textContent = "";
   const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
   rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
