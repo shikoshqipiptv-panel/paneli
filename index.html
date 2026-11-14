@@ -1124,6 +1124,13 @@ function buildEditor(it, box) {
   dateI = mk("Data e skadimit", inp("date", it.date, v => { if (v) it.date = v; else dateI.value = it.date; }));
   mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
   startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
+  /* abonim ekzistues pa fillim: fillimi = skadimi minus kohëzgjatja (skadimi nuk ndryshon, pa pyetje e pa kujtesë) */
+  { const fb = document.createElement("div"); fb.style.cssText = "display:flex;flex-wrap:wrap;gap:6px";
+    [[1, "1 muaj"], [3, "3 muaj"], [6, "6 muaj"], [12, "1 vit"]].forEach(([m, l]) => {
+      const x = document.createElement("button"); x.type = "button"; x.className = "ghost"; x.style.cssText = "min-height:0;padding:6px 10px;font-size:14px"; x.textContent = l;
+      x.onclick = () => { if (!it.date) return; it.months = m; it.start = addMonths(it.date, -m); startI.value = it.start; save(); sv(KEY, items); render(); };
+      fb.appendChild(x); });
+    const w = document.createElement("div"); w.className = "f wide"; const sp = document.createElement("span"); sp.textContent = "Fillimi nga skadimi: skadimi minus… (vetëm vendos fillimin)"; w.append(sp, fb); g.appendChild(w); }
   const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
   monI = mk("Kohëzgjatja (kliko: 1 vit / 6 muaj / 3 muaj / 1 muaj)", sel(mopts, it.months || 0, v => { it.months = +v; if (!autoTp()) recalcStart(); }));
   segify(monI);
@@ -1679,6 +1686,8 @@ async function pullFile(file, manual) {
         const nm = (!nz(ex.name) || nz(ex.name) === un0 || (ex.pnm !== undefined && ex.name === ex.pnm)) ? n : ex.name;
         const nn2 = (!nz(ex.note) || (ex.pnt !== undefined && ex.note === ex.pnt)) ? (nt || "") : ex.note;
         const nw = {name: nm, pnm: n, pnt: nt || "", date, time: tm || ex.time || cfg.time, start: s0 || ex.start || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || ex.months || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        /* abonimet me Mega (Mega vetë ose të lidhura): datat e ndryshuara nga ti nuk mbishkruhen nga paneli; merret vetëm kur paneli jep skadim më të vonë (rinovim i vërtetë). Pa Mega: paneli vendos si më parë */
+        if ((pkey(ex.panel) === "mega" || ex.dual) && ex.date && date <= ex.date) { nw.date = ex.date; nw.time = ex.time || nw.time; nw.start = ex.start || nw.start; nw.months = ex.months || nw.months; }
         if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
       } else {
         const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: tm || cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
