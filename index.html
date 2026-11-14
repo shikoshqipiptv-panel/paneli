@@ -273,4 +273,1631 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--soft-line);
 .chip.freechip{background:#f1f7ff;color:var(--accent);border:1px solid var(--soft-line);box-shadow:none;text-shadow:none;
   -webkit-backdrop-filter:none;backdrop-filter:none;animation:none!important;min-height:44px;font-size:14px}
 .chip.freechip::after{display:none}
-  
+.chip.freechip.on{background:var(--soft);box-shadow:0 0 0 2px var(--soft-line)}
+.freechip .ct{font-size:14px;font-weight:600}
+.tools{gap:8px}
+
+/* lista */
+.list{overflow:hidden}
+.lhead{background:#fff;color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;font-size:12px;padding:12px 14px!important}
+.head{padding:12px 14px}
+.head>div,.lhead>span{border-left:0!important}
+.item{border-bottom:1px solid #eef0f3}
+.head:hover{background:#fafbfc}
+.nm{font-weight:600}
+.c-mac,.c-app{color:var(--muted);font-size:12px!important}
+.expgrp{background:#f1f5fd;color:#374151;font-weight:600;font-size:13px;padding:10px 14px;border-color:var(--line)}
+
+/* statusi si pill i lehtë */
+.head>.c-state{justify-self:start;align-self:center;display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;
+  background:color-mix(in srgb,currentColor 11%,#fff)}
+.item.open{background:#f6f9ff}
+.item.unpaid,.item.falas,.item.isnew{border-left:3px solid color-mix(in srgb,var(--t) 45%,#fff);background:color-mix(in srgb,var(--t) 3%,#fff)}
+.item.open.isfree,.item.isfree{background:#f6f9ff}
+.item.isfree .nt{color:var(--accent)}
+
+/* panel Lion / Mega: pastel, jo dominues */
+.item[data-p]{border-left:3px solid color-mix(in srgb,var(--pc) 50%,#fff)}
+.item[data-p] .head .c-panel{padding:2px 10px;font-size:11px;font-weight:600;letter-spacing:.02em;
+  background:color-mix(in srgb,var(--pc) 13%,#fff);color:color-mix(in srgb,var(--pc) 85%,#000)}
+.sc[data-p]{border-left:4px solid color-mix(in srgb,var(--pc) 50%,#fff)}
+.sc[data-p] .sct b{background:color-mix(in srgb,var(--pc) 13%,#fff);color:color-mix(in srgb,var(--pc) 85%,#000)!important;
+  padding:2px 12px;font-size:.8em;letter-spacing:.02em;font-weight:600}
+.sc[data-p].cur{background:#fff}
+
+/* badge-t */
+.pay,.bd{border-radius:999px;border:0;padding:2px 9px;font-size:11px;font-weight:600;
+  color:var(--c,var(--accent));background:color-mix(in srgb,var(--c,var(--accent)) 11%,#fff)}
+.bd[style]{background:color-mix(in srgb,var(--red) 11%,#fff)}
+.pay.fal{--c:var(--green)}
+
+/* abonimi i hapur: madhësi të buta */
+.sc,.sc.solo{padding:18px 20px;min-height:0}
+.sc.cur{border-color:var(--soft-line);box-shadow:0 0 0 3px rgba(59,111,224,.08)}
+.sc.free{border-color:var(--soft-line);box-shadow:0 0 0 3px rgba(59,111,224,.08)}
+.sh{font-size:22px;font-weight:700}
+.sct{font-size:16px}
+.big{font-size:22px;font-weight:700}
+.sr{font-size:14px;padding:9px 0;border-top:1px solid #eef0f3}
+.sr span:last-child{font-weight:500}
+.sbar button{min-height:38px;font-size:14px}
+.sedit{padding:14px;font-size:14px}
+.sedit .f{font-size:12px}
+.sedit input,.sedit select,.sedit textarea{min-height:38px;font-size:14px}
+.sedit .btns button,.sedit .btns a.btn{min-height:38px;font-size:14px}
+.seg button{min-height:42px;font-size:14px;border:1px solid var(--line);border-radius:8px}
+.seg button.on{background:var(--soft);color:var(--accent);border-color:var(--soft-line)}
+.payopts button{min-height:40px;font-size:14px;border:1px solid var(--line)}
+.payopts button.on.up{background:#fdeeed;border-color:#f3d0ce;color:var(--red)}
+.payopts button.on.fa{background:#e8f6ee;border-color:#c5e8d3;color:var(--green)}
+.payopts button.on.pd{background:var(--soft);border-color:var(--soft-line);color:var(--accent)}
+.payzone{border-top:1px solid var(--line)}
+@media (min-width:1000px){.sh{font-size:24px}.sct{font-size:17px}.big{font-size:24px}.sr{font-size:14px;padding:9px 0}.sc{padding:20px 22px}.sbar button{min-height:38px;font-size:14px}}
+@media (max-width:999px){.sh{font-size:22px}.big{font-size:22px}.sct{font-size:16px}.sr{font-size:14px;padding:9px 0}.sc{padding:16px}.sbar button{min-height:40px;font-size:14px}}
+@media (max-width:759px){
+  input,select,textarea,.sedit input,.sedit select,.sedit textarea{font-size:16px}
+  .head .c-state{background:color-mix(in srgb,currentColor 11%,#fff)}
+  .head .c-panel{border:0}
+  .head .lnk{background:#f7f8fa}
+}
+
+/* alarmi: i butë */
+#alertbox .ap{border:1px solid #f1dfb8;border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.12)}
+#alertbox .ah{background:#fff7e6;color:#8a5a12;font-weight:700;border-bottom:1px solid #f1dfb8}
+#alertbox .ah button{background:#fff;color:#8a5a12;border:1px solid #f1dfb8}
+#alertbox .ab{background:#fff;border:1px solid #f1dfb8;color:#8a5a12;box-shadow:0 6px 16px rgba(17,24,39,.14)}
+#alertbox .ab em{background:var(--red)}
+/* historiku */
+.hday{padding:12px 14px 4px;font-size:12px;font-weight:700;color:var(--muted);background:var(--bg)}
+.hrow{display:flex;gap:12px;padding:10px 14px;border-top:1px solid var(--line);border-left:4px solid var(--pc,transparent);background:var(--card)}
+.htm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:42px}
+.hrow .meta{overflow-wrap:anywhere;margin-top:2px}
+/* telefon: menuja poshtë, kartela të ndara, filtrat me rrëshqitje */
+@media (max-width:759px){
+  html{scroll-padding-top:12px}
+  .top{position:fixed;top:auto;bottom:0;left:0;right:0;border-bottom:0;border-top:1px solid var(--line);padding:0 0 env(safe-area-inset-bottom,0px);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:saturate(1.6) blur(16px);-webkit-backdrop-filter:saturate(1.6) blur(16px)}
+  .top-in{justify-content:space-around;gap:0;padding:6px;overflow:visible}
+  .brand{display:none}
+  .top a{flex:1;text-align:center;padding:8px 2px;border-radius:12px;font-size:11px;font-weight:700;line-height:1.3}
+  .top a.on{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+  main{padding:14px 12px calc(86px + env(safe-area-inset-bottom,0px))}
+  h1{font-size:28px;letter-spacing:-.02em;margin:4px 2px 14px}
+  #alertbox{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .list{background:transparent;border:0;border-radius:0;overflow:visible}
+  #hlist.list{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+  .item:last-child{border-bottom:1px solid var(--line)}
+  .item[data-p]{border-left:1px solid var(--line);box-shadow:inset 5px 0 0 var(--pc),0 1px 2px rgba(16,24,40,.05)}
+  .head{padding:14px 14px 14px 18px}
+  .head .c-state{background:color-mix(in srgb,currentColor 12%,transparent)}
+  .head .lnk{background:var(--bg)}
+  .card{border-radius:18px}
+  .chips{flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .chip{flex:1 1 30%;border-radius:999px;padding:10px 8px}
+  .chip.freechip{flex:1 1 100%;min-height:92px;border-radius:22px;padding:12px 16px}
+  .chip.freechip .cl{font-size:21px;font-weight:800}
+  .chip.freechip .ct{font-size:19px;font-weight:700;line-height:1.25}
+  input,select,textarea,button,a.btn{border-radius:14px}
+}
+</style>
+</head>
+<body>
+<div id="pinbox" style="display:none;position:fixed;inset:0;z-index:99;background:var(--bg,#f4f6fb);align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;text-align:center">
+  <div style="font-size:42px">🔒</div>
+  <div style="font-weight:700;font-size:18px">Shkruaj PIN-in</div>
+  <input id="pininp" type="password" inputmode="numeric" autocomplete="off" maxlength="64" style="max-width:220px;text-align:center;font-size:24px;letter-spacing:6px">
+  <button id="pinbtn" type="button" style="display:none">Hap</button>
+  <div id="pinmsg" style="min-height:20px;color:#dc2626;font-size:14px"></div>
+</div>
+
+<div id="alertbox"><div class="ap">
+  <div class="ah"><span id="alertttl"></span><button type="button" id="alertmin" title="Minimizo">—</button><button type="button" id="alertx" title="Mbyll">✕</button></div>
+  <div class="al" id="alertlist"></div>
+  <div class="af"><button type="button" id="alertgo">Shfaqi në listë</button></div>
+</div><button type="button" class="ab" id="alertbub" title="Hap alarmin">⏰<em id="alertcnt"></em></button></div>
+
+<header class="top"><div class="top-in">
+  <span class="brand">📋 Promemori <small style="font-weight:400;opacity:.6">v11</small></span>
+  <a href="#lista" data-v="lista">Lista</a>
+  <a href="#krijo" data-v="krijo">➕ Krijo</a>
+  <a href="#konfigurimi" data-v="konfigurimi">⚙️ Konfigurimi</a>
+  <a href="#historiku" data-v="historiku">🕘 Historiku</a>
+</div></header>
+
+<main>
+<datalist id="clientsdl"></datalist>
+<datalist id="appsdl"></datalist>
+
+<section id="v-lista" class="view">
+  <h1>Lista e abonimeve</h1>
+  <div id="stat" class="card"></div>
+  <div class="lay" id="lay"><aside id="side"></aside><div class="lmain">
+  <div class="chips">
+    <button class="chip" data-f="all" id="ch-all"></button>
+    <button class="chip" data-f="soon" id="ch-soon"></button>
+    <button class="chip" data-f="over" id="ch-over"></button>
+    <button class="chip freechip" data-f="free" id="ch-free"><span class="cl"></span><span class="ct"></span></button>
+    <button class="chip" data-f="unpaid" id="ch-unpaid"></button>
+    <button class="chip" data-f="falas" id="ch-falas"></button>
+  </div>
+  <div class="tools">
+    <input id="q" placeholder="Kërko emër, username ose shënim" autocapitalize="none">
+    <select id="pf"></select>
+    <select id="sb">
+      <option value="date">Rendit: data</option>
+      <option value="name">Rendit: emri</option>
+      <option value="panel">Rendit: paneli</option>
+    </select>
+  </div>
+  <div class="list">
+    <div class="lhead"><span>Emri</span><span>Fillimi</span><span>Skadon</span><span>Paneli</span><span>Mbetet</span><span>Aplikacioni</span><span>MAC</span><span></span></div>
+    <div id="list"></div>
+  </div>
+  <p id="cnt" class="meta" style="text-align:center"></p>
+  <button id="more" class="ghost" style="display:none;width:100%">Shfaq edhe 50</button>
+  <p class="meta" style="text-align:center">Prek një rresht për të parë abonimet e klientit. Për t'i ndryshuar të dhënat, shtyp «Modifiko të dhënat». Ndryshimet ruhen automatikisht.</p>
+  </div></div>
+</section>
+
+<section id="v-krijo" class="view">
+  <h1>Krijo abonim</h1>
+  <div class="card">
+    <div class="grid">
+      <label class="f">Emri<input id="n" placeholder="p.sh. Paolo"></label>
+      <label class="f">Username<input id="u" autocapitalize="none"></label>
+      <label class="f">Paneli<select id="p"></select></label>
+      <label class="f">Data e krijimit (fillimit)<input id="d" type="date"></label>
+      <label class="f">Kohëzgjatja<select id="m"></select></label>
+      <label class="f">Ora e skadimit<input id="h" type="time"></label>
+      <label class="f">Aplikacioni<input id="ap" list="appsdl" placeholder="p.sh. SmartOne" autocapitalize="none"></label>
+      <label class="f">MAC adresa<input id="mc" placeholder="AA:BB:CC:DD:EE:FF" autocapitalize="none"></label>
+      <label class="f">Aplikacioni 2 (aparati i dytë, opsionale)<input id="ap2" list="appsdl" placeholder="p.sh. Smart IPTV" autocapitalize="none"></label>
+      <label class="f">MAC 2 (aparati i dytë, opsionale)<input id="mc2" placeholder="AA:BB:CC:DD:EE:FF" autocapitalize="none"></label>
+      <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="du" type="checkbox" style="width:22px;height:22px">🔗 Është edhe në panel tjetër (lidhet me abonimin tjetër me të njëjtin emër)</label>
+      <div id="dualopts" class="wide" style="display:none;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)"></div>
+      <label class="f wide" style="flex-direction:row;align-items:center;gap:8px"><input id="tp" type="checkbox" style="width:22px;height:22px">⏳ Abonim i shkurtër (e plotësoj me muaj më vonë, me kujtesë në alert + Telegram)</label>
+      <label class="f" id="tpdw" style="display:none">Ditë gjithsej (p.sh. 344)<input id="tpd" type="number" min="1" max="364" value="344"></label>
+      <label class="f wide">Shënim (opsionale)<input id="t"></label>
+    </div>
+    <div id="prev" class="meta" style="margin:10px 0"></div>
+    <button id="add">Shto</button>
+    <span id="addmsg" class="meta" style="margin-left:8px"></span>
+  </div>
+
+  <h2>📥 Importo shumë njëherësh</h2>
+  <div class="card">
+    <p class="meta" style="margin-top:0">Një rresht për abonent: <b>emri; username; paneli; data e krijimit; muaj OSE data e skadimit; shënim; aplikacioni; MAC; MAC 2; aplikacioni 2</b><br>P.sh. <code>Paolo; xjhffahsd; Lion; 09.11.2026; 6</code> ose <code>Shoku Takut; username; Lion; ; 01-11-2027; shënim</code>. Për 1 vit shkruaj 12.</p>
+    <textarea id="impbox" rows="6" placeholder="Paolo; xjhffahsd; Lion; 09.11.2026; 6"></textarea>
+    <button id="imp" style="margin-top:8px">Importo</button>
+    <p id="impmsg" class="meta"></p>
+  </div>
+</section>
+
+<section id="v-historiku" class="view">
+  <h1>Historiku i modifikimeve</h1>
+  <div class="tools" style="grid-template-columns:1fr auto"><input id="hq" placeholder="Kërko emër ose ndryshim" autocapitalize="none"><button class="del" id="hclr" type="button">Pastro</button></div>
+  <div id="hlist" class="list"></div>
+</section>
+
+<section id="v-konfigurimi" class="view">
+  <h1>Konfigurimi</h1>
+  <div class="grid" style="align-items:start">
+    <div>
+      <h2 style="margin-top:0">Panelet</h2>
+      <div class="card">
+        <div id="plist"></div>
+        <div class="row" style="margin-top:6px">
+          <input id="newp" placeholder="Panel i ri">
+          <button id="addp">Shto</button>
+        </div>
+      </div>
+
+      <h2>Të fshirët</h2>
+      <div class="card">
+        <p id="gonetxt" class="meta" style="margin-top:0"></p>
+        <button type="button" id="goneclr" class="ghost">Harro listën (lejo t'i ngarkojë përsëri)</button>
+      </div>
+
+      <h2>Telegram (kujtesa për abonimet e shkurtra)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Boti dërgon mesazh për abonimet që mbarojnë sot ose nesër, dhe për ato të shkurtrat (p.sh. 344 ditë) që duhen plotësuar (çdo muaj dhe kur mbeten ≤7 ditë). Maksimumi një herë në ditë për abonim. Vlerat ruhen vetëm në këtë pajisje. <b>Dërgohet kur aplikacioni është i hapur.</b></p>
+        <div class="grid">
+          <label class="f wide">Bot token (nga @BotFather)<input id="tgtoken" type="password" autocapitalize="none" autocomplete="off"></label>
+          <label class="f wide">Chat ID (numri yt, nga @userinfobot)<input id="tgchat" autocapitalize="none" autocomplete="off"></label>
+        </div>
+        <button type="button" id="tgtest" style="margin-top:8px">Dërgo mesazh prove</button>
+        <p id="tgmsg" class="meta"></p>
+      </div>
+
+      <h2>Vlerat e paracaktuara</h2>
+      <div class="card">
+        <div class="grid">
+          <label class="f">Ora e skadimit<input id="ctime" type="time"></label>
+          <label class="f">Kohëzgjatja<select id="cmonths"></select></label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 style="margin-top:0">Sinkronizo me emailin (GitHub)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Dërgon listën direkt në <code>reminders.json</code> te repo juaj private në GitHub. Atje programi dërgon emailet: 1 ditë para, ditën e skadimit nga ora 08:00, dhe kur vjen ora e skadimit. Tokeni ruhet vetëm në këtë pajisje.<br><b>Pajisje e re (telefon, PC):</b> shkruaj repon dhe tokenin, vendos tick-un «automatikisht» dhe shtyp «Merr nga GitHub». Pas kësaj çdo pajisje tërheq vetë listën kur e hap dhe e dërgon pas çdo ndryshimi.</p>
+        <div class="grid">
+          <label class="f">Repo (emri/repo)<input id="syncrepo" placeholder="p.sh. arisheqi/promemori" autocapitalize="none"></label>
+          <label class="f">Dega (branch)<input id="syncbranch" placeholder="main" autocapitalize="none"></label>
+          <label class="f wide">Token GitHub (Contents: Read and write)<input id="synctoken" type="password" autocapitalize="none" autocomplete="off"></label>
+          <button type="button" id="showtok" class="ghost" style="margin:4px 0">👁 Shfaq tokenin</button>
+        </div>
+        <label class="f" style="flex-direction:row;align-items:center;margin:10px 0"><input id="syncauto" type="checkbox">Sinkronizo automatikisht pas çdo ndryshimi</label>
+        <button id="syncnow">Sinkronizo tani</button>
+        <button id="syncpull" type="button" class="ghost" style="margin-left:8px">Merr nga GitHub</button>
+        <button id="lionpull" type="button" style="margin-left:8px">Merr Lion/Mega nga GitHub</button>
+        <button id="syncdiag" type="button" style="margin-left:8px">Diagnostiko</button>
+        <p id="syncmsg" class="meta"></p>
+        <details style="margin-top:6px"><summary class="meta" style="cursor:pointer">🔄 Krahaso me GitHub</summary><div id="cmpbox"></div></details>
+        <hr style="border:0;border-top:1px solid #e2e8f0;margin:14px 0">
+        <b>Hyrje vetëm me PIN në pajisje të tjera (telefon, incognito)</b>
+        <p class="meta">Përdoret në kompjuterin ku tokeni është i vendosur më sipër. Shkruaj një PIN/fjalëkalim të ri (min. 8 karaktere, jo PIN-in e vjetër). Programi e enkripton tokenin me të dhe të jep një rresht <code>const VAULT = "…";</code>. Ngjite te <code>index.html</code> në repo publike (zëvendëso rreshtin <code>const VAULT = "";</code>). Pastaj në telefon kërkohet vetëm PIN-i.</p>
+        <label class="f">PIN / fjalëkalim i ri<input id="vaultpin" type="password" autocomplete="new-password" autocapitalize="none"></label>
+        <button id="vaultgen" type="button" style="margin-top:8px">Gjenero kodin e enkriptuar</button>
+        <textarea id="vaultout" readonly style="display:none;width:100%;height:120px;margin-top:8px;font-size:12px"></textarea>
+        <p id="vaultmsg" class="meta"></p>
+      </div>
+
+      <h2>Për emailin (dorazi)</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Gjeneron listën në formatin e <code>reminders.json</code> për programin e emailit.</p>
+        <div class="btns" style="margin-top:0">
+          <button class="ghost" id="exp">Gjenero &amp; kopjo</button>
+          <button class="ghost" id="expdl">Shkarko reminders.json</button>
+        </div>
+        <textarea id="expbox" readonly rows="8" style="display:none;margin-top:8px;font:12px monospace"></textarea>
+      </div>
+
+      <h2>Kopje rezervë</h2>
+      <div class="card">
+        <p class="meta" style="margin-top:0">Të dhënat ruhen vetëm në këtë telefon. Bëj kopje herë pas here.</p>
+        <button class="ghost" id="bk">Gjenero kopjen</button>
+        <textarea id="bkbox" readonly rows="5" style="display:none;margin-top:8px;font:12px monospace"></textarea>
+        <textarea id="rsbox" rows="3" placeholder="Ngjit këtu kopjen për ta rikthyer" style="margin:12px 0 8px"></textarea>
+        <button class="del" id="rs">Rikthe (zëvendëson gjithçka)</button>
+        <p id="rsmsg" class="meta"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+window.addEventListener("error", function (e) {
+  var d = document.createElement("div");
+  d.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:9999;background:#fee2e2;color:#7f1d1d;padding:12px;font:13px/1.4 monospace;white-space:pre-wrap";
+  d.textContent = "Gabim: " + e.message + " (rreshti " + e.lineno + ")";
+  document.body.appendChild(d);
+});
+</script>
+<script>
+const KEY = "abonime-v1", PKEY = "panele-v1", CKEY = "cfg-v1";
+const $ = id => document.getElementById(id);
+const p2 = n => String(n).padStart(2, "0");
+function ld(k, def) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : def; } catch (e) { return def; } }
+let ver = 0;
+function sv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (k === KEY) { histLog(); ver++; try { localStorage.setItem("dirty-v1", "1"); } catch (e) {} schedSync(); } }
+function schedSync() { if (typeof sync === "undefined" || !sync.auto || !sync.token) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 3000); }
+
+let needDev = null;
+let items = ld(KEY, []);
+/* ---------- historiku i modifikimeve (ruhet në këtë pajisje, max 800 ndryshime) ---------- */
+const HK = "hist-v1", HF = {name: "Emri", client: "Klienti", username: "Username", panel: "Paneli", start: "Fillimi", date: "Skadimi", time: "Ora", months: "Muaj", free: "I lirë", unpaid: "Pa paguar", falas: "Falas", app: "Aplikacioni", mac: "MAC", app2: "Aplikacioni 2", mac2: "MAC 2", note: "Shënim", tp: "Kujtesa deri", bs: "Lion filloi"};
+const hsnapOf = a => { const m = {}; (a || []).forEach(x => { if (!x) return; const o = {}; Object.keys(HF).forEach(k => { o[k] = x[k] == null || x[k] === false || x[k] === 0 ? "" : String(x[k]); }); m[x.id] = o; }); return m; };
+let hsnap = hsnapOf(items);
+function hv(k, v) { if (!v) return "—"; if (["start", "date", "tp", "bs"].includes(k)) return fmt(v); if (["free", "unpaid", "falas"].includes(k)) return "Po"; return v; }
+function histLog() {
+  try {
+    const now = hsnapOf(items), out = [], t = Date.now();
+    for (const id in now) {
+      const n = now[id], o = hsnap[id];
+      if (!o) { out.push({t, n: n.name, p: n.panel, a: "➕ U shtua · skadon " + hv("date", n.date)}); continue; }
+      const ch = Object.keys(HF).filter(k => n[k] !== o[k]).map(k => HF[k] + ": " + hv(k, o[k]) + " → " + hv(k, n[k]));
+      if (ch.length) out.push({t, n: n.name, p: n.panel, a: ch.join(" · ")});
+    }
+    for (const id in hsnap) if (!now[id]) out.push({t, n: hsnap[id].name, p: hsnap[id].panel, a: "🗑 U fshi · skadonte më " + hv("date", hsnap[id].date)});
+    hsnap = now;
+    if (out.length) localStorage.setItem(HK, JSON.stringify(ld(HK, []).concat(out).slice(-800)));
+  } catch (e) {}
+}
+function renderHist() {
+  const box = $("hlist"), q = ($("hq").value || "").trim().toLowerCase();
+  const h = ld(HK, []).slice().reverse().filter(e => !q || (e.n + " " + e.p + " " + e.a).toLowerCase().includes(q));
+  box.textContent = "";
+  if (!h.length) { const d = document.createElement("div"); d.className = "empty"; d.textContent = "Ende pa modifikime."; box.appendChild(d); return; }
+  let day = "";
+  h.slice(0, 300).forEach(e => {
+    const dt = new Date(e.t), dk = iso(dt);
+    if (dk !== day) { day = dk; const g = document.createElement("div"); g.className = "hday"; g.textContent = fmt(dk); box.appendChild(g); }
+    const r = document.createElement("div"); r.className = "hrow"; if (pkey(e.p)) r.dataset.p = pkey(e.p);
+    const tm = document.createElement("span"); tm.className = "htm"; tm.textContent = p2(dt.getHours()) + ":" + p2(dt.getMinutes());
+    const b = document.createElement("div"), nm = document.createElement("b"), ac = document.createElement("div");
+    nm.textContent = e.n + (e.p ? " · " + e.p : ""); ac.className = "meta"; ac.textContent = e.a; b.append(nm, ac); r.append(tm, b); box.appendChild(r);
+  });
+}
+$("hq").addEventListener("input", renderHist);
+$("hclr").onclick = () => { if (confirm("Të pastrohet historiku?")) { try { localStorage.removeItem(HK); } catch (e) {} renderHist(); } };
+items.forEach(x => { if (x.dual === undefined) x.dual = !!x.client; }); // lidhja tani bëhet me tick; ata me Klient të shkruar mbeten të lidhur
+let panels = ld(PKEY, ["Mega", "Lion"]);
+let cfg = Object.assign({time: "14:00", months: 1}, ld(CKEY, {}));
+if (![1, 3, 6, 12].includes(cfg.months)) cfg.months = 1;
+let sync = Object.assign({repo: "", branch: "main", token: "", auto: true, sha: ""}, ld("sync-v1", {}));
+let syncTimer = null;
+let copyMsg = "";
+let editing = false, openId = null, flt = "all", lim = 50;
+const MONTHS = [[0, "—"], [1, "1 muaj"], [3, "3 muaj"], [6, "6 muaj"], [12, "1 vit"]];
+
+const iso = d => d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+const todayIso = () => iso(new Date());
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmt = s => { if (!s) return ""; const [y, m, d] = s.split("-"); return d + "." + m + "." + y; };
+const durLabel = m => (MONTHS.find(x => x[0] === m) || [0, m + " muaj"])[1];
+function addMonths(s, mo) {
+  const [y, m, d] = s.split("-").map(Number);
+  const t = new Date(y, m - 1 + mo, 1);
+  const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  return iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, last)));
+}
+function addDays(s, n) { const [y, m, d] = s.split("-").map(Number); return iso(new Date(y, m - 1, d + n)); }
+/* ---- abonim i shkurtër (p.sh. 344 ditë) që plotësohet me muaj deri në 12 muaj ---- */
+const tpActive = it => !!it.tp && it.date < it.tp;
+const tpMiss = it => Math.max(0, Math.round((parse(it.tp) - parse(it.date)) / 864e5));
+function tpDue(it) {
+  if (!tpActive(it) || !it.start || state(it).over) return false;
+  if (tpMiss(it) <= 31) return daysLeft(it) <= 7;   // mungojnë pak ditë: një kujtesë para skadimit, pa kujtesa mujore
+  return todayIso() >= addMonths(it.start, 1 + (it.tpk || 0)) || daysLeft(it) <= 7;
+}
+function tpExtend(it, n = 1) {
+  const nd = addMonths(it.date, n);
+  if (nd >= it.tp) { it.date = it.tp; delete it.tp; delete it.tpk; }
+  else {
+    it.date = nd;
+    let k = 1; while (addMonths(it.start, k) <= todayIso()) k++;
+    it.tpk = k - 1;
+  }
+  sv(KEY, items); render();
+}
+function normDate(s) {
+  s = (s || "").trim();
+  if (/^\d{10}(\d{3})?$/.test(s)) { const d = new Date(s.length === 13 ? +s : s * 1000); return isNaN(d) ? "" : iso(d); }   // timestamp
+  let m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:$|[T\s,])/);                                                  // 2026-03-05, 2026-03-05 14:20, 2026-03-05T14:20:00Z
+  if (m) return m[1] + "-" + p2(m[2]) + "-" + p2(m[3]);
+  m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2}|\d{4})(?:$|[T\s,])/);                                                // 05.03.2026, 5/3/26 14:20
+  return m ? (m[3].length === 2 ? "20" + m[3] : m[3]) + "-" + p2(m[2]) + "-" + p2(m[1]) : "";
+}
+const endDT = it => new Date(it.date + "T" + (it.time || "23:59"));
+function daysLeft(it) {
+  const n = new Date(), td = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.round((parse(it.date) - td) / 864e5);
+}
+function mdLeft(it) {
+  if (state(it).over) return "";
+  const td = todayIso(); let m = 0; while (m < 600 && addMonths(td, m + 1) <= it.date) m++;
+  const d = Math.round((parse(it.date) - parse(addMonths(td, m))) / 864e5);
+  return (m ? m + " muaj" : "") + (m && d ? " e " : "") + (d || !m ? d + " ditë" : "");
+}
+function daysTxt(o) { const l = daysLeft(o); return state(o).over ? "mbaroi" : l === 0 ? "sot" : l + " ditë"; }
+function state(it) {
+  if (new Date() >= endDT(it)) return {over: true, t: "mbaroi", c: "var(--muted)"};
+  const l = daysLeft(it);
+  if (l === 0) return {t: "SOT" + (it.time ? " " + it.time : ""), c: "var(--red)"};
+  return {t: l === 1 ? "nesër" : "pas " + l + " ditësh", c: l <= 3 ? "var(--red)" : l <= 14 ? "var(--amber)" : "var(--green)"};
+}
+function calUrl(it) {
+  const [y, m, d] = it.date.split("-").map(Number);
+  let a, b;
+  if (it.time) {
+    const [hh, mm] = it.time.split(":").map(Number);
+    const e = new Date(y, m - 1, d, hh, mm + 30);
+    a = it.date.replace(/-/g, "") + "T" + p2(hh) + p2(mm) + "00";
+    b = iso(e).replace(/-/g, "") + "T" + p2(e.getHours()) + p2(e.getMinutes()) + "00";
+  } else {
+    a = it.date.replace(/-/g, "");
+    b = iso(new Date(y, m - 1, d + 1)).replace(/-/g, "");
+  }
+  const det = [it.username ? "Username: " + it.username : "", it.panel ? "Paneli: " + it.panel : "", apps(it) ? "Aplikacioni: " + apps(it) : "", macs(it) ? "MAC: " + macs(it) : "", it.note || ""].filter(Boolean).join("\n");
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" +
+    encodeURIComponent("Mbaron: " + it.name + (it.panel ? " (" + it.panel + ")" : "")) +
+    "&dates=" + a + "/" + b + "&details=" + encodeURIComponent(det) + "&ctz=Europe/Tirane";
+}
+function fillSelect(sel, opts, keep) {
+  const cur = keep ? sel.value : "";
+  sel.innerHTML = "";
+  opts.forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; sel.appendChild(o); });
+  if (keep && opts.some(o => String(o[0]) === cur)) sel.value = cur;
+}
+
+/* ---------- pamjet (menuja lart) ---------- */
+const VIEWS = ["lista", "krijo", "konfigurimi", "historiku"];
+function showView() {
+  let v = location.hash.slice(1);
+  if (!VIEWS.includes(v)) v = "lista";
+  VIEWS.forEach(x => {
+    $("v-" + x).classList.toggle("on", x === v);
+    document.querySelector('.top a[data-v="' + x + '"]').classList.toggle("on", x === v);
+  });
+  if (v === "historiku") renderHist();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", showView);
+
+/* ---------- panelet ---------- */
+const allPanels = () => [...new Set([...panels, ...items.map(x => x.panel).filter(Boolean)])];
+function addPanel(p) { if (!panels.includes(p)) { panels.push(p); sv(PKEY, panels); } }
+function renderDualOpts() {
+  const box = $("dualopts"); if (!box) return;
+  box.innerHTML = ""; const on = $("du").checked; box.style.display = on ? "block" : "none"; if (!on) return;
+  const t = document.createElement("div"); t.style.cssText = "font-weight:600;margin-bottom:8px"; t.textContent = "Krijo edhe në (zgjidh):";
+  const row = document.createElement("div"); row.style.cssText = "display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px";
+  const mkc = (lab, cls, val) => { const l = document.createElement("label"); l.style.cssText = "display:flex;align-items:center;gap:6px"; const i = document.createElement("input"); i.type = "checkbox"; i.checked = true; i.style.cssText = "width:20px;height:20px"; if (cls) i.className = cls; if (val) i.value = val; l.append(i, document.createTextNode(lab)); return [l, i]; };
+  allPanels().filter(x => x !== $("p").value).forEach(pn => row.appendChild(mkc(pn, "dp", pn)[0]));
+  const t2 = document.createElement("div"); t2.style.cssText = "font-weight:600;margin:6px 0 8px"; t2.textContent = "dhe kopjo aplikacionin / MAC-un:";
+  const row2 = document.createElement("div"); row2.style.cssText = "display:flex;gap:16px;flex-wrap:wrap";
+  const [la, ia] = mkc("Aplikacionin"), [lm, im] = mkc("MAC adresën"); ia.id = "dapp"; im.id = "dmac"; row2.append(la, lm);
+  const h = document.createElement("div"); h.className = "meta"; h.style.margin = "8px 0 0"; h.textContent = "Username-i dhe skadimi te paneli tjetër merren si këtu; i ndryshon më pas nëse duhet.";
+  box.append(t, row, t2, row2, h);
+}
+function refreshPanels() {
+  renderDualOpts();
+  const all = allPanels();
+  fillSelect($("p"), all.map(x => [x, x]), true);
+  fillSelect($("pf"), [["", "Të gjitha panelet"], ...all.map(x => [x, x])], true);
+  const box = $("plist"); box.innerHTML = "";
+  all.forEach(p => {
+    const n = items.filter(x => x.panel === p).length;
+    const row = document.createElement("div"); row.className = "row";
+    const inp = document.createElement("input"); inp.value = p;
+    inp.onchange = () => {
+      const nv = inp.value.trim();
+      if (!nv || (nv !== p && all.includes(nv))) { inp.value = p; return; }
+      items.forEach(x => { if (x.panel === p) x.panel = nv; });
+      panels = [...new Set(allPanels().map(x => x === p ? nv : x))];
+      sv(KEY, items); sv(PKEY, panels); refreshPanels(); render();
+    };
+    const cnt = document.createElement("span"); cnt.className = "meta"; cnt.textContent = n + " ab.";
+    const b = document.createElement("button"); b.className = "del"; b.textContent = n ? "në përdorim" : "Fshi"; b.disabled = n > 0;
+    b.onclick = () => { panels = panels.filter(x => x !== p); sv(PKEY, panels); refreshPanels(); };
+    row.append(inp, cnt, b); box.appendChild(row);
+  });
+}
+
+/* ---------- lista ---------- */
+function renew(it, mo) {
+  const base = state(it).over ? todayIso() : it.date;
+  it.start = base; it.months = mo; it.date = addMonths(base, mo);
+  sv(KEY, items); render();
+}
+const ckey = x => (x.client || x.name || "").trim().toLowerCase();
+const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && ckey(x) === ckey(it));
+const pkey = p => /lion/i.test(p || "") ? "lion" : /mega/i.test(p || "") ? "mega" : "";
+let editEl = null;   // kutia e modifikimit: rri brenda kartelës së abonimit që po modifikohet
+const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
+/* ---- lista e të fshirëve: nuk ngarkohen më nga Lion/Mega pa të pyetur ---- */
+const goneKey = o => (o.panel || "").toLowerCase() + "|" + ((o.username || "").trim() ? o.username.trim().toLowerCase() : (o.name || "").trim().toLowerCase());
+const gList = k => { const v = ld(k, []); return Array.isArray(v) ? v : []; };
+const gSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const isGone = o => gList("del-v1").includes(goneKey(o));
+const isDeclined = o => gList("decl-v1").includes(goneKey(o));
+function addGone(o) { const k = goneKey(o); const d = gList("del-v1"); if (!d.includes(k)) { d.push(k); gSave("del-v1", d); } gSave("decl-v1", gList("decl-v1").filter(x => x !== k)); }
+function delGone(o) { const k = goneKey(o); gSave("del-v1", gList("del-v1").filter(x => x !== k)); gSave("decl-v1", gList("decl-v1").filter(x => x !== k)); }
+function updGoneTxt() { const e = $("gonetxt"); if (e) e.textContent = "Të fshirë të mbajtur mend: " + gList("del-v1").length + " (nuk ngarkohen nga Lion/Mega pa të pyetur)."; }
+/* fshirje me pyetje konfirmimi */
+function delItem(it) {
+  const lk = linked(it).length;
+  const msg = "🗑 A je i sigurt që dëshiron ta fshish këtë abonent?\n\n«" + it.name + "»" + (it.username ? "  (@" + it.username + ")" : "") + (it.panel ? "  ·  " + it.panel : "") + (it.date ? "\nSkadon: " + fmt(it.date) : "") +
+    (lk ? "\n\nAbonimet e lidhura në panel tjetër NUK fshihen." : "") + "\n\nKy veprim nuk kthehet.";
+  if (!confirm(msg)) return;
+  addGone(it); items = items.filter(x => x.id !== it.id);
+  if (openId === it.id) { openId = null; editing = false; }
+  sv(KEY, items); refreshPanels(); render();
+}
+/* zëvendëson një <select> me butona që zgjidhen me klik (1 vit, 6 muaj, 3 muaj, 1 muaj) */
+function segify(sel) {
+  if (sel._seg) { sel._sync(); return; }
+  const box = document.createElement("div"); box.className = "seg"; sel._seg = box;
+  sel.style.display = "none"; sel.after(box);
+  sel._sync = () => {
+    box.innerHTML = "";
+    [...sel.options].filter(o => +o.value > 0).sort((a, b) => b.value - a.value).forEach(o => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o.textContent; b.className = String(o.value) === sel.value ? "on" : "";
+      b.onclick = e => { e.preventDefault(); sel.value = o.value; sel.dispatchEvent(new Event("input", {bubbles: true})); sel.dispatchEvent(new Event("change", {bubbles: true})); sel._sync(); };
+      box.appendChild(b);
+    });
+  };
+  sel._sync();
+}
+function refreshHead(el, it) {
+  const s = state(it), dl = daysLeft(it), fr = it.free && !s.over;
+  const nmEl = el.querySelector(".nm"); nmEl.textContent = "";
+  const ntEl = document.createElement("span"); ntEl.className = "nt"; ntEl.textContent = (it.free ? "🆓 " : "") + it.name; nmEl.appendChild(ntEl);
+  if (it.unpaid) { const pb = document.createElement("span"); pb.className = "pay"; pb.textContent = "PA PAGUAR"; nmEl.appendChild(pb); }
+  if (it.falas) { const fb = document.createElement("span"); fb.className = "pay fal"; fb.textContent = "FALAS"; nmEl.appendChild(fb); }
+  if (isNew(it)) { const nb = document.createElement("span"); nb.className = "pay nw"; nb.textContent = "NEW"; nmEl.appendChild(nb); }
+  if (tpActive(it)) { const tb = document.createElement("span"); tb.className = "pay"; tb.style.setProperty("--c", "var(--amber)"); tb.textContent = "⏳ +" + tpMiss(it) + " d"; nmEl.appendChild(tb); }
+  const cd = el.querySelector(".c-del"); cd.textContent = "";
+  const rd = document.createElement("button"); rd.type = "button"; rd.className = "rdel"; rd.textContent = "🗑"; rd.title = "Fshi"; rd.setAttribute("aria-label", "Fshi abonentin");
+  rd.onclick = e => { e.stopPropagation(); delItem(it); }; cd.appendChild(rd);
+  if (pkey(it.panel)) el.dataset.p = pkey(it.panel); else delete el.dataset.p;
+  el.classList.toggle("isfree", !!fr);
+  el.classList.toggle("unpaid", !!it.unpaid); el.classList.toggle("falas", !!it.falas); el.classList.toggle("isnew", isNew(it));
+  el.querySelector(".sub").textContent = [it.username ? "@" + it.username : "", apps(it), macs(it)].filter(Boolean).join(" · ");
+  el.querySelector(".lnk").textContent = linked(it).map(o => "🔗 " + (o.panel || "?") + (o.free ? " (i lirë)" : "") + ": " + daysTxt(o) + " (" + fmt(o.date) + ")").join("  ·  ");
+  el.querySelector(".c-start").textContent = it.start ? fmt(it.start) : "—";
+  el.querySelector(".c-date").textContent = fmt(it.date) + (it.time ? " " + it.time : "");
+  el.querySelector(".c-panel").textContent = it.panel || "";
+  el.querySelector(".c-app").textContent = apps(it);
+  el.querySelector(".c-mac").textContent = macs(it);
+  const t = s.over ? "mbaroi" : dl === 0 ? "SOT" + (it.time ? " " + it.time : "") : dl + " ditë";
+  const st = el.querySelector(".c-state"); st.textContent = fr ? "I LIRË · " + t : t; st.style.color = fr ? "var(--accent)" : s.c;
+}
+function fillApps() { $("appsdl").innerHTML = [...new Set(items.map(x => x.app).filter(Boolean))].map(x => '<option value="' + esc(x) + '">').join(""); }
+const rowEls = new Map();
+function fillInfo(it) {
+  const info = $("sinfo"); if (!info) return;
+  const ae = document.activeElement, keep = editEl && ae && editEl.contains(ae) ? ae : null;   // mos e humb fokusin kur kutia e modifikimit rivendoset
+  info.innerHTML = "";
+  const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
+  const h = document.createElement("div"); h.className = "sh"; h.textContent = it.client || it.name; if (it.free) h.style.color = "var(--blue)";
+  const sb = document.createElement("div"); sb.className = "meta"; sb.style.cssText = "margin:4px 0 14px;font-size:15px";
+  sb.textContent = g.length > 1 ? "ka " + g.length + " abonime: " + g.map(x => x.panel || "?").join(" + ") : "ka 1 abonim";
+  info.append(h, sb);
+  g.forEach(x => {
+    const s = state(x), dl = daysLeft(x), c = document.createElement("div");
+    const ed = editing && x === it && editEl;
+    c.className = "sc" + (g.length === 1 && !ed ? " solo" : "") + (x === it ? " cur" : "") + (x.free ? " free" : "");
+    if (pkey(x.panel)) c.dataset.p = pkey(x.panel);
+    const big = s.over ? "mbaroi" : dl === 0 ? "SOT" : dl + " ditë";
+    const rows = [["Fillimi", x.start ? fmt(x.start) : ""], ["Skadon", fmt(x.date) + (x.time ? " " + x.time : "")], ["Mbetet", mdLeft(x)], ["Username", x.username], ["Aplikacioni", x.app], ["MAC", x.mac], ["Aplikacioni 2", x.app2], ["MAC 2", x.mac2], ["Shënim", x.note]];
+    c.innerHTML = '<div class="sct"><b>' + esc(x.panel || "?") + '</b>' + (x.free ? '<span class="bd">I LIRË</span>' : '') + (isNew(x) ? '<span class="bd">NEW</span>' : '') + (x.unpaid ? '<span class="bd" style="color:var(--red);border-color:var(--red)">PA PAGUAR</span>' : '') + (x.falas ? '<span class="bd" style="color:var(--green);border-color:var(--green)">FALAS</span>' : '') + '<span class="big" style="color:' + (x.free && !s.over ? "var(--accent)" : s.c) + '">' + big + '</span></div>' +
+      rows.filter(r => r[1]).map(r => '<div class="sr"><span>' + r[0] + '</span><span>' + esc(r[1]) + '</span></div>').join("");
+    /* klikimi i parë: kartela zgjidhet (pamje e ngrirë); klikimi i dytë: modifikohet aty në vend */
+    c.onclick = () => { if (x.id !== openId) { openId = x.id; editing = false; } else if (!editing) editing = true; else return; render(); };
+    if (x.pnm && nz(x.pnm) && x.pnm !== x.name) {
+      const ub = document.createElement("button"); ub.type = "button"; ub.className = "ghost"; ub.style.cssText = "margin-top:10px;width:100%";
+      ub.textContent = "↻ Emri në panel: «" + x.pnm + "» — përdore";
+      ub.onclick = e => { e.stopPropagation(); x.name = x.pnm; if (x.pnt) x.note = x.pnt; sv(KEY, items); render(); };
+      c.appendChild(ub);
+    }
+    if (x === it && !editing) { const h = document.createElement("div"); h.className = "hint meta"; h.textContent = "✏️ Kliko sërish për ta modifikuar këtu"; c.appendChild(h); }
+    if (ed) c.appendChild(editEl);
+    info.appendChild(c);
+  });
+  if (keep && keep.isConnected) { try { keep.focus({preventScroll: true}); } catch (e) {} }
+}
+function renderSide() {
+  const side = $("side"), lay = $("lay"), it = items.find(x => x.id === openId);
+  lay.classList.toggle("has", !!it); side.innerHTML = "";
+  if (!it) { editing = false; return; }
+  const bar = document.createElement("div"); bar.className = "sbar";
+  const bk = document.createElement("button"); bk.className = "ghost"; bk.textContent = "← Mbrapa";
+  bk.onclick = () => { openId = null; editing = false; render(); };
+  const eb = document.createElement("button"); eb.textContent = editing ? "✓ Mbaro modifikimin" : "✏️ Modifiko të dhënat";
+  eb.onclick = () => { editing = !editing; render(); };
+  bar.append(bk, eb);
+  const info = document.createElement("div"); info.id = "sinfo";
+  if (editing) { editEl = document.createElement("div"); editEl.className = "sedit"; editEl.onclick = e => e.stopPropagation(); }
+  else editEl = null;
+  side.append(bar, info);
+  if (editEl) buildEditor(it, editEl);
+  fillInfo(it);
+  /* ⏰ kujtesa për plotësim: e dukshme, menjëherë poshtë të dhënave */
+  const tz = document.createElement("div"); tz.className = "payzone"; tz.style.marginTop = "20px";
+  const tt = document.createElement("div"); tt.className = "ptitle"; tt.textContent = "⏰ Kujtesa për plotësim";
+  const ti = document.createElement("div"); ti.className = "meta"; ti.style.marginBottom = "10px";
+  const to = document.createElement("div"); to.className = "payopts";
+  const base = it.start || todayIso();
+  if (tpActive(it)) {
+    ti.textContent = "✅ Aktive. Duhet plotësuar deri më " + fmt(it.tp) + " (mungojnë " + tpMiss(it) + " ditë). " + (tpMiss(it) <= 31 ? "Do të të kujtoj kur të mbeten ≤7 ditë deri në skadim" : "Do të të kujtoj më " + fmt(addMonths(base, 1 + (it.tpk || 0))) + " dhe pastaj çdo muaj, si dhe kur mbeten ≤7 ditë") + ": në alertin e aplikacionit dhe në Telegram.";
+    const bd = document.createElement("button"); bd.type = "button"; bd.className = "del"; bd.textContent = "Hiq kujtesën"; bd.onclick = () => { delete it.tp; delete it.tpk; sv(KEY, items); render(); };
+    [1, 3, 6, 12].forEach(n => { const ba = document.createElement("button"); ba.type = "button"; ba.textContent = "➕ Shtova " + n + (n === 1 ? " muaj" : " muaj"); ba.onclick = () => tpExtend(it, n); to.appendChild(ba); });
+    to.appendChild(bd);
+  } else {
+    ti.textContent = "Pa kujtesë. Zgjidh sa muaj gjithsej duhet të ketë ky abonim (nga fillimi); do të të kujtoj çdo muaj derisa ta plotësosh.";
+    [1, 3, 6, 12].forEach(n => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = "⏳ Plotëso në " + n + " muaj";
+      b.onclick = () => {
+        const tp = addMonths(base, n);
+        if (it.date >= tp) { alert("Ky abonim i ka tashmë " + n + " muaj ose më shumë."); return; }
+        if (!it.start) it.start = base;
+        let k = 1; while (addMonths(it.start, k) <= todayIso()) k++;
+        it.tp = tp; it.tpk = k - 1; sv(KEY, items); render();
+      };
+      to.appendChild(b);
+    });
+  }
+  tz.append(tt, ti, to); side.appendChild(tz);
+  /* butoni i pagesës: veçmas, në fund, larg butonit të modifikimit */
+  const pz = document.createElement("div"); pz.className = "payzone";
+  const pt = document.createElement("div"); pt.className = "ptitle"; pt.textContent = "Pagesa";
+  const po = document.createElement("div"); po.className = "payopts";
+  const cur = it.unpaid ? "up" : it.falas ? "fa" : "";
+  [["up", "❗ Pa paguar"], ["fa", "🎁 Falas"]].forEach(([k, l]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = k + (cur === k ? " on" : ""); b.textContent = l;
+    b.onclick = () => { delete it.unpaid; delete it.falas; if (cur !== k) { if (k === "up") it.unpaid = true; else it.falas = true; } sv(KEY, items); render(); };
+    po.appendChild(b);
+  });
+  pz.append(pt, po); side.appendChild(pz);
+}
+function groupMsg(it) {
+  const g = [it, ...linked(it)].sort((a, b) => (a.panel || "").localeCompare(b.panel || ""));
+  return (it.client || it.name) + ": " + g.map(x => (x.panel || "?") + (x.free ? " (i lirë)" : "") + " " + daysTxt(x)).join(" · ");
+}
+/* ---- LION → MEGA: viti numërohet nga fillimi i Lion; Mega merr vetëm ditët që mungojnë për ta plotësuar vitin ---- */
+function yearPlan(it, panel, from) {
+  if (pkey(panel) === "lion") return null;                                  // baza është gjithmonë Lion
+  const b0 = [it, ...linked(it)].find(y => pkey(y.panel) === "lion" && y.start);
+  const base = b0 || (it.bs ? {start: it.bs, panel: "Lion"} : null);   // bs = kur filloi Lion-i që i kaloi dikujt tjetër
+  if (!base) return null;
+  const end = addMonths(base.start, 12), days = Math.round((parse(end) - parse(from)) / 864e5);
+  return days > 0 ? {base, end, days, time: base.time || cfg.time} : null;
+}
+/* dritare me disa zgjedhje (confirm() ka vetëm 2) */
+function choose(msg, opts) {
+  return new Promise(res => {
+    const ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px";
+    const bx = document.createElement("div"); bx.style.cssText = "background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:18px;max-width:440px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.35)";
+    const p = document.createElement("div"); p.style.cssText = "white-space:pre-wrap;margin-bottom:14px;font-size:16px;line-height:1.4"; p.textContent = msg;
+    const row = document.createElement("div"); row.style.cssText = "display:flex;flex-direction:column;gap:8px";
+    const done = v => { ov.remove(); res(v); };
+    opts.forEach(([v, l, cls]) => { const b = document.createElement("button"); b.type = "button"; b.className = cls || ""; b.textContent = l; b.onclick = () => done(v); row.appendChild(b); });
+    ov.onclick = e => { if (e.target === ov) done(null); };
+    bx.append(p, row); ov.appendChild(bx); document.body.appendChild(ov);
+  });
+}
+/* muaj + ditë ndërmjet dy datave, p.sh. «10 muaj e 5 ditë» */
+function mdBetween(a, b) {
+  let m = 0; while (m < 600 && addMonths(a, m + 1) <= b) m++;
+  const d = Math.round((parse(b) - parse(addMonths(a, m))) / 864e5);
+  return (m ? m + " muaj" : "") + (m && d ? " e " : "") + (d || !m ? d + " ditë" : "");
+}
+/* Lion i kalon dikujt tjetër: Mega e mbetur mban mend kur filloi Lion (bs) dhe pyet a ta bëjë vitin nga ajo datë */
+async function orphanMega(it, oth) {
+  if (pkey(it.panel) !== "lion" || !it.start) return;
+  const end = addMonths(it.start, 12), days = Math.round((parse(end) - parse(todayIso())) / 864e5), who = it.client || it.name;
+  for (const o of oth) {
+    if (pkey(o.panel) === "lion") continue;
+    o.bs = it.start;
+    const miss = Math.round((parse(end) - parse(o.date)) / 864e5);
+    if (days <= 0 || miss <= 0) continue;
+    const td = todayIso(), act = o.date > td ? "Mega është aktive edhe " + mdBetween(td, o.date) + " (deri " + fmt(o.date) + "), pastaj" : o.panel + " skadoi më " + fmt(o.date) + ", dhe";
+    const opts = [["rem", "⏰ Lëre siç është dhe më kujto sa mungojnë", ""], ["yr", "Plotëso vitin tani · skadon " + fmt(end) + " (+" + miss + " ditë)", "ghost"], ["keep", "Pa kujtesë", "ghost"]];
+    const ch = await choose("«" + who + "» · " + o.panel + " mbeti pa Lion.\nLion filloi më " + fmt(it.start) + ", pra viti mbaron më " + fmt(end) + ".\n" + act + " i mungojnë " + mdBetween(o.date, end) + " (" + miss + " ditë) për ta plotësuar vitin.\n\nA ta vendos kujtesën?", opts);
+    if (ch === "rem") { if (!o.start) o.start = td; o.tp = end; let k = 1; while (addMonths(o.start, k) <= td) k++; o.tpk = k - 1; }
+    else if (ch === "yr") { o.date = end; o.months = 0; o.time = it.time || o.time; delete o.tp; delete o.tpk; }
+  }
+}
+/* kthen false nëse anulohet; true = vazhdo; "both" = ndrysho emrin edhe te abonimi i lidhur. fromName=true: vjen nga fusha «Emri» */
+/* pas dhënies, aplikacioni/MAC i klientit të vjetër fshihen dhe kutia e Aplikacionit hapet për t'u plotësuar */
+function clearDev(it) { it.app = ""; it.mac = ""; it.app2 = ""; it.mac2 = ""; needDev = it.id; setTimeout(() => { if (needDev === it.id) needDev = null; }, 30000); }
+async function askGive(it, newName, fromName) {
+  const oth = linked(it);
+  if (newName.trim().toLowerCase() === ckey(it)) return true;
+  const old = it.client || it.name, lab = (it.panel || "Abonimi") + " i «" + old + "»";
+  const giveTxt = "👤 Ia jap «" + newName + "» (klient i ri)";
+  const doGive = async () => { await orphanMega(it, oth); it.client = ""; it.dual = false; delete it.free; clearDev(it); };
+  if (fromName && it.free) {
+    const q = "🆓 " + lab + " është abonim i lirë.\nKe shkruar emrin «" + newName + "». Çfarë po bën?\n\n• Ia jap «" + newName + "»: abonimi kalon te klienti i ri; aplikacioni dhe MAC fshihen që t'i plotësosh ti.\n• Vetëm ndryshoj emrin: është i njëjti klient, po e korrigjoj." + (oth.length ? "\n\n" + groupMsg(it) : "");
+    const a = await choose(q, [["give", giveTxt], ["rename", "✏️ Vetëm ndryshoj emrin", "ghost"], [null, "Anulo", "ghost"]]);
+    if (!a) return false;
+    if (a === "give") { await doGive(); return true; }
+    if (!oth.length) return true;
+    const b = await choose("A don të ndryshoj të dy emrat?\n\n" + [it, ...oth].map(o => (o.panel || "?") + ": «" + o.name + "»").join("\n") + "\n\nEmri i ri: «" + newName + "»",
+      [["both", "Po, ndrysho të dy emrat"], ["one", "Jo, vetëm këtë (" + (it.panel || "?") + ")", "ghost"], [null, "Anulo", "ghost"]]);
+    if (!b) return false;
+    return b === "both" ? "both" : true;
+  }
+  if (!oth.length) return true;
+  const a = await choose("🔗 " + lab + " është i lidhur me " + oth.map(o => o.panel || "?").join(", ") + " të të njëjtit klient.\nKe shkruar emrin «" + newName + "». Çfarë po bën?\n\n• Ia jap «" + newName + "»: vetëm " + (it.panel || "ky abonim") + " kalon te klienti i ri (aplikacioni dhe MAC fshihen). " + oth.map(o => o.panel || "?").join(", ") + " mbetet te «" + old + "» dhe do të pyes si ta plotësosh vitin.\n• Vetëm ndryshoj emrin: është i njëjti klient, e ndryshoj te të dy.",
+    [["give", giveTxt], ["both", "✏️ Vetëm ndryshoj emrin (te të dy)", "ghost"], [null, "Anulo", "ghost"]]);
+  if (!a) return false;
+  if (a === "give") { await doGive(); return true; }
+  return "both";
+}
+/* ndryshon emrin; both = edhe te abonimet e lidhura; përndryshe lidhja ruhet përmes fushës «Klienti» */
+function applyRename(it, nv, both) {
+  const old = ckey(it), grp = linked(it);
+  if (!both && grp.length && !it.client) it.client = it.name;
+  it.name = nv;
+  if (both) [it, ...grp].forEach(x => { x.name = nv; if (x.client && x.client.trim().toLowerCase() === old) x.client = nv; });
+}
+function buildEditor(it, box) {
+  box.innerHTML = "";
+  if (!linked(it).length && it.bs && pkey(it.panel) !== "lion") {
+    const e = addMonths(it.bs, 12), m = Math.round((parse(e) - parse(it.date)) / 864e5);
+    const nb = document.createElement("div");
+    nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+    nb.textContent = "ℹ️ Lion filloi më " + fmt(it.bs) + " (iu dha dikujt tjetër) · viti mbaron më " + fmt(e) + (m > 0 ? " · mungojnë " + mdBetween(it.date, e) + " pas " + fmt(it.date) : " · viti është i plotë");
+    box.appendChild(nb);
+  }
+  if (linked(it).length) {
+    const nb = document.createElement("div");
+    nb.className = "nbin"; nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+    nb.textContent = "🔗 " + groupMsg(it);
+    box.appendChild(nb);
+  }
+  const g = document.createElement("div"); g.className = "grid";
+  const mk = (lab, node, cls) => {
+    const w = document.createElement("label"); w.className = "f " + (cls || "");
+    const s = document.createElement("span"); s.textContent = lab; w.append(s, node); g.appendChild(w); return node;
+  };
+  const save = () => { sv(KEY, items); const re = rowEls.get(it.id); if (re) refreshHead(re, it); fillInfo(it); updSum(); };
+  const inp = (type, val, on) => {
+    const i = document.createElement("input"); i.type = type; i.value = val || "";
+    if (type === "text") i.autocapitalize = "none";
+    i.addEventListener("change", () => { on(i.value); save(); });
+    return i;
+  };
+  const sel = (opts, val, on) => {
+    const s = document.createElement("select");
+    fillSelect(s, opts); s.value = String(val);
+    s.addEventListener("change", () => { on(s.value); save(); });
+    return s;
+  };
+  let dateI, startI, monI;
+  const recalc = () => {
+    if (!it.start && it.months > 0) { it.start = todayIso(); startI.value = it.start; }
+    if (it.start && it.months > 0) { it.date = addMonths(it.start, it.months); dateI.value = it.date; }
+  };
+  /* kohëzgjatja e zgjedhur (p.sh. 1 vit) është më e gjatë se ç'ka vërtet abonimi (p.sh. i lirë me 335 ditë): kujtesë automatike për plotësim */
+  const autoTp = () => {
+    const m = it.months, td = todayIso();
+    if (!(m > 0) || !it.date || it.date <= td) return false;
+    const full = addMonths(td, m);
+    if (it.date >= full) return false;
+    if (it.tp === full) return true;
+    const miss = Math.round((parse(full) - parse(it.date)) / 864e5);
+    if (!confirm("⏳ Abonimi skadon më " + fmt(it.date) + ", por " + durLabel(m) + " nga sot është " + fmt(full) + ".\nMungojnë " + miss + " ditë.\n\nA ta vendos kujtesën që t'i shtosh para skadimit?\n\n(Anulo = vetëm ndryshon kohëzgjatjen, pa kujtesë)")) return false;
+    if (!it.start) it.start = td;
+    it.tp = full; let k = 1; while (addMonths(it.start, k) <= td) k++; it.tpk = k - 1;
+    setTimeout(() => { sv(KEY, items); render(); }, 0);
+    return true;
+  };
+  /* kur ndryshon kohëzgjatja: skadimi mbetet ai që është, fillimi llogaritet prapa nga skadimi */
+  const recalcStart = () => {
+    if (it.date && it.months > 0) { it.start = addMonths(it.date, -it.months); startI.value = it.start; }
+  };
+
+  const ni = document.createElement("input"); ni.type = "text"; ni.autocapitalize = "none"; ni.value = it.name;
+  ni.addEventListener("change", async () => {
+    const nv = ni.value.trim();
+    if (!nv || nv === it.name) { ni.value = it.name; return; }
+    const r = await askGive(it, nv, true);
+    if (!r) { ni.value = it.name; return; }
+    applyRename(it, nv, r === "both"); sv(KEY, items); render();
+  });
+  mk("Emri", ni);
+  const fw = document.createElement("label"); fw.className = "f wide"; fw.style.cssText = "flex-direction:row;align-items:center;gap:8px";
+  const fc = document.createElement("input"); fc.type = "checkbox"; fc.checked = !!it.free; fc.style.cssText = "width:22px;height:22px";
+  const ft = document.createElement("span"); ft.style.fontWeight = "600";
+  const fi = () => { ft.textContent = it.free ? "Abonim i lirë: mbeten " + Math.max(daysLeft(it), 0) + " ditë (deri më " + fmt(it.date) + "). Për t'ia dhënë një klienti: hiq tick-un dhe ndrysho emrin." : "Abonim i lirë (përdoret për klient tjetër)"; };
+  fc.addEventListener("change", () => { it.free = fc.checked; if (!it.free) delete it.free; fi(); sv(KEY, items); render(); });
+  fi(); fw.append(fc, ft); g.appendChild(fw);
+  const dw = document.createElement("label"); dw.className = "f wide"; dw.style.cssText = "flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap";
+  const dc = document.createElement("input"); dc.type = "checkbox"; dc.checked = !!it.dual; dc.style.cssText = "width:22px;height:22px";
+  const dt = document.createElement("span"); dt.style.fontWeight = "600"; dt.textContent = "🔗 Abonim i dyfishtë (lidhet me panelin tjetër të të njëjtit klient)";
+  const dh = document.createElement("span"); dh.className = "meta"; dh.style.cssText = "flex-basis:100%;margin:0";
+  const dHint = () => { dh.textContent = !it.dual ? "" : linked(it).length ? "Lidhur: " + groupMsg(it) : "S'u gjet abonim tjetër me emrin «" + (it.client || it.name) + "» që ka tick. Shtoje me butonin ➕ më poshtë ose vendos të njëjtin emër te tjetri."; };
+  dc.addEventListener("change", () => {
+    it.dual = dc.checked; if (!it.dual) delete it.dual;
+    if (it.dual) items.forEach(x => { if (x !== it && ckey(x) === ckey(it) && x.panel !== it.panel) x.dual = true; });
+    sv(KEY, items); render();
+  });
+  dHint();
+  const ds = document.createElement("div"); ds.style.cssText = "flex-basis:100%;display:flex;gap:6px;flex-wrap:wrap";
+  const first = (it.name || "").trim().split(/\s+/)[0].toLowerCase();
+  if (it.dual && !linked(it).length && first.length >= 3) {
+    items.filter(x => x !== it && x.panel !== it.panel && (x.name || "").toLowerCase().includes(first)).slice(0, 4).forEach(x => {
+      const lb = document.createElement("button"); lb.type = "button"; lb.className = "ghost"; lb.textContent = "Lidh me «" + x.name + "» (" + (x.panel || "?") + ")";
+      lb.onclick = e => { e.preventDefault(); const cn = it.client || it.name; it.client = cn; it.dual = true; x.client = cn; x.dual = true; sv(KEY, items); render(); };
+      ds.appendChild(lb);
+    });
+  }
+  dw.append(dc, dt, dh, ds); g.appendChild(dw);
+  const ci = document.createElement("input"); ci.type = "text"; ci.setAttribute("list", "clientsdl"); ci.autocapitalize = "none";
+  ci.value = it.client || ""; ci.placeholder = it.name;
+  ci.addEventListener("change", async () => {
+    const nv = ci.value.trim();
+    if (!(await askGive(it, nv || it.name))) { ci.value = it.client || ""; return; }
+    it.client = nv; sv(KEY, items); render();
+  });
+  mk("Klienti (shkruaj të njëjtin emër në Lion dhe Mega për t'i lidhur)", ci, "wide");
+  $("clientsdl").innerHTML = [...new Set(items.map(x => x.client || x.name))].map(x => '<option value="' + x.replace(/"/g, "&quot;") + '">').join("");
+  mk("Username", inp("text", it.username, v => { it.username = v.trim(); }));
+  const appI = inp("text", it.app, v => { it.app = v.trim(); }); appI.setAttribute("list", "appsdl"); mk("Aplikacioni", appI);
+  if (needDev === it.id) { needDev = null; appI.placeholder = "← plotëso aplikacionin e klientit të ri"; appI.style.borderColor = "var(--amber)"; setTimeout(() => appI.focus(), 80); }
+  mk("MAC adresa", inp("text", it.mac, v => { it.mac = v.trim().toUpperCase(); }));
+  const appI2 = inp("text", it.app2, v => { it.app2 = v.trim(); }); appI2.setAttribute("list", "appsdl"); mk("Aplikacioni 2 (aparati i dytë)", appI2);
+  mk("MAC adresa 2 (aparati i dytë)", inp("text", it.mac2, v => { it.mac2 = v.trim().toUpperCase(); }));
+  mk("Paneli", sel(allPanels().map(x => [x, x]), it.panel || "", v => { it.panel = v; addPanel(v); refreshPanels(); }));
+  dateI = mk("Data e skadimit", inp("date", it.date, v => { if (v) it.date = v; else dateI.value = it.date; }));
+  mk("Ora e skadimit", inp("time", it.time, v => { it.time = v || cfg.time; }));
+  startI = mk("Data e krijimit", inp("date", it.start, v => { it.start = v; recalc(); }));
+  const mopts = MONTHS.some(x => x[0] === it.months) ? MONTHS : [...MONTHS, [it.months, it.months + " muaj"]];
+  monI = mk("Kohëzgjatja (kliko: 1 vit / 6 muaj / 3 muaj / 1 muaj)", sel(mopts, it.months || 0, v => { it.months = +v; if (!autoTp()) recalcStart(); }));
+  segify(monI);
+  const ta = document.createElement("textarea"); ta.rows = 2; ta.value = it.note || "";
+  ta.addEventListener("change", () => { it.note = ta.value.trim(); save(); });
+  mk("Shënim", ta, "wide");
+  box.appendChild(g);
+  const sumEl = document.createElement("div");
+  sumEl.style.cssText = "padding:10px 12px;margin:10px 0;border:1px solid var(--line);border-radius:10px;font-weight:600;background:var(--bg)";
+  function updSum() {
+    const mt = it.months ? " (" + (it.months === 12 ? "1 vit" : it.months + " muaj") + ")" : "";
+    sumEl.textContent = "▶ Fillon " + (it.start ? fmt(it.start) : "—") + "  →  ⏹ Mbaron " + fmt(it.date) + (it.time ? " " + it.time : "") + mt;
+  }
+  updSum(); box.appendChild(sumEl);
+
+  const cps = allPanels().filter(p => p !== it.panel);
+  if (cps.length) {
+    const cb = document.createElement("div");
+    cb.style.cssText = "padding:10px 12px;margin:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--bg)";
+    const ct = document.createElement("div"); ct.style.cssText = "font-weight:600;margin-bottom:8px"; ct.textContent = "📋 Kopjo te paneli tjetër (zgjidh çfarë):";
+    const ck = document.createElement("div"); ck.style.cssText = "display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px";
+    const mkc = lab => { const l = document.createElement("label"); l.style.cssText = "display:flex;align-items:center;gap:6px"; const i = document.createElement("input"); i.type = "checkbox"; i.checked = true; i.style.cssText = "width:20px;height:20px"; l.append(i, document.createTextNode(lab)); ck.appendChild(l); return i; };
+    const cApp = mkc("Aplikacionin"), cMac = mkc("MAC adresën");
+    const cbt = document.createElement("div"); cbt.className = "btns";
+    const doCopy = names => {
+      if (!cApp.checked && !cMac.checked) { cm.textContent = "Zgjidh aplikacionin ose MAC."; return; }
+      if ((!cApp.checked || !it.app) && (!cMac.checked || !it.mac)) { cm.textContent = "Nuk ka çfarë të kopjohet (fushat e zgjedhura janë bosh)."; return; }
+      const done = [];
+      names.forEach(pn => {
+        let ex = items.find(x => x !== it && ckey(x) === ckey(it) && x.panel === pn), made = false;
+        if (!ex) {
+          const t = todayIso(); it.client = it.client || it.name; it.dual = true; made = true;
+          const yp = yearPlan(it, pn, t);
+          ex = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: pn, date: yp ? yp.end : addMonths(t, cfg.months), start: t, months: yp ? 0 : cfg.months, time: yp ? yp.time : cfg.time, note: "", mig: 1};
+          if (yp) made = "yr:" + yp.days;
+          items.push(ex);
+        }
+        if (cApp.checked && it.app) ex.app = it.app;
+        if (cApp.checked && it.app2) ex.app2 = it.app2;
+        if (cMac.checked && it.mac) ex.mac = it.mac;
+        if (cMac.checked && it.mac2) ex.mac2 = it.mac2;
+        done.push(pn + (typeof made === "string" ? " (i ri, " + made.slice(3) + " ditë deri në plotësimin e vitit nga Lion)" : made ? " (i ri, kontrollo datën)" : ""));
+      });
+      copyMsg = "✓ U kopjua te: " + done.join(", ");
+      sv(KEY, items); render();
+    };
+    cps.forEach(pn => {
+      const x = document.createElement("button"); x.type = "button"; x.className = "ghost";
+      const exists = items.some(y => y !== it && ckey(y) === ckey(it) && y.panel === pn);
+      x.textContent = "→ " + pn + (exists ? "" : " (krijo)"); x.onclick = () => doCopy([pn]); cbt.appendChild(x);
+    });
+    if (cps.length > 1) { const x = document.createElement("button"); x.type = "button"; x.className = "ghost"; x.textContent = "→ Të gjitha"; x.onclick = () => doCopy(cps); cbt.appendChild(x); }
+    const cm = document.createElement("div"); cm.className = "meta"; cm.style.margin = "8px 0 0"; cm.textContent = copyMsg; copyMsg = "";
+    cb.append(ct, ck, cbt, cm); box.appendChild(cb);
+  }
+
+  const b = document.createElement("div"); b.className = "btns";
+  [[1, "+1 muaj"], [3, "+3 muaj"], [6, "+6 muaj"], [12, "+1 vit"]].forEach(([m, l]) => {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "Rinovo " + l; x.onclick = () => renew(it, m); b.appendChild(x);
+  });
+  linked(it).forEach(o => {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "Hap " + (o.panel || "?") + " · " + fmt(o.date);
+    x.onclick = () => { openId = o.id; render(); }; b.appendChild(x);
+  });
+  { const yp = yearPlan(it, it.panel, todayIso());
+    if (yp && it.date !== yp.end) {
+      const y = document.createElement("button"); y.className = "ghost"; y.textContent = "📅 Plotëso vitin nga Lion (" + fmt(yp.end) + ")" + (d => d > 0 ? " · +" + d + " ditë" : "")(Math.round((parse(yp.end) - parse(it.date)) / 864e5));
+      y.onclick = () => {
+        if (!confirm("Lion filloi më " + fmt(yp.base.start) + ".\nViti plotësohet më " + fmt(yp.end) + ".\n\n«" + it.name + "» te " + it.panel + " do të skadojë më " + fmt(yp.end) + " (tani: " + fmt(it.date) + "). Vazhdo?")) return;
+        it.date = yp.end; it.months = 0; it.time = yp.time; delete it.tp; delete it.tpk; sv(KEY, items); render();
+      };
+      b.appendChild(y);
+    } }
+  const free = allPanels().filter(p => !items.some(x => ckey(x) === ckey(it) && x.panel === p));
+  if (free.length) {
+    const x = document.createElement("button"); x.className = "ghost"; x.textContent = "➕ Shto edhe në " + free[0];
+    x.onclick = async () => {
+      const s = todayIso(), yp = yearPlan(it, free[0], s);
+      let date = addMonths(s, cfg.months), months = cfg.months, time = cfg.time;
+      if (yp) {
+        const ch = await choose("Lion filloi më " + fmt(yp.base.start) + ". Viti plotësohet më " + fmt(yp.end) + ".\n\nTe " + free[0] + " duhen " + yp.days + " ditë (nga sot " + fmt(s) + " deri më " + fmt(yp.end) + ").",
+          [["rest", "Plotëso vitin · " + yp.days + " ditë", ""], ["full", "Abonim i plotë " + cfg.months + " muaj nga sot", "ghost"], [null, "Anulo", "ghost"]]);
+        if (!ch) return;
+        if (ch === "rest") { date = yp.end; months = 0; time = yp.time; }
+      }
+      it.client = it.client || it.name; it.dual = true;
+      const n = {id: Date.now() + Math.random(), name: it.name, client: it.client, dual: true, username: "", panel: free[0], date, start: s, months, time, note: ""};
+      items.push(n); sv(KEY, items); openId = n.id; render();
+    };
+    b.appendChild(x);
+  }
+  const a = document.createElement("a"); a.className = "btn ghost"; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Në kalendar";
+  a.onclick = () => { a.href = calUrl(it); };
+  a.href = calUrl(it); b.appendChild(a);
+  const cl = document.createElement("button"); cl.className = "ghost"; cl.textContent = "Mbyll";
+  cl.onclick = () => { editing = false; render(); };
+  b.appendChild(cl);
+  const d = document.createElement("button"); d.className = "del"; d.textContent = "🗑 Fshi abonentin";
+  d.onclick = () => delItem(it);
+  b.appendChild(d);
+  box.appendChild(b);
+}
+/* ---------- totali + krahasimi me GitHub ---------- */
+const counts = a => { const by = {}; a.forEach(x => { const p = x.panel || "?"; by[p] = (by[p] || 0) + 1; }); return {n: a.length, by, fal: a.filter(x => x.falas).length, up: a.filter(x => x.unpaid).length, fr: a.filter(x => x.free).length}; };
+const cTxt = c => c.n + " abonentë (" + Object.entries(c.by).map(([p, k]) => p + " " + k).join(", ") + ") · 🎁 Falas " + c.fal + " · ❗ Pa paguar " + c.up + " · 🆓 Të lira " + c.fr;
+let cmpTxt = "", cmpDiff = false;
+let statOpen = false;
+function updStat() {
+  const el = $("stat"); if (!el) return;
+  try {
+    el.innerHTML = ""; el.style.padding = statOpen ? "" : "6px 12px";
+    const c0 = counts(items);
+    const top = document.createElement("div"); top.style.cssText = "display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:15px";
+    const t = document.createElement("span"); t.style.flex = "1"; t.textContent = "📊 " + (statOpen ? cTxt(c0) : c0.n + " abonentë");
+    const ar = document.createElement("span"); ar.textContent = statOpen ? "▲" : "▼"; ar.className = "meta";
+    top.append(t, ar); top.onclick = () => { statOpen = !statOpen; updStat(); };
+    el.appendChild(top);
+  } catch (e) {}
+  updCmp();
+}
+/* krahasimi me GitHub: vendoset te Konfigurimi (nën «Sinkronizo me emailin»), jo në listë */
+function updCmp() {
+  const el = $("cmpbox"); if (!el) return;
+  try {
+    el.innerHTML = "";
+    const b = document.createElement("div"); b.className = "meta"; b.style.cssText = "margin-top:6px;white-space:pre-wrap";
+    b.textContent = cmpTxt || ("Kjo pajisje: " + (isDirty() ? "ka ndryshime të pa dërguara" : "pa ndryshime të pa dërguara") + " · versioni: " + (sync.sha ? sync.sha.slice(0, 7) : "asnjë (s'është sinkronizuar kurrë)"));
+    const w = document.createElement("div"); w.className = "btns"; w.style.marginTop = "8px";
+    const c = document.createElement("button"); c.type = "button"; c.className = "ghost"; c.textContent = "🔄 Krahaso me GitHub"; c.onclick = compareGH; w.appendChild(c);
+    if (cmpDiff) {
+      const m = document.createElement("button"); m.type = "button"; m.textContent = "⇄ Bashko me GitHub (pa humbur asgjë)";
+      m.onclick = async () => {
+        readSync();
+        try {
+          const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+          if (!g.ok) throw new Error(await errMsg(g));
+          const r = mergeRemote(await g.json()); cmpTxt = "✓ U bashkua: " + r.add + " të rinj, " + r.upd + " të përditësuar. Tani " + items.length + " gjithsej; po dërgohet te GitHub."; cmpDiff = false;
+        } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); }
+        updCmp();
+      };
+      w.appendChild(m);
+      const p = document.createElement("button"); p.type = "button"; p.textContent = "⬇ Merr nga GitHub (zëvendëson listën e kësaj pajisjeje)";
+      p.onclick = async () => { readSync(); if (await pullNow(true)) { cmpTxt = ""; cmpDiff = false; } updCmp(); }; w.appendChild(p);
+    }
+    el.append(b, w);
+  } catch (e) {}
+}
+async function compareGH() {
+  readSync();
+  if (!syncReady()) { cmpTxt = "Plotëso repon dhe tokenin te Konfigurimi."; cmpDiff = false; updCmp(); return; }
+  cmpTxt = "Po krahasoj me GitHub…"; updCmp();
+  try {
+    const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json(), r = counts(JSON.parse(fromB64(j.content))), l = counts(items);
+    const same = j.sha === sync.sha && !isDirty();
+    cmpDiff = !same;
+    cmpTxt = "GitHub: " + cTxt(r) + "\nKjo pajisje: " + cTxt(l) + "\n" + (same ? "✓ Njësoj me GitHub." : "✗ Ndryshojnë" + (isDirty() ? " (kjo pajisje ka ndryshime të pa dërguara)" : sync.sha ? " (GitHub ka version tjetër)" : " (kjo pajisje s'është sinkronizuar kurrë me GitHub, prandaj s'e tërheq vetë)") + ".");
+  } catch (e) { cmpTxt = "Gabim: " + (e.message || "rrjeti"); cmpDiff = false; }
+  updCmp();
+}
+/* slide: herë pas here butoni «Të lira» shfaq një nga një abonimet e lira (emri + ditët) dhe kthehet te teksti */
+let ftList = [], ftBusy = false;
+function ftCycle() {
+  if (ftBusy || document.hidden || !ftList.length) return;
+  const b = $("ch-free"), tk = b.querySelector(".ct"), names = ftList.slice(0, 12); ftBusy = true;
+  const step = i => {
+    if (i >= names.length) { tk.classList.remove("run"); b.classList.remove("tick"); setTimeout(() => { ftBusy = false; }, 600); return; }
+    tk.classList.remove("run"); void tk.offsetWidth; tk.textContent = names[i]; b.classList.add("tick"); tk.classList.add("run");
+    setTimeout(() => step(i + 1), 2650);
+  };
+  step(0);
+}
+setTimeout(ftCycle, 3500); setInterval(ftCycle, 14000);
+let expOpen = false;
+function render() {
+  updGoneTxt();
+  rowEls.clear(); fillApps(); renderSide(); updStat(); if (typeof updAlert === "function") updAlert();
+  const all = items.map(it => ({it, s: state(it)}));
+  const soon = x => !x.s.over && daysLeft(x.it) <= 7;
+  $("ch-all").textContent = "Të gjithë " + all.length;
+  $("ch-soon").textContent = "≤7 ditë " + all.filter(soon).length;
+  $("ch-over").textContent = "Mbaruar " + all.filter(x => x.s.over).length;
+  const frl = all.filter(x => x.it.free && !x.s.over);
+  $("ch-free").querySelector(".cl").textContent = "Të lira " + frl.length;
+  $("ch-free").classList.toggle("has", frl.length > 0);
+  ftList = frl.map(x => x.it).sort((a, b) => endDT(a) - endDT(b)).map(it => it.name + "\n" + daysTxt(it));
+  $("ch-unpaid").textContent = "❗ Pa paguar " + all.filter(x => x.it.unpaid).length;
+  $("ch-falas").textContent = "🎁 Falas " + all.filter(x => x.it.falas).length;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.f === flt));
+  const q = $("q").value.trim().toLowerCase(), pf = $("pf").value, sb = $("sb").value;
+  const rows = all.filter(x => (!pf || x.it.panel === pf) &&
+    (!q || (x.it.name + " " + (x.it.client || "") + " " + (x.it.username || "") + " " + (x.it.note || "") + " " + (x.it.app || "") + " " + (x.it.mac || "") + " " + (x.it.mac2 || "") + " " + (x.it.app2 || "")).toLowerCase().includes(q)) &&
+    (flt === "all" || (flt === "over" ? x.s.over : flt === "free" ? (x.it.free && !x.s.over) : flt === "unpaid" ? !!x.it.unpaid : flt === "falas" ? !!x.it.falas : soon(x))));
+  rows.sort((a, b) => {
+    if (sb === "name") return a.it.name.localeCompare(b.it.name, "sq", {sensitivity: "base"});
+    if (sb === "panel") return (a.it.panel || "").localeCompare(b.it.panel || "") || endDT(a.it) - endDT(b.it);
+    if (!!a.s.over !== !!b.s.over) return a.s.over ? 1 : -1;
+    return a.s.over ? endDT(b.it) - endDT(a.it) : endDT(a.it) - endDT(b.it);
+  });
+  /* të mbaruarit gjithmonë në fund, në grupin «Expired» (të mbyllur; hapen me klik ose kur kërkon) */
+  const grp = flt !== "over";
+  const act = grp ? rows.filter(x => !x.s.over) : rows, exp = grp ? rows.filter(x => x.s.over) : [];
+  const expShow = exp.length && (expOpen || !!q || (openId && exp.some(x => x.it.id === openId)));
+  rows.length = 0; rows.push(...act, ...(expShow ? exp : []));
+  const shown = rows.slice(0, lim);
+  const box = $("list"); box.innerHTML = "";
+  $("cnt").textContent = rows.length ? "Shfaqen " + shown.length + " nga " + rows.length : "";
+  $("more").style.display = rows.length > lim ? "block" : "none";
+  const expHead = () => {
+    const h = document.createElement("div"); h.className = "expgrp";
+    h.textContent = (expShow ? "▾ " : "▸ ") + "📦 Expired · " + exp.length + (expShow ? "" : " (kliko për t'i parë)");
+    h.onclick = () => { expOpen = !expOpen; render(); };
+    return h;
+  };
+  if (!rows.length && !exp.length) { box.innerHTML = '<div class="empty">Asnjë abonent.</div>'; return; }
+  if (q) {
+    const seen = new Set();
+    shown.forEach(({it}) => {
+      const k = ckey(it);
+      if (it.free || seen.has(k) || !linked(it).length || seen.size >= 5) return;
+      seen.add(k);
+      const nb = document.createElement("div");
+      nb.style.cssText = "padding:10px 12px;margin-bottom:10px;border:1px solid var(--accent);border-radius:10px;font-weight:600;background:var(--card)";
+      nb.textContent = "🔗 " + groupMsg(it);
+      box.appendChild(nb);
+    });
+  }
+  let headDone = false;
+  shown.forEach(({it, s}) => {
+    if (s.over && grp && !headDone) { box.appendChild(expHead()); headDone = true; }
+    const el = document.createElement("div");
+    el.className = "item" + (openId === it.id ? " open" : "");
+    el.innerHTML = '<div class="head"><div class="c-name"><div class="nm"></div></div><div class="c-start"></div><div class="c-date"></div><div class="c-panel"></div><div class="c-state"></div><div class="c-app"></div><div class="c-mac"></div><div class="c-del"></div><div class="sub"></div><div class="lnk"></div></div><div class="edit"></div>';
+    refreshHead(el, it);
+    el.querySelector(".head").onclick = () => { openId = openId === it.id ? null : it.id; editing = false; render(); if (openId && innerWidth < 1000) scrollTo(0, 0); };
+    rowEls.set(it.id, el);
+    box.appendChild(el);
+  });
+  if (exp.length && grp && !headDone) box.appendChild(expHead());
+}
+const resetLim = () => { lim = 50; render(); };
+$("q").oninput = resetLim; $("pf").onchange = resetLim; $("sb").onchange = resetLim;
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => { flt = c.dataset.f; resetLim(); });
+
+/* ---------- alarmi i javës së fundit (shfaqet kur hapet programi) ---------- */
+let alertGone = false, alertMin = false;
+function updAlert() {
+  const bx = $("alertbox"); if (!bx) return;
+  const soon = items.filter(it => !it.free && !state(it).over && daysLeft(it) <= 7);
+  const tps = items.filter(tpDue);
+  const list = [...new Set([...soon, ...tps])].sort((a, b) => endDT(a) - endDT(b));
+  if (!list.length || alertGone) { bx.style.display = "none"; return; }
+  bx.style.display = "block"; bx.classList.toggle("min", alertMin);
+  $("alertttl").textContent = (tps.length ? "⏰ Kujtesa" : "⏰ Skadojnë brenda 7 ditëve") + " (" + list.length + ")";
+  $("alertcnt").textContent = list.length;
+  $("alertlist").innerHTML = list.map(it => '<div class="ar" style="flex-wrap:wrap"><span><b>' + esc(it.name) + '</b>' + (it.panel ? ' <span class="meta">· ' + esc(it.panel) + '</span>' : '') + '</span><i style="color:' + state(it).c + '">' + esc(state(it).t) + '</i>' +
+    (tpDue(it) ? '<div style="width:100%;display:flex;gap:8px;align-items:center;justify-content:space-between"><span class="meta">⏳ Mungojnë ' + tpMiss(it) + ' ditë deri më ' + esc(fmt(it.tp)) + '</span><button type="button" class="tpadd" data-id="' + esc(it.id) + '" style="min-height:0;padding:5px 10px;font-size:13px">➕ Shtova 1 muaj</button></div>' : '') + '</div>').join("");
+}
+$("alertlist").onclick = e => { const bt = e.target.closest(".tpadd"); if (!bt) return; const it = items.find(x => String(x.id) === bt.dataset.id); if (it) tpExtend(it); };
+$("alertmin").onclick = () => { alertMin = true; updAlert(); };
+$("alertbub").onclick = () => { alertMin = false; updAlert(); };
+$("alertx").onclick = () => { alertGone = true; updAlert(); };
+$("alertgo").onclick = () => { flt = "soon"; alertMin = true; location.hash = "#lista"; resetLim(); };
+$("more").onclick = () => { lim += 50; render(); };
+
+/* ---------- krijo ---------- */
+function updPrev() {
+  const s = $("d").value, mo = +$("m").value;
+  $("tpdw").style.display = $("tp").checked ? "" : "none";
+  if ($("tp").checked) {
+    const n = +$("tpd").value || 344;
+    $("prev").textContent = s ? "Skadon më " + fmt(addDays(s, n)) + " " + ($("h").value || "") + " (" + n + " ditë). Për 12 muaj mungojnë " + Math.max(0, Math.round((parse(addMonths(s, 12)) - parse(addDays(s, n))) / 864e5)) + " ditë; do të të kujtoj çdo muaj." : "";
+    return;
+  }
+  $("prev").textContent = s && mo ? "Skadon më " + fmt(addMonths(s, mo)) + " " + ($("h").value || "") : "";
+}
+["d", "m", "h", "tp", "tpd"].forEach(i => $(i).addEventListener("input", updPrev));
+$("tp").addEventListener("change", updPrev);
+$("du").addEventListener("change", renderDualOpts); $("p").addEventListener("change", renderDualOpts);
+$("add").onclick = () => {
+  const n = $("n").value.trim(), u = $("u").value.trim(), p = $("p").value;
+  const s = $("d").value, mo = +$("m").value;
+  const tpOn = $("tp").checked, tpDays = Math.min(364, Math.max(1, +$("tpd").value || 344));
+  if (!n || !s || (!mo && !tpOn)) { $("addmsg").textContent = "Plotëso emrin, datën dhe kohëzgjatjen."; return; }
+  const du = $("du").checked;
+  const ap = $("ap").value.trim(), mc = $("mc").value.trim().toUpperCase(), mc2 = $("mc2").value.trim().toUpperCase(), ap2 = $("ap2").value.trim(), tm = $("h").value || cfg.time;
+  const endS = tpOn ? addDays(s, tpDays) : addMonths(s, mo);
+  const nit = {id: Date.now() + Math.random(), cr: Date.now(), name: n, username: u, app: ap, mac: mc, mac2: mc2, app2: ap2, mig: 1, dual: du, panel: p, date: endS, start: s, months: tpOn ? 0 : mo, time: tm, note: $("t").value.trim()};
+  if (tpOn) { nit.tp = addMonths(s, 12); nit.tpk = 0; }
+  items.push(nit);
+  if (du) items.forEach(x => { if (ckey(x) === n.toLowerCase()) x.dual = true; });
+  const alsoIn = [];
+  if (du) {
+    const wApp = $("dapp") && $("dapp").checked, wMac = $("dmac") && $("dmac").checked;
+    [...document.querySelectorAll("#dualopts .dp")].filter(c => c.checked).forEach(c => {
+      let ex = items.find(x => ckey(x) === n.toLowerCase() && x.panel === c.value);
+      if (!ex) { ex = {id: Date.now() + Math.random(), cr: Date.now(), name: n, client: n, dual: true, username: "", panel: c.value, date: addMonths(s, mo), start: s, months: mo, time: tm, note: "", mig: 1}; items.push(ex); }
+      if (wApp && ap) ex.app = ap;
+      if (wApp && ap2) ex.app2 = ap2;
+      if (wMac && mc) ex.mac = mc;
+      if (wMac && mc2) ex.mac2 = mc2;
+      alsoIn.push(c.value);
+    });
+  }
+  sv(KEY, items);
+  $("du").checked = false; $("tp").checked = false; updPrev();
+  ["n", "u", "t", "ap", "mc", "mc2", "ap2"].forEach(i => $(i).value = "");
+  $("addmsg").textContent = "✓ U shtua: " + n + (alsoIn.length ? " (dhe te " + alsoIn.join(", ") + ")" : "");
+  refreshPanels(); render(); $("n").focus();
+};
+$("imp").onclick = () => {
+  const lines = $("impbox").value.split("\n").map(l => l.trim()).filter(Boolean);
+  let ok = 0, dup = 0; const bad = [];
+  lines.forEach((ln, i) => {
+    let [n, u, pr, ds, ms, nt, ap, mc, mc2, ap2] = ln.split(/[;\t]/).map(x => x.trim());
+    if (mc && !mc2) { const mm = mc.match(/([0-9a-f]{2}[:-]){5}[0-9a-f]{2}/gi) || []; if (mm.length > 1) { mc = mm[0]; mc2 = mm[1]; } }
+    const s = normDate(ds);
+    const endD = normDate(ms);
+    const mo = endD ? 0 : (/vit/i.test(ms || "") ? 12 * (parseInt(ms) || 1) : parseInt(ms));
+    if (!n || !(endD || (s && mo > 0))) { bad.push(i + 1); return; }
+    let p = "";
+    if (pr) { p = panels.find(x => x.toLowerCase() === pr.toLowerCase()) || pr; addPanel(p); }
+    const date = endD || addMonths(s, mo);
+    if (items.some(x => x.name === n && (x.username || "") === (u || "") && (x.panel || "") === p && x.date === date)) { dup++; return; }
+    items.push({id: Date.now() + Math.random(), name: n, username: u || "", panel: p, date, start: s, months: mo || 0, time: cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1});
+    ok++;
+  });
+  sv(KEY, items); refreshPanels(); render();
+  $("impmsg").textContent = "U shtuan " + ok + (dup ? ", u kaluan " + dup + " të përsëritura" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") : ".");
+  if (!bad.length) $("impbox").value = "";
+};
+
+/* ---------- konfigurimi ---------- */
+function applyCfg() {
+  $("ctime").value = cfg.time; $("cmonths").value = String(cfg.months);
+  $("h").value = cfg.time; $("m").value = String(cfg.months); updPrev();
+  [$("m"), $("cmonths")].forEach(x => x._sync && x._sync());
+}
+$("ctime").onchange = () => { cfg.time = $("ctime").value || "14:00"; sv(CKEY, cfg); applyCfg(); };
+$("cmonths").onchange = () => { cfg.months = +$("cmonths").value; sv(CKEY, cfg); applyCfg(); };
+$("addp").onclick = () => { const p = $("newp").value.trim(); if (p) { addPanel(p); $("newp").value = ""; refreshPanels(); } };
+function apps(x) { return [x.app, x.app2].filter(Boolean).join(" · "); }
+function macs(x) { return [x.mac, x.mac2].filter(Boolean).join(" · "); }
+function remindersJson() {
+  return JSON.stringify(items.map(x => ({id: x.id, months: x.months || 0, name: x.name, client: x.client || "", username: x.username || "", panel: x.panel || "", free: !!x.free, unpaid: !!x.unpaid, falas: !!x.falas, pnm: x.pnm || "", pnt: x.pnt || "", cr: x.cr || 0, dual: !!x.dual, date: x.date, start: x.start || "", app: x.app || "", mac: x.mac || "", mac2: x.mac2 || "", app2: x.app2 || "", time: x.time || "14:00", note: x.note || "", tp: x.tp || "", tpk: x.tpk || 0, bs: x.bs || ""})), null, 2);
+}
+$("exp").onclick = () => {
+  const box = $("expbox"); box.value = remindersJson(); box.style.display = "block"; box.focus(); box.select();
+  try { navigator.clipboard.writeText(box.value); } catch (e) {}
+};
+$("expdl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([remindersJson()], {type: "application/json"}));
+  a.download = "reminders.json"; document.body.appendChild(a); a.click(); a.remove();
+};
+/* ---------- sinkronizimi me GitHub ---------- */
+const b64 = s => btoa(unescape(encodeURIComponent(s)));
+const errText = st => st === 401 ? "tokeni është i pavlefshëm ose ka skaduar" : st === 403 ? "tokeni s'ka leje (duhet Contents: Read and write)" : st === 404 ? "repo nuk u gjet (kontrollo emrin dhe që tokeni ka akses te ky repo)" : st === 409 || st === 422 ? "konflikt, provo sërish" : "HTTP " + st;
+let syncBusy = false;
+const ghUrl = () => "https://api.github.com/repos/" + sync.repo + "/contents/reminders.json";
+const ghH = () => ({Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"});
+const syncReady = () => /^[\w.-]+\/[\w.-]+$/.test(sync.repo) && !!sync.token;
+const isDirty = () => { try { return !!localStorage.getItem("dirty-v1"); } catch (e) { return false; } };
+const fromB64 = t => new TextDecoder().decode(Uint8Array.from(atob(String(t).replace(/\s/g, "")), c => c.charCodeAt(0)));
+/* zëvendëson listën lokale me atë të GitHub */
+function adoptRemote(j) {
+  const arr = JSON.parse(fromB64(j.content));
+  if (!Array.isArray(arr)) throw new Error("reminders.json nuk është listë");
+  items = arr.map(x => {
+    const o = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "",
+      dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
+    if (x.bs) o.bs = x.bs;
+    if (x.free) o.free = true;
+    if (x.unpaid) o.unpaid = true;
+    if (x.falas) o.falas = true;
+    if (x.pnm) o.pnm = x.pnm;
+    if (x.cr) o.cr = x.cr;
+    if (x.pnt) o.pnt = x.pnt;
+    if (x.tp) { o.tp = x.tp; o.tpk = x.tpk || 0; }
+    return o;
+  });
+  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); localStorage.removeItem("sha-v1-lion.txt"); localStorage.removeItem("sha-v1-mega.txt"); } catch (e) {}
+  sync.sha = j.sha; sv("sync-v1", sync);
+  items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
+  openId = null; editing = false; refreshPanels(); render();
+}
+/* bashkon listën e GitHub me atë të kësaj pajisjeje, pa humbur asgjë (shton ata që mungojnë, merr shenjat Falas/Pa paguar/Të lira) */
+function mergeRemote(j) {
+  const arr = JSON.parse(fromB64(j.content));
+  if (!Array.isArray(arr)) throw new Error("reminders.json nuk është listë");
+  const low = v => String(v || "").trim().toLowerCase();
+  let add = 0, upd = 0;
+  arr.forEach(x => {
+    const r = {id: x.id || Date.now() + Math.random(), name: x.name || "", client: x.client || "", username: x.username || "", panel: x.panel || "", dual: !!x.dual, date: x.date, start: x.start || "", months: x.months || 0, time: x.time || cfg.time, note: x.note || "", app: x.app || "", mac: (x.mac || "").toUpperCase(), mac2: (x.mac2 || "").toUpperCase(), app2: x.app2 || "", mig: 1};
+    ["free", "unpaid", "falas", "pnm", "pnt", "cr", "bs"].forEach(k => { if (x[k]) r[k] = x[k]; });
+    if (x.tp) { r.tp = x.tp; r.tpk = x.tpk || 0; }
+    if (!r.date) return;
+    const ex = items.find(y => y.id === r.id) || items.find(y => low(y.panel) === low(r.panel) && (r.username ? low(y.username) === low(r.username) : low(y.name) === low(r.name) && y.date === r.date));
+    if (!ex) { if (isGone(r)) return; items.push(r); add++; return; }
+    let ch = false;
+    ["free", "unpaid", "falas"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = true; ch = true; } });
+    ["client", "app", "mac", "app2", "mac2", "note", "start", "pnm", "pnt", "username", "bs"].forEach(k => { if (r[k] && !ex[k]) { ex[k] = r[k]; ch = true; } });
+    if (r.dual && !ex.dual) { ex.dual = true; ch = true; }
+    if (r.tp && ex.tp && (r.tpk || 0) > (ex.tpk || 0)) { ex.tpk = r.tpk; ch = true; }
+    if (r.cr && !ex.cr) { ex.cr = r.cr; ch = true; }
+    if (r.date > ex.date) { ex.date = r.date; ex.start = r.start || ex.start; ex.months = r.months || ex.months; ex.time = r.time || ex.time; ch = true; }
+    if (ch) upd++;
+  });
+  sync.sha = j.sha; sv("sync-v1", sync);
+  items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
+  sv(KEY, items); refreshPanels(); render();
+  return {add, upd};
+}
+/* tërheq listën nga GitHub. manual=true: me butonin (me konfirmim); manual=false: automatikisht, vetëm kur është e sigurt */
+async function pullNow(manual) {
+  const msg = $("syncmsg");
+  if (!syncReady()) { if (manual) msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (syncBusy) return false;
+  if (!manual && (isDirty() || editing)) return false;
+  syncBusy = true;
+  try {
+    const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+    if (g.status === 404) { if (manual) msg.textContent = "reminders.json s'ekziston ende në GitHub."; return false; }
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json();
+    if (!manual) {
+      if (j.sha === sync.sha) return false;                    // asgjë e re
+      if (sync.sha === "" && items.length) { const m = mergeRemote(j); msg.textContent = "✓ U bashkua me GitHub: " + m.add + " të rinj, " + m.upd + " të përditësuar (" + items.length + " gjithsej)"; return true; }   // pajisje e pasinkronizuar kurrë: bashkon, pa humbur asgjë
+    } else if (items.length && !confirm("Lista e kësaj pajisjeje do të zëvendësohet me atë nga GitHub. Vazhdoj?")) return false;
+    adoptRemote(j);
+    msg.textContent = "✓ U ngarkuan " + items.length + " abonime nga GitHub (" + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + ")";
+    return true;
+  } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+  finally { syncBusy = false; }
+}
+async function syncNow() {
+  const msg = $("syncmsg");
+  if (syncBusy) { schedSync(); return false; }
+  if (!syncReady()) { msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (!items.length) { msg.textContent = "Lista është bosh, s'e dërgoj (që të mos fshihet ajo në GitHub). Shtyp «Merr nga GitHub»."; return false; }
+  syncBusy = true;
+  msg.textContent = "Po sinkronizoj…";
+  const br = sync.branch || "main", v0 = ver;
+  try {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      let sha, remote;
+      const g = await fetch(ghUrl() + "?ref=" + encodeURIComponent(br) + "&_=" + Date.now(), {headers: ghH(), cache: "no-store"});
+      if (g.ok) { remote = await g.json(); sha = remote.sha; } else if (g.status !== 404) throw new Error(await errMsg(g));
+      if (sha && sha !== sync.sha) {
+        // GitHub ka version që kjo pajisje s'e njeh (ndryshuar nga pajisje tjetër ose s'është sinkronizuar kurrë)
+        let same = false; try { same = fromB64(remote.content).trim() === remoteJsonSafe(); } catch (e) {}
+        if (!same && !confirm("Lista në GitHub është ndryshe nga ajo e kësaj pajisjeje (mund ta ketë ndryshuar një pajisje tjetër).\n\nOK = e mbishkruaj me listën e kësaj pajisjeje\nAnulo = marr listën nga GitHub (humbasin ndryshimet e kësaj pajisjeje)")) {
+          adoptRemote(remote); msg.textContent = "✓ U ngarkua lista nga GitHub (" + items.length + " abonime)"; return true;
+        }
+      }
+      const body = {message: "Përditësim nga aplikacioni", content: b64(remindersJson()), branch: br};
+      if (sha) body.sha = sha;
+      const p = await fetch(ghUrl(), {method: "PUT", headers: Object.assign({"Content-Type": "application/json"}, ghH()), body: JSON.stringify(body), cache: "no-store"});
+      if (p.ok) {
+        try { sync.sha = (await p.json()).content.sha; sv("sync-v1", sync); if (ver === v0) localStorage.removeItem("dirty-v1"); } catch (e) {}
+        msg.textContent = "✓ Sinkronizuar " + new Date().toLocaleTimeString("sq", {hour: "2-digit", minute: "2-digit"}) + " (" + items.length + " abonime)";
+        return true;
+      }
+      if ((p.status === 409 || p.status === 422) && attempt < 2) continue; // sha e vjetër, provo sërish
+      throw new Error(await errMsg(p));
+    }
+  } catch (e) { msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+  finally { syncBusy = false; }
+}
+const remoteJsonSafe = () => remindersJson().trim();
+async function errMsg(r) {
+  let d = ""; try { d = (await r.json()).message || ""; } catch (e) {}
+  return errText(r.status) + (d ? " [" + d + "]" : "");
+}
+function readSync() {
+  sync.repo = $("syncrepo").value.trim(); sync.branch = $("syncbranch").value.trim() || "main";
+  sync.token = $("synctoken").value.trim(); sync.auto = $("syncauto").checked; sv("sync-v1", sync);
+}
+$("syncrepo").value = sync.repo; $("syncbranch").value = sync.branch; $("synctoken").value = sync.token; $("syncauto").checked = !!sync.auto;
+$("showtok").onclick = () => { const t = $("synctoken"), h = t.type === "password"; t.type = h ? "text" : "password"; $("showtok").textContent = h ? "🙈 Fshih tokenin" : "👁 Shfaq tokenin"; };
+["syncrepo", "syncbranch", "synctoken", "syncauto"].forEach(id => { $(id).onchange = readSync; $(id).oninput = readSync; });
+$("syncnow").onclick = () => { readSync(); syncNow(); };
+$("syncpull").onclick = () => { readSync(); pullNow(true); };
+/* ---------- lion.txt nga GitHub: bashkon abonentët (shton të rinj, përditëson ekzistuesit, s'fshin asgjë) ---------- */
+/* paketa -> muaj: «6 Months» = 6, «1 Month» = 1, «1 Year» = 12; ditët/orët nuk numërohen si muaj */
+function pkgMonths(t) {
+  t = String(t || "").trim(); if (!t) return 0;
+  let m = t.match(/(\d+)\s*(?:years?|yrs?|vit(?:e|et)?|v)\b/i); if (m) return 12 * +m[1];
+  m = t.match(/(\d+)\s*(?:months?|mo|muaj)\b/i); if (m) return +m[1];
+  if (/day|hour|ditë|dite|ore|orë/i.test(t)) return 0;
+  m = t.match(/^\d+$/); return m ? +m[0] : 0;
+}
+/* ora nga data e skadimit, p.sh. «2027-05-11 21:53» -> «21:53» */
+function timeOf(t) {
+  t = String(t || "").trim();
+  if (/^\d{10}(\d{3})?$/.test(t)) { const d = new Date(t.length === 13 ? +t : t * 1000); return isNaN(d) ? "" : p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  const m = t.match(/(?:^|[T\s,])(\d{1,2}):(\d{2})(?::\d{2})?/); return m && +m[1] < 24 && +m[2] < 60 ? p2(m[1]) + ":" + m[2] : "";
+}
+const nz = t => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "");
+async function pullFile(file, manual) {
+  const msg = $("syncmsg");
+  if (!syncReady()) { if (manual) msg.textContent = "Plotëso repo (emri/repo) dhe tokenin."; return false; }
+  if (syncBusy || (!manual && editing)) return false;
+  try {
+    const u = "https://api.github.com/repos/" + sync.repo + "/contents/" + file + "?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now();
+    const g = await fetch(u, {headers: ghH(), cache: "no-store"});
+    if (g.status === 404) { if (manual) msg.textContent = file + " s'ekziston ende në GitHub."; return false; }
+    if (!g.ok) throw new Error(await errMsg(g));
+    const j = await g.json();
+    let last = ""; try { last = localStorage.getItem("sha-v1-" + file) || ""; } catch (e) {}
+    if (!manual && j.sha === last) return false;
+    const lines = fromB64(j.content).split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
+    let add = 0, upd = 0, same = 0, dup = 0, fill = 0; const held = []; const seen = new Set(); const bad = []; let badEx = ""; const hadItems = items.length > 0;
+    lines.forEach((ln, i) => {
+      let [n, un, pr, ds, ms, nt, ap, mc, mc2, ap2, pk] = ln.split(/[;\t]/).map(x => x.trim());
+      let pkm = pkgMonths(pk);   // kohëzgjatja nga paketa e panelit (muaj)
+      if (!nz(n) && un) n = un;      // paneli shkruan «---» kur shënimi është bosh
+      if (!nz(nt)) nt = "";
+      let s0 = normDate(ds), endD = normDate(ms), tm = endD ? timeOf(ms) : "";
+      let mo0 = endD ? 0 : pkgMonths(ms);
+      if (!endD && !(s0 && mo0 > 0)) {
+        /* rresht me rend tjetër fushash: kërko vetë datat (e para = fillimi, e fundit = skadimi) dhe paketën */
+        const cells = ln.split(/[;\t]/).map(x => x.trim()), dts = cells.filter(c => normDate(c)).sort((a, b) => (normDate(a) + " " + timeOf(a)).localeCompare(normDate(b) + " " + timeOf(b)));
+        if (dts.length) { endD = normDate(dts[dts.length - 1]); tm = timeOf(dts[dts.length - 1]); s0 = dts.length > 1 ? normDate(dts[0]) : s0; }
+        if (!pkm) pkm = cells.map(pkgMonths).find(v => v > 0) || 0;
+        mo0 = 0;
+      }
+      if (!n || !(endD || (s0 && mo0 > 0))) { bad.push(i + 1); if (badEx === "") badEx = "«" + ln.slice(0, 90) + "»"; return; }
+      /* kohëzgjatja: nga paketa, ose e llogaritur nga data e fillimit dhe e mbarimit kur ajo s'është shkruar */
+      const calc = (s0 && endD) ? Math.round((parse(endD) - parse(s0)) / (864e5 * 30.44)) : 0;
+      const mo = mo0 || pkm || (calc > 0 ? calc : 0);
+      let p = "";
+      if (pr) { p = panels.find(x => x.toLowerCase() === pr.toLowerCase()) || pr; addPanel(p); }
+      const date = endD || addMonths(s0, mo0);
+      const key = p.toLowerCase() + "|" + (un ? un.toLowerCase() : n.toLowerCase() + "|" + date);
+      if (seen.has(key)) { dup++; return; }                 // rresht i përsëritur brenda skedarit
+      seen.add(key);
+      let ex = items.find(x => (x.panel || "") === p && (un ? (x.username || "").toLowerCase() === un.toLowerCase() : x.name === n && !x.username));
+      /* abonentët që ti i ke vendosur vetëm me emër (pa username): lidhen me emrin/shënimin dhe marrin username-in nga Lion/Mega */
+      if (!ex) {
+        const nn = nz(n), dd = x => Math.abs(Math.round((parse(x.date) - parse(date)) / 864e5));
+        const c = items.filter(x => (x.panel || "") === p && !x.username && nn.length >= 3 && (nz(x.name) === nn ||
+          (nn.length >= 4 && nz(x.name).length >= 4 && (nz(x.name).startsWith(nn) || nn.startsWith(nz(x.name))) && dd(x) <= 45)));
+        c.sort((a, b) => (nz(b.name) === nn) - (nz(a.name) === nn) || dd(a) - dd(b));
+        if (c.length) ex = c[0];
+      }
+      if (ex) {
+        if (un && !ex.username) { ex.username = un; fill++; }
+        /* Lion përditëson vetëm datat; emrin, shënimin, aplikacionin dhe MAC i plotëson vetëm kur janë bosh te ti */
+        const un0 = nz(un || ex.username);
+        /* emri/shënimi nga paneli përditësohen vetë kur ti s'i ke ndryshuar dorazi (janë bosh, si username-i, ose njësoj si herën e kaluar nga paneli) */
+        const nm = (!nz(ex.name) || nz(ex.name) === un0 || (ex.pnm !== undefined && ex.name === ex.pnm)) ? n : ex.name;
+        const nn2 = (!nz(ex.note) || (ex.pnt !== undefined && ex.note === ex.pnt)) ? (nt || "") : ex.note;
+        const nw = {name: nm, pnm: n, pnt: nt || "", date, time: tm || ex.time || cfg.time, start: s0 || ex.start || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || ex.months || 0, note: nn2, app: ex.app || ap || "", mac: (ex.mac || mc || "").toUpperCase(), mac2: (ex.mac2 || mc2 || "").toUpperCase() || ex.mac2, app2: ex.app2 || ap2 || ex.app2};
+        if (Object.keys(nw).every(k => ex[k] === nw[k])) same++; else { Object.assign(ex, nw); upd++; }
+      } else {
+        const ni = {id: Date.now() + Math.random(), name: n, pnm: n, pnt: nt || "", username: un || "", panel: p, date, start: s0 || (endD && mo ? addMonths(endD, -mo) : ""), months: mo || 0, time: tm || cfg.time, note: nt || "", app: ap || "", mac: (mc || "").toUpperCase(), mac2: (mc2 || "").toUpperCase(), app2: ap2 || "", mig: 1};
+        /* NEW vetëm për abonentë të rinj të vërtetë (jo gjatë ngarkimit të parë, jo për ata të krijuar para >3 ditësh) */
+        if (hadItems && (!s0 || Date.now() - parse(s0).getTime() < 3 * 864e5)) ni.cr = Date.now();
+        if (isGone(ni)) { if (!isDeclined(ni)) held.push(ni); return; }   // fshirë më parë nga ti
+        items.push(ni);
+        add++;
+      }
+    });
+    if (held.length) {
+      const lst = held.slice(0, 12).map(x => "• " + x.name + (x.username ? " (@" + x.username + ")" : "") + " · " + (x.panel || "?") + " · " + fmt(x.date)).join("\n");
+      if (confirm("Këta abonentë i ke fshirë më parë, por janë përsëri te " + file + ":\n\n" + lst + (held.length > 12 ? "\n… dhe " + (held.length - 12) + " të tjerë" : "") + "\n\nA t'i vendos përsëri?\n\nOK = po, i vendos\nCancel = jo, mos i vendos (as mos më pyet për ta)")) {
+        held.forEach(x => { delGone(x); items.push(x); add++; });
+      } else { const dd = gList("decl-v1"); held.forEach(x => { const k = goneKey(x); if (!dd.includes(k)) dd.push(k); }); gSave("decl-v1", dd); }
+    }
+    try { localStorage.setItem("sha-v1-" + file, j.sha); } catch (e) {}
+    if (add || upd || fill) { sv(KEY, items); sv(PKEY, panels); refreshPanels(); render(); }
+    if (manual || add || upd || fill) msg.textContent = "✓ " + file + ": " + add + " të rinj, " + upd + " të përditësuar, " + fill + " username të plotësuar, " + same + " pa ndryshim" + (dup ? ", " + dup + " të përsëritura të kaluara" : "") + (bad.length ? ". Rreshta me gabim: " + bad.join(", ") + " (p.sh. " + badEx + " — s'kuptohet data ose kohëzgjatja)" : "") + ".";
+    return true;
+  } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
+}
+async function pullLion(manual) { await pullFile("lion.txt", manual); await pullFile("mega.txt", manual); }
+$("lionpull").onclick = () => { readSync(); pullLion(true); };
+$("syncdiag").onclick = async () => {
+  readSync();
+  const msg = $("syncmsg"), L = [];
+  const show = () => { msg.style.whiteSpace = "pre-wrap"; msg.textContent = "Faqja v4\n" + L.join("\n"); };
+  L.push("Repo: " + (sync.repo || "(bosh)") + " | Dega: " + (sync.branch || "main") + " | Token: " + (sync.token ? sync.token.slice(0, 11) + "… (" + sync.token.length + " shkronja)" : "(bosh)")); show();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo) || !sync.token) { L.push("✗ Plotëso repon (emri/repo) dhe tokenin."); show(); return; }
+  const H = {Authorization: "Bearer " + sync.token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
+  const api = "https://api.github.com/repos/" + sync.repo;
+  const step = async (label, u, opt) => {
+    try {
+      const r = await fetch(u, Object.assign({headers: H, cache: "no-store"}, opt || {}));
+      let j = {}; try { j = await r.json(); } catch (e) {}
+      L.push((r.ok ? "✓ " : "✗ ") + label + " → HTTP " + r.status + (r.ok ? "" : " " + (j.message || "")));
+      if (r.ok && j.private !== undefined) L.push("   repo është " + (j.private ? "PRIVATE" : "PUBLIC ⚠") + (j.permissions && j.permissions.push === false ? " | tokeni s'ka leje shkrimi" : ""));
+      show(); return r.ok ? j : null;
+    } catch (e) { L.push("✗ " + label + " → rrjeti/CORS: " + e.message); show(); return null; }
+  };
+  const rp = await step("Hyrja te repo", api);
+  if (!rp) { L.push("→ Kontrollo emrin e repos dhe që tokeni e ka këtë repo të zgjedhur."); show(); return; }
+  await step("Dega " + (sync.branch || "main"), api + "/branches/" + encodeURIComponent(sync.branch || "main"));
+  await step("Skedari reminders.json", api + "/contents/reminders.json?ref=" + encodeURIComponent(sync.branch || "main") + "&_=" + Date.now());
+  L.push("Tani shtyp \"Sinkronizo tani\"."); show();
+};
+
+
+$("bk").onclick = () => {
+  const box = $("bkbox"); box.value = JSON.stringify({items, panels, cfg}); box.style.display = "block"; box.focus(); box.select();
+  try { navigator.clipboard.writeText(box.value); } catch (e) {}
+};
+$("rs").onclick = () => {
+  const b = $("rs");
+  if (!b.dataset.s) { b.dataset.s = "1"; b.textContent = "Prek sërish për ta rikthyer"; return; }
+  delete b.dataset.s; b.textContent = "Rikthe (zëvendëson gjithçka)";
+  try {
+    const d = JSON.parse($("rsbox").value);
+    if (!Array.isArray(d.items)) throw 0;
+    items = d.items; panels = d.panels || panels; cfg = Object.assign(cfg, d.cfg || {});
+    sv(KEY, items); sv(PKEY, panels); sv(CKEY, cfg);
+    refreshPanels(); applyCfg(); render();
+    $("rsmsg").textContent = "✓ U rikthyen " + items.length + " abonime."; $("rsbox").value = "";
+  } catch (e) { $("rsmsg").textContent = "Kopja nuk është e vlefshme."; }
+};
+
+/* ---------- migrim një herë: MAC dhe aplikacioni nga shënimi në fushat e tyre ---------- */
+const MACRE = /([0-9a-f]{2}[:-]){5}[0-9a-f]{2}/i;
+let mg = false;
+items.forEach(x => {
+  if (x.mig) return; x.mig = 1; mg = true;
+  const m = (x.note || "").match(MACRE) || (x.name || "").match(MACRE);
+  if (m && !x.mac) x.mac = m[0].toUpperCase().replace(/-/g, ":");
+  const rest = (x.note || "").replace(MACRE, "").trim();
+  if (!x.app && rest && /smart|iptv|extreme|xtream|player|ott/i.test(rest) && rest.length <= 30) { x.app = rest; x.note = ""; }
+  else if (m && x.note && !rest) x.note = "";
+});
+if (mg) sv(KEY, items);
+/* ---------- nisja ---------- */
+fillSelect($("m"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+segify($("m"));
+fillSelect($("cmonths"), MONTHS.filter(x => x[0]).map(([v, l]) => [v, l]));
+segify($("cmonths"));
+$("d").value = todayIso();
+applyCfg(); refreshPanels(); render(); showView();
+const pullAll = async () => { await pullNow(false); await pullLion(false); };
+pullAll();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAll(); });
+setInterval(() => { if (!document.hidden) pullAll(); }, 120000);
+$("goneclr").onclick = () => { if (confirm("Të harrohen të gjithë të fshirët? Pas kësaj Lion/Mega mund t'i vendosë përsëri.")) { gSave("del-v1", []); gSave("decl-v1", []); updGoneTxt(); } };
+updGoneTxt();
+/* ---------- Telegram ---------- */
+let tg = Object.assign({token: "", chat: ""}, ld("tg-v1", {}));
+$("tgtoken").value = tg.token; $("tgchat").value = tg.chat;
+function readTg() { tg.token = $("tgtoken").value.trim(); tg.chat = $("tgchat").value.trim(); try { localStorage.setItem("tg-v1", JSON.stringify(tg)); } catch (e) {} }
+["tgtoken", "tgchat"].forEach(id => { $(id).oninput = readTg; $(id).onchange = readTg; });
+async function tgSend(text) {
+  if (!tg.token || !tg.chat) return false;
+  try { const r = await fetch("https://api.telegram.org/bot" + tg.token + "/sendMessage", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({chat_id: tg.chat, text})}); return r.ok; }
+  catch (e) { return false; }
+}
+$("tgtest").onclick = async () => { readTg(); $("tgmsg").textContent = "Po dërgohet…"; $("tgmsg").textContent = (await tgSend("✅ Promemori: Telegram u lidh me sukses.")) ? "✓ U dërgua. Shiko Telegramin." : "✗ S'u dërgua. Kontrollo token-in, Chat ID dhe që i ke shkruar /start botit."; };
+let tgBusy = false;
+async function tpNotify() {
+  if (tgBusy || !tg.token || !tg.chat) return; tgBusy = true;
+  try {
+    const sent = ld("tgsent-v1", {}), td = todayIso();
+    const send = async (k, msg) => { if (sent[k] === td) return; if (await tgSend(msg)) sent[k] = td; };
+    /* 1) abonime që mbarojnë sot ose nesër (edhe kur ora e skadimit ka kaluar, por dita është sot) */
+    for (const it of items.filter(x => !x.free && daysLeft(x) >= 0 && daysLeft(x) <= 1)) {
+      const dl = daysLeft(it);
+      await send("exp:" + it.id, (dl === 0 ? "🔴 Mbaron SOT" : "🟠 Mbaron nesër") + ": " + it.name + (it.panel ? " (" + it.panel + ")" : "") + (it.username ? " @" + it.username : "") + " · " + fmt(it.date) + (it.time ? " " + it.time : ""));
+    }
+    /* 2) abonime të shkurtra që duhen plotësuar */
+    for (const it of items.filter(tpDue)) {
+      await send("tp:" + it.id, "⏳ " + it.name + (it.panel ? " (" + it.panel + ")" : "") + ": abonimi skadon më " + fmt(it.date) + " (" + daysTxt(it) + "). Mungojnë " + tpMiss(it) + " ditë për ta plotësuar deri më " + fmt(it.tp) + ". Shto 1 muaj.");
+    }
+    try { localStorage.setItem("tgsent-v1", JSON.stringify(sent)); } catch (e) {}
+  } finally { tgBusy = false; }
+}
+tpNotify(); setInterval(tpNotify, 600000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) tpNotify(); });
+/* ---------- rifreskim kur ndryshon dita (numërimi "pas X ditësh") ---------- */
+let lastDay = todayIso();
+function dayCheck() {
+  if (todayIso() === lastDay) return;
+  const a = document.activeElement;
+  if (a && a.closest && a.closest(".edit")) return;
+  lastDay = todayIso(); render();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) dayCheck(); });
+setInterval(dayCheck, 60000);
+let newSig = items.filter(isNew).length;
+setInterval(() => {
+  const n = items.filter(isNew).length; if (n === newSig) return;
+  const a = document.activeElement; if (a && a.closest && a.closest(".edit,.sedit")) return;
+  newSig = n; render();
+}, 60000);
+</script>
+<script>
+/* PIN / vault: tokeni enkriptohet me PIN (PBKDF2 + AES-GCM). Në pajisje të reja kërkohet vetëm PIN-i. */
+const VAULT = "v1.1000000.Ex842wIeCEP+7wciS/PD/fqNUODD0W7YSojDrfM7CHI4hsMAaAfxMxuPeqzX2AH8RnGYdY5P61ZYvShO0IJBSrbf/gDdZ82B/HwHJlBeAMnlX1xd48VM96lbBrjvWPSWz7R1llkN/XH/UzdiZE89JDD7X4e5LC/BrBesDOcNc8uQvNakDIA7ssacmLRHJ8oUblEVyxTBkKzwc9gX3cghzLSxpDxGmBz+xCOnL6so7HrGRTrsVQMnII6pPrsNfRH9";
+(async function () {
+  const box = document.getElementById("pinbox"), inp = document.getElementById("pininp"), msg = document.getElementById("pinmsg"), btn = document.getElementById("pinbtn");
+  const E = new TextEncoder(), ITER = 1000000;
+  const b2s = u => { let r = ""; u.forEach(c => r += String.fromCharCode(c)); return btoa(r); };
+  const s2b = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+  async function deriveKey(pin, salt, iter) {
+    const base = await crypto.subtle.importKey("raw", E.encode(pin), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({name: "PBKDF2", salt, iterations: iter, hash: "SHA-256"}, base, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
+  }
+  async function seal(pin, obj) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(pin, salt, ITER);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, E.encode(JSON.stringify(obj))));
+    const all = new Uint8Array(28 + ct.length); all.set(salt, 0); all.set(iv, 16); all.set(ct, 28);
+    return "v1." + ITER + "." + b2s(all);
+  }
+  async function unseal(pin, v) {
+    const p = v.split("."), all = s2b(p[2]), iter = parseInt(p[1], 10);
+    const key = await deriveKey(pin, all.slice(0, 16), iter);
+    const pt = await crypto.subtle.decrypt({name: "AES-GCM", iv: all.slice(16, 28)}, key, all.slice(28));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  const rd = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+
+  /* ---- gjenerimi i kodit (në kompjuter) ---- */
+  const gen = document.getElementById("vaultgen");
+  if (gen) gen.onclick = async () => {
+    const vm = document.getElementById("vaultmsg"), out = document.getElementById("vaultout");
+    const pin = document.getElementById("vaultpin").value;
+    const repo = document.getElementById("syncrepo").value.trim(), br = document.getElementById("syncbranch").value.trim() || "main", tok = document.getElementById("synctoken").value.trim();
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !tok) { vm.textContent = "Plotëso më sipër repon (emri/repo) dhe tokenin."; return; }
+    if (pin.length < 8) { vm.textContent = "PIN-i duhet të ketë të paktën 8 karaktere."; return; }
+    vm.textContent = "Po enkriptohet…"; gen.disabled = true;
+    try {
+      out.value = 'const VAULT = "' + await seal(pin, {r: repo, b: br, t: tok}) + '";';
+      out.style.display = "block"; out.focus(); out.select();
+      try { navigator.clipboard.writeText(out.value); } catch (e) {}
+      vm.textContent = "✓ Gati (u kopjua). Ngjite në index.html në vend të rreshtit const VAULT = \"\"; dhe ruaje (Commit). PIN-in mos e humb: s'ka rikthim.";
+    } catch (e) { vm.textContent = "Gabim: hape faqen me https."; }
+    gen.disabled = false;
+  };
+
+  /* ---- porta ---- */
+  if (VAULT) {
+    const s = rd("sync-v1");
+    if (s.token && s.repo) return;              // kjo pajisje është tashmë e hapur
+    inp.inputMode = "text"; btn.style.display = "";
+    box.style.display = "flex"; setTimeout(() => inp.focus(), 50);
+    const unlock = async () => {
+      const pin = inp.value; if (!pin) return;
+      btn.disabled = true; msg.style.color = "#64748b"; msg.textContent = "Po kontrollohet…";
+      try {
+        const o = await unseal(pin, VAULT);
+        localStorage.setItem("sync-v1", JSON.stringify(Object.assign({}, rd("sync-v1"), {repo: o.r, branch: o.b || "main", token: o.t, auto: true})));
+        location.reload();
+      } catch (e) {
+        msg.style.color = "#dc2626";
+        msg.textContent = (e && e.name === "OperationError") ? "PIN i gabuar" : "Gabim: hape faqen me https";
+        inp.value = ""; btn.disabled = false; inp.focus();
+      }
+    };
+    btn.onclick = unlock;
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") unlock(); });
+    return;
+  }
+
+  /* ---- porta e vjetër (derisa të vendoset VAULT) ---- */
+  const OK = "47ab178bf6d0a4000708b74052b81576a6a5f1ce51906148da7c045ee5314485", K = "pin-ok-v1";
+  const sha = async t => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", E.encode(t)))).map(b => b.toString(16).padStart(2, "0")).join("");
+  try { if (localStorage.getItem(K) === OK) return; } catch (e) {}
+  box.style.display = "flex"; setTimeout(() => inp.focus(), 50);
+  inp.addEventListener("input", async () => {
+    msg.textContent = "";
+    if (inp.value.length < 6) return;
+    let h = ""; try { h = await sha("promemori:" + inp.value); } catch (e) { msg.textContent = "Hape faqen me https."; return; }
+    if (h === OK) { try { localStorage.setItem(K, OK); } catch (e) {} box.style.display = "none"; inp.value = ""; }
+    else if (inp.value.length >= 12) { inp.value = ""; msg.textContent = "PIN i gabuar"; }
+    else if (inp.value.length === 6) { msg.textContent = "PIN i gabuar"; setTimeout(() => { inp.value = ""; }, 600); }
+  });
+})();
+</script>
+</body>
+</html>
