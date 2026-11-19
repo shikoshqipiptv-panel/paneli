@@ -185,9 +185,9 @@ button.paybtn.ok{background:var(--green)}
 #alertbox.min .ap{display:none}#alertbox.min .ab{display:block}
 
 /* ---- Lion = portokalli, Mega = vjollcë ---- */
-:root{--lion:#ea580c;--mega:#7c3aed}
+:root{--lion:#ea580c;--mega:#7c3aed;--p3:#0891b2}
 @media (prefers-color-scheme:dark){:root{--lion:#fb923c;--mega:#a78bfa}}
-[data-p="lion"]{--pc:var(--lion)}[data-p="mega"]{--pc:var(--mega)}
+[data-p="lion"]{--pc:var(--lion)}[data-p="mega"]{--pc:var(--mega)}[data-p="p3"]{--pc:var(--p3)}
 .item[data-p]{border-left:6px solid var(--pc)}
 .item[data-p] .head .c-panel{display:block;justify-self:start;padding:2px 12px;border-radius:999px;border:0;background:var(--pc);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
 .item[data-p] .head .c-panel:empty{display:none}
@@ -776,7 +776,7 @@ function renew(it, mo) {
 }
 const ckey = x => (x.client || x.name || "").trim().toLowerCase();
 const linked = it => !it.dual ? [] : items.filter(x => x !== it && x.dual && ckey(x) === ckey(it));
-const pkey = p => /lion/i.test(p || "") ? "lion" : /mega/i.test(p || "") ? "mega" : "";
+const pkey = p => /lion/i.test(p || "") ? "lion" : /mega/i.test(p || "") ? "mega" : /orange/i.test(p || "") ? "p3" : "";
 let editEl = null;   // kutia e modifikimit: rri brenda kartelës së abonimit që po modifikohet
 const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const isNew = it => !!it.cr && Date.now() - it.cr < 864e5;   // «NEW» për 24 orë
@@ -1513,7 +1513,7 @@ function adoptRemote(j) {
     if (x.tp) { o.tp = x.tp; o.tpk = x.tpk || 0; }
     return o;
   });
-  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); localStorage.removeItem("sha-v1-lion.txt"); localStorage.removeItem("sha-v1-mega.txt"); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify(items)); localStorage.removeItem("dirty-v1"); localStorage.removeItem("sha-v1-lion.txt"); localStorage.removeItem("sha-v1-mega.txt"); localStorage.removeItem("sha-v1-orange.txt"); } catch (e) {}
   sync.sha = j.sha; sv("sync-v1", sync);
   items.forEach(x => { if (x.panel && !panels.includes(x.panel)) panels.push(x.panel); }); sv(PKEY, panels);
   openId = null; editing = false; refreshPanels(); render();
@@ -1710,7 +1710,7 @@ async function pullFile(file, manual) {
     return true;
   } catch (e) { if (manual) msg.textContent = "Gabim: " + (e.message || "rrjeti"); return false; }
 }
-async function pullLion(manual) { await pullFile("lion.txt", manual); await pullFile("mega.txt", manual); }
+async function pullLion(manual) { await pullFile("lion.txt", manual); await pullFile("orange.txt", manual); await pullFile("mega.txt", manual); }
 $("lionpull").onclick = () => { readSync(); pullLion(true); };
 $("syncdiag").onclick = async () => {
   readSync();
